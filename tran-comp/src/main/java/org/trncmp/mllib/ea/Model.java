@@ -1,0 +1,281 @@
+// ====================================================================== BEGIN FILE =====
+// **                                    M O D E L                                      **
+// =======================================================================================
+// **                                                                                   **
+// **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
+// **                                                                                   **
+// **  Copyright (c) 2018, Stephen W. Soliday                                           **
+// **                      stephen.soliday@trncmp.org                                   **
+// **                      http://research.trncmp.org                                   **
+// **                                                                                   **
+// **  -------------------------------------------------------------------------------  **
+// **                                                                                   **
+// **  This program is free software: you can redistribute it and/or modify it under    **
+// **  the terms of the GNU General Public License as published by the Free Software    **
+// **  Foundation, either version 3 of the License, or (at your option)                 **
+// **  any later version.                                                               **
+// **                                                                                   **
+// **  This program is distributed in the hope that it will be useful, but WITHOUT      **
+// **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    **
+// **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.   **
+// **                                                                                   **
+// **  You should have received a copy of the GNU General Public License along with     **
+// **  this program. If not, see <http://www.gnu.org/licenses/>.                        **
+// **                                                                                   **
+// ----- Modification History ------------------------------------------------------------
+/**
+ * @file Model.java
+ *  <p>
+ *  Provides interface for an evolvable model.
+ *
+ * @author Stephen W. Soliday
+ * @date   2015-08-20
+ */
+// =======================================================================================
+
+package org.trncmp.mllib.ea;
+
+import org.trncmp.lib.ConfigDB;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
+
+// =======================================================================================
+/** @class Model
+ *
+ * Abstract interface for an evolvable model.
+ *
+ * The user must overload the following functions.
+ *   - alloc_metric   -- Allocate space for a metric object.
+ *   - alloc_encoding -- Allocate space for an encoding object.
+ *   - init           -- Initialize the model. One time setup activities belong here.
+ *   - display_long   -- Present a full representation of the model parameters
+ *                       and metrics.
+ *   - display_short  -- Present an abbreviated representation of the variable
+ *                       parameters, should be one line.
+ *   - execute        -- Execute the model on one set of variable parameters and
+ *                       generate metrics.
+ *   - isLeftBetter   -- Compare two metrics and return true if the left metric is
+ *                       better than the right.
+ *   - meetsThreshold -- Stop the generations if the metric is good enough.
+ */
+// ---------------------------------------------------------------------------------------
+public abstract class Model {
+  // -------------------------------------------------------------------------------------
+  static final Logger logger = LogManager.getRootLogger();
+
+  
+  // =====================================================================================
+  /** @brief Allocate metric.
+   *  @return pointer to a new allocation of a metric.
+   *
+   *  Allocate space for a metric object.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract Metric alloc_metric( );
+
+  
+  // =====================================================================================
+  /** @brief Allocate encoding.
+   *  @return pointer to a new allocation of an encoding.
+   *
+   *  Allocate space for an encoding object.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract Encoding alloc_encoding ( );
+
+  
+  // =====================================================================================
+  /** @brief Initialize Model.
+   *  @param  config pointer to a configuration database.
+   *  @return false is no errors occur.
+   *
+   *  Initialize the model. One time setup activities belong here.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract boolean config( ConfigDB config );
+
+  
+  // =====================================================================================
+  /** @brief Save.
+   *  @param E pointer to the encoding for this model.
+   *
+   *  Provides a means for intermediate saves. C.temp_save controls the interval
+   *  for saving the best population model. 0=no intermediate save. non zero will save
+   *  every C.temp_save generations.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract void save( Encoding E );
+
+  
+  // =====================================================================================
+  /** @brief Display Long.
+   *  @param M   pointer to the return metrics
+   *  @param E   pointer to the encoding for this model.
+   *  @param msg message sent to this model display.
+   *
+   *  Present a full representation of the model parameters and metrics.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract void display_long( Metric M, Encoding E, String msg );
+
+  
+  // =====================================================================================
+  /** @brief Display Short.
+   *  @param M pointer to the return metrics
+   *  @param E pointer to the encoding for this model.
+   *
+   *  Present an abbreviated representation of the variable parameters,
+   *  should be one line..
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract void display_short( Metric M, Encoding E );
+
+  
+  // =====================================================================================
+  /** @brief Execute.
+   *  @param M pointer to the return metrics
+   *  @param E pointer to the encoding for this model.
+   *
+   *  Execute the model on one set of variable parameters and generate metrics.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract void execute( Metric M, Encoding E );
+
+  
+  // =====================================================================================
+  /** @brief Test.
+   *  @param lhs pointer to the left hand side metric.
+   *  @param rhs pointer to the right hand side metric.
+   *  @return true if the left hand metric is better than the right.
+   *
+   *  Compare two metrics and return true if the left metric 
+   *  is better than the right.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract boolean isLeftBetter( Metric lhs, Metric rhs );
+
+  
+  // =====================================================================================
+  /** @brief Test.
+   *  @param M pointer to a metric.
+   *  @return true if the metric is good enough.
+   *
+   *  Stop the generations if the metric is good enough.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract boolean meetsThreshold( Metric M );
+
+
+
+
+  // =====================================================================================
+  /** @brief Default Constructor.
+   *
+   *  Used incase the used calls super()
+   */
+  // -------------------------------------------------------------------------------------
+  public Model( ) {
+    // -----------------------------------------------------------------------------------
+  }
+
+  
+  // =====================================================================================
+  /** @brief Default Display.
+   *  @param M pointer to a  Metric.
+   *  @param E pointer to an Encoding.
+   *
+   *  Call the display procedure.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display( Metric M,  Encoding E ) {
+    // -----------------------------------------------------------------------------------
+    display( M, E, false );
+  }
+
+  
+  // =====================================================================================
+  /** @brief Display.
+   *  @param M     pointer to a  Metric.
+   *  @param E     pointer to an Encoding.
+   *  @param short flag, if true use the short display probided by the user.
+   *
+   *  Use one of the user supplied procedures to display something about this model
+   *  in relationship to a metric and an encoding.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display( Metric M,  Encoding E,  boolean use_short ) {
+    // -----------------------------------------------------------------------------------
+    if ( use_short ) {
+      display_short( M, E );
+    } else {
+      display_long( M, E, null );
+    }
+  }
+
+  // =====================================================================================
+  /** @brief Pre Evolve.
+   *  @param BM pointer to a best  metric.
+   *  @param BE pointer to a best  encoding.
+   *  @param WM pointer to a wosrt metric.
+   *  @param WE pointer to a worst encoding.
+   *
+   *  When the user overrides this procedure, they have the opportunity to execute code
+   *  within the model before the evolution begins.
+   *
+   *  @note It is prefered but not required that this procedure should be overridden
+   *        by the user.
+   */
+  // -------------------------------------------------------------------------------------
+  public void run_before( Metric BM, Encoding BE, Metric WM, Encoding WE ) {
+    // -----------------------------------------------------------------------------------
+    logger.debug( "Model::run_before ( this default should be overridden )" );
+
+    display_long( BM, BE, "Initial best population member"  );
+    display_long( WM, WE, "Initial worst population member" );
+  }
+
+  
+  // =====================================================================================
+  /** @brief Post Evolve.
+   *  @param BM pointer to a best  metric.
+   *  @param BE pointer to a best  encoding.
+   *  @param WM pointer to a wosrt metric.
+   *  @param WE pointer to a worst encoding.
+   *
+   *  When the user overrides this procedure, they have the opportunity to execute code
+   *  within the model after the evolution is over.
+   *
+   *  @note It is prefered but not required that this procedure should be overridden
+   *        by the user.
+   */
+  // -------------------------------------------------------------------------------------
+  public void run_after( Metric BM, Encoding BE, Metric WM, Encoding WE ) {
+    // -----------------------------------------------------------------------------------
+    logger.debug( "Model::run_after ( this default should be overridden )" );
+
+    display_long( BM, BE, "Final best population member" );
+    display_long( WM, WE, "Final worst population member" );
+  }
+
+  
+  // =====================================================================================
+  /** @brief Pre-process.
+   *  @param E pointer to an array of encoding objects for this model.
+   *  @param npop number of encodings to preprocess
+   *
+   *  Pre-process encodings prior to evaluation.
+   */
+  // -------------------------------------------------------------------------------------
+  public void pre_process( Encoding[] E, int npop ) {
+    // -----------------------------------------------------------------------------------
+    // ADD CODE IN THE DERIVED CLASS TO HANDEL THIS
+  }
+
+  
+} // end class AbstractModel
+
+  
+// =======================================================================================
+// **                              A B S T R A C T M O D E L                            **
+// ======================================================================== END FILE =====

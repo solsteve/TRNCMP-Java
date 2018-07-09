@@ -1,0 +1,42 @@
+version: 0.2
+
+phases:
+
+  install:
+    commands:
+      - echo Entering install phase...
+      - echo Nothing to do in the install phase...
+
+  pre_build:
+    commands:
+      - echo Entering pre_build phase...
+      - echo Nothing to do in the pre_build phase...
+
+  build:
+    commands:
+      - echo Entering build phase...
+      - echo Build started on `date`
+
+      # Update AWS CLI to get secretsmanager command
+      - pip install awscli --upgrade
+
+      # Set up settings-security.xml.
+      #- aws secretsmanager describe-secret --secret-id hpsp-codebuild-deployer/maven/settings-security.xml
+      - touch ${PWD}/settings-security.xml
+      - chmod 600 ${PWD}/settings-security.xml
+      - aws --output text secretsmanager get-secret-value --secret-id hpsp-codebuild-deployer/maven/settings-security.xml --query SecretString >${PWD}/settings-security.xml
+      #- echo "PWD  = ${PWD}"
+      #- ls -l ${PWD}/settings-security.xml ${PWD}/settings.xml ${PWD}/pom.xml
+      #- md5sum --binary ${PWD}/settings-security.xml ${PWD}/settings.xml ${PWD}/pom.xml
+
+      # Build and Deploy to Nexus using local settings.xml
+      - MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true" mvn -U -B --settings $PWD/settings.xml -Dsettings.security=${PWD}/settings-security.xml -f $PWD/pom.xml deploy
+
+      - shred -f --remove ${PWD}/settings-security.xml || rm -f ${PWD}/settings-security.xml
+      #- ls -l ${PWD}
+      - echo Build complete on `date`
+
+  post_build:
+    commands:
+      - echo Entering post_build phase...
+      - echo Build completed on `date`
