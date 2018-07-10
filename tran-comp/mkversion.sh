@@ -2,8 +2,8 @@
 
 rm -f src/main/java/org/trncmp/Version.java
 
-ORG=$(head -15 pom.xml | tail -10 | grep -i groupId | cut -d '>' -f 2 | cut -d '<' -f1)
-VERSION=$(head -15 pom.xml | tail -10 | grep -v model | grep -i version | cut -d '>' -f 2 | cut -d '-' -f1)
+ORG=$(head -12 pom.xml | tail -6 | grep -i groupId | cut -d '>' -f 2 | cut -d '<' -f1)
+VERSION=$(head -12 pom.xml | tail -6 | grep -i version | cut -d '>' -f 2 | cut -d '-' -f1)
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 
