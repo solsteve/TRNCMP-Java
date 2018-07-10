@@ -30,15 +30,21 @@
 help:
 	@echo ""
 	@echo "type:"
-	@echo "   make all"
+	@echo "   make help"
+	@echo "   make install"
+	@echo "   make deploy"
 	@echo "   make clean"
 	@echo "   make fullclean"
 	@echo "   make distclean"
 	@echo ""
 	@echo ""
 
-all:
+install:
 	make -C tran-comp install
+	mvn install
+
+deploy: install
+	mvn deploy
 
 clean:
 	make -C tran-comp $@
