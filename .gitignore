@@ -1,0 +1,12 @@
+target/
+developer.properties
+
+# IDE configs
+nbproject/
+nbactions.xml
+nb-configuration.xml
+.idea/
+*.iml
+*.project
+.settings/
+*.classpath
