@@ -1,0 +1,82 @@
+<settings>
+
+  <mirrors>
+    <mirror>
+      <id>hpsp.mirror</id>
+      <url>https://ec2-35-174-175-163.compute-1.amazonaws.com:8443/nexus/content/groups/public</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+
+  <servers>
+    <!-- See https://maven.apache.org/guides/mini/guide-encryption.html -->
+    <server>
+      <id>hpsp.mirror</id>
+      <username>hpsp-codebuild-deployer</username>
+      <password>{PKvasHYUNE8HIySeAY6ZBzuD5kMIsJSsOH00wI3LBmMOuWzblOA7RFX0c0PV/a+9GLS/dPRzUtaQvgJjrunRgA==}</password>
+    </server>
+    <server>
+      <id>hpsp.distributionManagement.repository</id>
+      <username>hpsp-codebuild-deployer</username>
+      <password>{PKvasHYUNE8HIySeAY6ZBzuD5kMIsJSsOH00wI3LBmMOuWzblOA7RFX0c0PV/a+9GLS/dPRzUtaQvgJjrunRgA==}</password>
+    </server>
+    <server>
+      <id>hpsp.distributionManagement.snapshotRepository</id>
+      <username>hpsp-codebuild-deployer</username>
+      <password>{PKvasHYUNE8HIySeAY6ZBzuD5kMIsJSsOH00wI3LBmMOuWzblOA7RFX0c0PV/a+9GLS/dPRzUtaQvgJjrunRgA==}</password>
+    </server>
+  </servers>
+ 
+  <activeProfiles>
+    <activeProfile>bootstrap-repo</activeProfile>
+  </activeProfiles>
+
+  <profiles>
+    <!--
+       - Set the bootstrap repo for a completely clean build
+       - and empty local repo. This bootstrap repo specifies
+       - where to find hpsp-parent (which in turn defines
+       - other repos to find other artifacts). Otherwise
+       - Maven can't find hpsp-parent parent POM and so the
+       - hpsp-parent can't point Maven to the Nexus repo.
+       -
+       - You wouldn't need this hpsp-parent is findable via
+       - project.parent.relativePath or if its in the local repo.
+       -
+       - You can also use this profile to add additional repos
+       - and override the deployment repos in a user-specific way
+       - without changing the baselined pom.xml files.  For
+       - example, use this if building an old tag but the repos
+       - in the tagged pom.xml files aren't the correct URLs any
+       - more (i.e. Nexus moved to new URL).
+      -->
+    <profile>
+      <id>bootstrap-repo</id>
+
+      <!--- Use this to set user-overriding distribution repos -->
+      <!--
+      <properties>
+        <hpsp.distributionManagement.repository>https://ec2-35-174-175-163.compute-1.amazonaws.com:8443/nexus/content/repositories/releases2</hpsp.distributionManagement.repository>
+        <hpsp.distributionManagement.snapshotRepository>https://ec2-35-174-175-163.compute-1.amazonaws.com:8443/nexus/content/repositories/snapshots2</hpsp.distributionManagement.snapshotRepository>
+      </properties>
+      -->
+
+      <repositories>
+        <repository>
+          <id>hpsp.mirror</id>
+          <url>https://ec2-35-174-175-163.compute-1.amazonaws.com:8443/nexus/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <!--
+         - Specify any additional user-specified repos here. But its
+         - probably better to handle this using mirroring + group repo.
+        -->
+    </profile>
+  </profiles>
+</settings>
