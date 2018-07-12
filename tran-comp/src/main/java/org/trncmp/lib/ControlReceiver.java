@@ -263,7 +263,7 @@ public class ControlReceiver extends Thread {
           public void run() {
             C.on_receive( shutdown_message );
           }
-        }.run();
+        }.start();
       }
     }
     close_port();
@@ -307,7 +307,8 @@ public class ControlReceiver extends Thread {
       while ( running ) {
         try {
           server_socket.receive( packet );
-          this.receive( new String( packet.getData(), 0, packet.getLength() ) );
+          String msg = new String( packet.getData(), 0, packet.getLength() );
+          this.receive( msg );
         } catch( SocketTimeoutException e ) {
           yield();
         }

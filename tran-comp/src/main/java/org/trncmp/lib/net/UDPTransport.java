@@ -289,7 +289,7 @@ public class UDPTransport {
     // ===================================================================================
     /** @brief Run.
      *
-     *  Thread run function. Watche the queue for new message and send them as they are
+     *  Thread run function. Watch the queue for new message and send them as they are
      *  available. Yield this thread if there are no available messages.
      */
     // -----------------------------------------------------------------------------------
