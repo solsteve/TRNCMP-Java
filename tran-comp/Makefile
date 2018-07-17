@@ -43,7 +43,7 @@ jar:
 	@echo $(JAVA_HOME)
 	@echo $(PATH)
 	mvn $(EXTRAS) package
-	@zip -d target/uber-trncmp-*.jar 'META-INF/*.SF' 'META-INF/*SF'
+	@zip -d target/uber-lib-*.jar 'META-INF/*.SF' 'META-INF/*SF'
 	cat ALIAS
 
 assembly:

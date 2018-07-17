@@ -37,12 +37,11 @@ import org.trncmp.lib.Math2;
 import org.trncmp.lib.AppOptions;
 
 import org.trncmp.lib.ConfigDB;
-import org.trncmp.lib.Dice;
 import org.trncmp.lib.StringTool;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
-import org.apache.log4j.Level;
+
 
 // =======================================================================================
 public class UGA {
@@ -59,29 +58,35 @@ public class UGA {
   public static final int NOISE     = 23;
   public static final int CLONE     = 24;
 
+  /** pointer to the configuration object */
   private UGAConfiguration config = null;
-  private Model            model  = null;
 
-  private Population primary = null; /**< Evolving population. */
-  private Population working = null; /**< Intermediate population. */
+  /** Pointer to the user supplied model for fitness evaluation */
+  private Model model  = null;
+
+  /** Evolving population. */
+  private Population primary = null;
+
+  /** Intermediate population. */
+  private Population working = null;
 
 
+  // -------------------------------------------------------------------------------------
 
-    // -----------------------------------------------------------------------------------
-
-    public static AppOptions.cli_map[] DEFAULT_CLI = {
-	// name    section  cfgkey   required     default                description
-	AppOptions.INIT( "pop",     "UGA", "pop",     true,  "200",                     "population size"           ),
-	AppOptions.INIT( "tour",    "UGA", "tour",    true,  "7",                       "tournament size"           ),
-	AppOptions.INIT( "pcross",  "UGA", "pcross",  true,  "[ 0.5, 0.9 ]",            "probability of cross over" ),
-	AppOptions.INIT( "pmutate", "UGA", "pmutate", true,  "[ 0.4, 0.08, 0.2, 0.01]", "probability of mutation"   ),
-	AppOptions.INIT( "bracket", "UGA", "bracket", true,  "0.333",                   "percent bracketed"         ),
-	AppOptions.INIT( "maxgen",  "UGA", "maxgen",  true,  "5000",                    "maximum generation"        ),
-	AppOptions.INIT( "report",  "UGA", "report",  true,  "100",                     "report interval"           ),
-	AppOptions.INIT( "save",    "UGA", "save",    true,  "0",                       "save interval 0=no save"   ),
-	AppOptions.INIT( "old",     "AUX", "oldpop",  false, null,                      "path to old population"    ),
-	AppOptions.INIT( "new",     "AUX", "newpop",  false, null,                      "path to new population"    ),
-    };
+  public static AppOptions.cli_map[] DEFAULT_CLI = {
+    // name    section  cfgkey   required     default                description
+    AppOptions.INIT( "pop",     "UGA", "pop",     true,  "200",          "population size"           ),
+    AppOptions.INIT( "tour",    "UGA", "tour",    true,  "7",            "tournament size"           ),
+    AppOptions.INIT( "pcross",  "UGA", "pcross",  true,  "[ 0.5, 0.9 ]", "probability of cross over" ),
+    AppOptions.INIT( "pmutate", "UGA", "pmutate", true,  "[ 0.4, 0.08]", "probability of alllele mutation"   ),
+    AppOptions.INIT( "smutate", "UGA", "smutate", true,  "[ 0.2, 0.01]", "sacle of mutation"   ),
+    AppOptions.INIT( "bracket", "UGA", "bracket", true,  "0.333",        "percent bracketed"         ),
+    AppOptions.INIT( "maxgen",  "UGA", "maxgen",  true,  "5000",         "maximum generation"        ),
+    AppOptions.INIT( "report",  "UGA", "report",  true,  "100",          "report interval"           ),
+    AppOptions.INIT( "save",    "UGA", "save",    true,  "0",            "save interval 0=no save"   ),
+    AppOptions.INIT( "old",     "AUX", "oldpop",  false, null,           "path to old population"    ),
+    AppOptions.INIT( "new",     "AUX", "newpop",  false, null,           "path to new population"    ),
+  };
 
 
   
@@ -92,7 +97,13 @@ public class UGA {
     return new UGAConfiguration( mod );
   }
 
+  
   // =====================================================================================
+  /** @brief private constructor.
+   *  @param cfg pointer to a configuration object.
+   *  @param mod pointer to a user defined model.
+   */
+  // -------------------------------------------------------------------------------------
   UGA( UGAConfiguration cfg, Model mod ) {
     // -----------------------------------------------------------------------------------
     config = cfg;
@@ -101,13 +112,20 @@ public class UGA {
     initialize();
   }
 
+  
   // =====================================================================================
   public void initialize() {
     // -----------------------------------------------------------------------------------
+    if ( model.config() ) {
+      logger.error( "Model experienced errors during initialization" );
+      System.exit(1);
+    }
+
     primary = new Population( config.nPop(), model );
     working = new Population( config.nPop(), model );
   }
 
+  
   // =====================================================================================
   /** @brief CrossOver.
    *  @param pCross probability of crossover vs. clone.
@@ -159,10 +177,10 @@ public class UGA {
 
   // =====================================================================================
   /** @brief Mutation.
-   *  @param pMutate probability that mutation is going to take place.
-   *  @param sMutate percentage of elements that get mutated.
    *  @param dst pointer to mutated Member.
    *  @param src pointer to original Member.
+   *  @param perc probability that mutation is going to take place.
+   *  @param scale percentage of elements that get mutated.
    *  @return true if mutation took place.
    *
    *  Determine if mutation will take place. If not, perform a simple clone. Mutation is
@@ -180,6 +198,153 @@ public class UGA {
     
     return dst.param.mutate( src.param, perc, scale );
   }
+
+
+  // =====================================================================================
+  /** @brief Randomize.
+   *
+   *  Randomize the population with configured probability of bracketing.
+   */
+  // -------------------------------------------------------------------------------------
+  public void randomize( ) {
+    // -----------------------------------------------------------------------------------
+    randomize( config.pBracket() );
+  }
+
+  // =====================================================================================
+  /** @brief Randomize.
+   *  @param b probability to bracket vers. randomize.
+   *
+   *  Randomize the population with supplied probability of bracketing.
+   */
+  // -------------------------------------------------------------------------------------
+  public void randomize( double b ) {
+    // -----------------------------------------------------------------------------------
+    primary.randomize( b );
+  }
+
+  
+
+
+  // =====================================================================================
+  /** @brief Display.
+   *  @param msg message to prefix the display.
+   *  @param M   pointer to population member.
+   *
+   *  Use the user supplied model to display a representation of the variable structure.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display_model( String msg, PopulationMember M ) {
+    // -----------------------------------------------------------------------------------
+    display_model( msg, M, false );
+  }
+
+  
+  // =====================================================================================
+  /** @brief Display.
+   *  @param msg       message to prefix the display.
+   *  @param M         pointer to population member.
+   *  @param use_short boolean to use short display.
+   *
+   *  Use the user supplied model to display a representation of the variable structure.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display_model( String msg, PopulationMember M, boolean use_short ) {
+    // -----------------------------------------------------------------------------------
+    model.display( msg, M.metric, M.param, use_short );
+  }
+
+
+
+
+  // =====================================================================================
+  /** @brief Display.
+   *  @param msg message to prefix the display.
+   *  @param idx index into the primary population.
+   *
+   *  Use the user supplied model to display a representation of the variable structure.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display_model_index( String msg, int idx ) {
+    // -----------------------------------------------------------------------------------
+    display_model_index( msg, idx, false );
+  }
+
+  
+  // =====================================================================================
+  /** @brief Display.
+   *  @param msg       message to prefix the display.
+   *  @param idx       index into the primary population.
+   *  @param use_short boolean to use short display.
+   *
+   *  Use the user supplied model to display a representation of the variable structure.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display_model_index( String msg, int idx, boolean use_short ) {
+    // -----------------------------------------------------------------------------------
+    display_model( msg, primary.get(idx), use_short );
+  }
+
+
+
+
+  // =====================================================================================
+  /** @brief Display.
+   *  @param msg message to prefix the display.
+   *  @param mt  member type to display.
+   *
+   *  Use the user supplied model to display a representation of the variable structure.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display_model_type( String msg, int mt ) {
+    // -----------------------------------------------------------------------------------
+    display_model_type( msg, mt, false );
+  }
+
+
+  // =====================================================================================
+  /** @brief Display.
+   *  @param msg       message to prefix the display.
+   *  @param mt        member type to display.
+   *  @param use_short boolean to use short display.
+   *
+   *  Use the user supplied model to display a representation of the variable structure.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display_model_type( String msg, int mt, boolean use_short ) {
+    // -----------------------------------------------------------------------------------
+    display_model_index( msg, primary.find( mt ), use_short );
+  }
+
+
+  
+
+  // =====================================================================================
+  /** @brief Read Population.
+   *  @param fspc string containing the path to a population file.
+   *  @return false if no errors occured.
+   */
+  // -------------------------------------------------------------------------------------
+  public boolean read( String fspc ) {
+    // -----------------------------------------------------------------------------------
+    logger.info( "Cannot read populations yet" );
+    return true;
+  }
+
+  
+  // =====================================================================================
+  /** @brief Write Population.
+   *  @param fspc string containing the path to a population file.
+   *  @return false if no errors occured.
+   */
+  // -------------------------------------------------------------------------------------
+  public boolean write( String fspc ) {
+    // -----------------------------------------------------------------------------------
+    logger.info( "Cannot write populations yet" );
+    return true;
+  }
+
+
 
 
   // =====================================================================================
@@ -263,10 +428,13 @@ public class UGA {
       // ----- report results ------------------------------------------------------------
 
       if ( 0 == ( iGen % config.report() ) ) {
-        System.out.printf( "%d: ", iGen );
-        model.display( primary.best().metric,  primary.best().param,  true );
-        System.out.printf( "%d: ", iGen );
-        model.display( primary.worst().metric, primary.worst().param, true );
+        model.display( String.format( "%d: ", iGen ),
+                       primary.best().metric,
+                       primary.best().param,  true );
+        
+        model.display( String.format( "%d: ", iGen ),
+                       primary.worst().metric,
+                       primary.worst().param, true );
         System.out.printf( "\n" );
       }
 
@@ -284,7 +452,7 @@ public class UGA {
 
     logger.debug("UGA: End Evolution");
 
-    model.run_after( primary.best().metric, primary.best().param,
+    model.run_after( primary.best().metric,  primary.best().param,
                      primary.worst().metric, primary.worst().param );
   }
 

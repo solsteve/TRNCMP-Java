@@ -48,7 +48,8 @@ import org.apache.log4j.LogManager;
  * The user must overload the following functions.
  *   - alloc_metric   -- Allocate space for a metric object.
  *   - alloc_encoding -- Allocate space for an encoding object.
- *   - init           -- Initialize the model. One time setup activities belong here.
+ *   - config         -- Initialize the model. One time setup activities belong here.
+ *   - save
  *   - display_long   -- Present a full representation of the model parameters
  *                       and metrics.
  *   - display_short  -- Present an abbreviated representation of the variable
@@ -87,13 +88,12 @@ public abstract class Model {
   
   // =====================================================================================
   /** @brief Initialize Model.
-   *  @param  config pointer to a configuration database.
-   *  @return false is no errors occur.
+   *  @return true if errors occur.
    *
    *  Initialize the model. One time setup activities belong here.
    */
   // -------------------------------------------------------------------------------------
-  public abstract boolean config( ConfigDB config );
+  public abstract boolean config();
 
   
   // =====================================================================================
@@ -117,7 +117,7 @@ public abstract class Model {
    *  Present a full representation of the model parameters and metrics.
    */
   // -------------------------------------------------------------------------------------
-  public abstract void display_long( Metric M, Encoding E, String msg );
+  public abstract void display_long( String msg, Metric M, Encoding E );
 
   
   // =====================================================================================
@@ -188,9 +188,9 @@ public abstract class Model {
    *  Call the display procedure.
    */
   // -------------------------------------------------------------------------------------
-  public void display( Metric M,  Encoding E ) {
+  public void display( String msg, Metric M,  Encoding E ) {
     // -----------------------------------------------------------------------------------
-    display( M, E, false );
+    display( msg, M, E, false );
   }
 
   
@@ -204,12 +204,12 @@ public abstract class Model {
    *  in relationship to a metric and an encoding.
    */
   // -------------------------------------------------------------------------------------
-  public void display( Metric M,  Encoding E,  boolean use_short ) {
+  public void display( String msg, Metric M,  Encoding E,  boolean use_short ) {
     // -----------------------------------------------------------------------------------
     if ( use_short ) {
       display_short( M, E );
     } else {
-      display_long( M, E, null );
+      display_long( msg, M, E );
     }
   }
 
@@ -231,8 +231,8 @@ public abstract class Model {
     // -----------------------------------------------------------------------------------
     logger.debug( "Model::run_before ( this default should be overridden )" );
 
-    display_long( BM, BE, "Initial best population member"  );
-    display_long( WM, WE, "Initial worst population member" );
+    display_long( "Initial best  population member",  BM, BE );
+    display_long( "Initial worst population member", WM, WE );
   }
 
   
@@ -254,8 +254,8 @@ public abstract class Model {
     // -----------------------------------------------------------------------------------
     logger.debug( "Model::run_after ( this default should be overridden )" );
 
-    display_long( BM, BE, "Final best population member" );
-    display_long( WM, WE, "Final worst population member" );
+    display_long( "Final best  population member", BM, BE );
+    display_long( "Final worst population member", WM, WE );
   }
 
   
@@ -277,5 +277,5 @@ public abstract class Model {
 
   
 // =======================================================================================
-// **                              A B S T R A C T M O D E L                            **
+// **                                     M O D E L                                     **
 // ======================================================================== END FILE =====

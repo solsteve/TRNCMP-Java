@@ -24,7 +24,7 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 //
-// @file Member.java
+// @file Population.java
 // <p>
 //  Provides the interfaces for a population member.
 //
@@ -169,7 +169,7 @@ class Population {
    *  Randomize the population.
    */
   // -------------------------------------------------------------------------------------
-  void randomize( ) {
+  public void randomize( ) {
     // -----------------------------------------------------------------------------------
     for ( int i=0; i<count; i++ ) {
       member[i].param.randomize();

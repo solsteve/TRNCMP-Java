@@ -141,17 +141,14 @@ public abstract class Encoding {
   // -------------------------------------------------------------------------------------
   public abstract int mutate( Encoding S, double perc, double scale );
 
-  
 
-  
   // =====================================================================================
   /** @brief Convert Encoding to String.
    *  @param fmt edit descriptor of each element.
    *  @return white space separated values of the Encoding elements
    */
   // -------------------------------------------------------------------------------------
-@Override
-public String toString() {
+  public String toString() {
     // -----------------------------------------------------------------------------------
     return format( "%11.4e", " " );
   }

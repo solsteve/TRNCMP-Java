@@ -91,6 +91,7 @@ public class UGAConfiguration {
 
   // =====================================================================================
   /** @brief Void constructor.
+   *  @param mod pointer to a user model.
    */
   // -------------------------------------------------------------------------------------
   public UGAConfiguration( Model mod ) {
@@ -101,6 +102,7 @@ public class UGAConfiguration {
 
   // =====================================================================================
   /** @brief Final build procedure.
+   *  @return pointer to a new UGA object.
    */
   // -------------------------------------------------------------------------------------
   public UGA build() {
@@ -117,12 +119,14 @@ public class UGAConfiguration {
 
   // =====================================================================================
   /** @brief Set full report flag.
+   *  @param f flag.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Display an abbreviated report if users model supports it.
    */
   // -------------------------------------------------------------------------------------
   public UGAConfiguration fullReport( boolean f ) {
+    // -----------------------------------------------------------------------------------
     p_fullReport = f;
     return this;
   }
@@ -130,120 +134,254 @@ public class UGAConfiguration {
   
   // =====================================================================================
   /** @brief Set maximum generations.
+   *  @param n maximum number of generations.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Maximum number of generations.
    */
   // -------------------------------------------------------------------------------------
   public UGAConfiguration maxgen( int n ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 1 > n ) {
+      logger.error( "maxgen=n ; n must be greater than 0" );
+      System.exit(1);
+    }
+    
     p_maxgen = n;
+    
     return this;
   }
 
   
   // =====================================================================================
   /** @brief Set report interval.
+   *  @param n report interval.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Number of generations between reports.
    */
   // -------------------------------------------------------------------------------------
   public UGAConfiguration report( int n ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 1 > n ) {
+      logger.error( "report=n ; n must be greater than 0" );
+      System.exit(1);
+    }
+
     p_report = n;
+     
     return this;
   }
 
   
   // =====================================================================================
   /** @brief Set save interval.
+   *  @return save interval.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Number of generations between saves 0=no save.
    */
   // -------------------------------------------------------------------------------------
   public UGAConfiguration save( int n ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 0 > n ) {
+      logger.error( "save=n ; n may not be negative" );
+      System.exit(1);
+    }
+
     p_save = n;
+
     return this;
   }
 
   
   // =====================================================================================
   /** @brief Set population size.
+   *  @param n population size.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Number of members in the population.
    */
   // -------------------------------------------------------------------------------------
   public UGAConfiguration nPop( int n ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 1 > n ) {
+      logger.error( "pop=n ; n must be greater than 0" );
+      System.exit(1);
+    }
+
     p_popSize = n;
+
     return this;
   }
 
   
   // =====================================================================================
   /** @brief Set tournament size.
+   *  @param n tournament size.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Number of members examined in a tournament.
    */
   // -------------------------------------------------------------------------------------
   public UGAConfiguration nTour( int n ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 1 > n ) {
+      logger.error( "tour=n ; n must be greater than 0" );
+      System.exit(1);
+    }
+
     p_tourSize = n;
+
     return this;
   }
 
   
   // =====================================================================================
   /** @brief Set bracket probability.
+   *  @param p probability that population member will be bracketed instead of randomized.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Percentage of population bracketed during randomization.
    */
   // -------------------------------------------------------------------------------------
   public UGAConfiguration pBracket( double p ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 0.0e0 > p ) {
+      logger.error( "bracket=p ; p must be greater than or equal to 0.0" );
+      System.exit(1);
+    }
+
+    if ( 1.0e0 < p ) {
+      logger.error( "bracket=p ; p must be less than or equal to 1.0" );
+      System.exit(1);
+    }
+
     p_pBracket = p;
+    
     return this;
   }
 
   
   // =====================================================================================
   /** @brief Set crossover probability.
+   *  @param po probability at generation 0
+   *  @param pf probability at genreation maxgen.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Probability of Crossover vs. Clone.
    */
   // -------------------------------------------------------------------------------------
-  public UGAConfiguration pCross( double vo, double vf ) {
-    p_pCrossStart = vo;
-    p_pCrossFinal = vf;
+  public UGAConfiguration pCross( double po, double pf ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 0.0e0 > po ) {
+      logger.error( "pcross=[po, pf] ; po must be greater than or equal to 0.0" );
+      System.exit(1);
+    }
+
+    if ( 1.0e0 < po ) {
+      logger.error( "pcross=[po, pf] ; po must be less than or equal to 1.0" );
+      System.exit(1);
+    }
+
+    if ( 0.0e0 > pf ) {
+      logger.error( "pcross=[po, pf] ; pf must be greater than or equal to 0.0" );
+      System.exit(1);
+    }
+
+    if ( 1.0e0 < pf ) {
+      logger.error( "pcross=[po, pf] ; pf must be less than or equal to 1.0" );
+      System.exit(1);
+    }
+
+    p_pCrossStart = po;
+    p_pCrossFinal = pf;
+    
     return this;
   }
 
   
   // =====================================================================================
   /** @brief Set start mutation probability.
+   *  @param po probability at generation 0
+   *  @param pf probability at genreation maxgen.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Probability for an individual allele to mutate.
    */
   // -------------------------------------------------------------------------------------
-  public UGAConfiguration pMutate( double vo, double vf ) {
-    p_pMutateStart = vo;
-    p_pMutateFinal = vf;
+  public UGAConfiguration pMutate( double po, double pf ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 0.0e0 > po ) {
+      logger.error( "pmutate=[po, pf] ; po must be greater than or equal to 0.0" );
+      System.exit(1);
+    }
+
+    if ( 1.0e0 < po ) {
+      logger.error( "pmutate=[po, pf] ; po must be less than or equal to 1.0" );
+      System.exit(1);
+    }
+
+    if ( 0.0e0 > pf ) {
+      logger.error( "pmutate=[po, pf] ; pf must be greater than or equal to 0.0" );
+      System.exit(1);
+    }
+
+    if ( 1.0e0 < pf ) {
+      logger.error( "pmutate=[po, pf] ; pf must be less than or equal to 1.0" );
+      System.exit(1);
+    }
+
+    p_pMutateStart = po;
+    p_pMutateFinal = pf;
+    
     return this;
   }
 
   
   // =====================================================================================
   /** @brief Set start mutation scale.
+   *  @param so scale at generation 0
+   *  @param sf scale at genreation maxgen.
    *  @return Pointer to this UGAConfiguration object.
    *
    *  Mutation scale.
    */
   // -------------------------------------------------------------------------------------
-  public UGAConfiguration sMutate( double vo, double vf ) {
-    p_sMutateStart = vo;
-    p_sMutateFinal = vf;
+  public UGAConfiguration sMutate( double so, double sf ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( 0.0e0 > so ) {
+      logger.error( "smutate=[so, sf] ; so must be greater than or equal to 0.0" );
+      System.exit(1);
+    }
+
+    if ( 1.0e0 < so ) {
+      logger.error( "smutate=[so, sf] ; so must be less than or equal to 1.0" );
+      System.exit(1);
+    }
+
+    if ( 0.0e0 > sf ) {
+      logger.error( "smutate=[po, sf] ; sf must be greater than or equal to 0.0" );
+      System.exit(1);
+    }
+
+    if ( 1.0e0 < sf ) {
+      logger.error( "smutate=[so, sf] ; sf must be less than or equal to 1.0" );
+      System.exit(1);
+    }
+
+    p_sMutateStart = so;
+    p_sMutateFinal = sf;
+
     return this;
   }
 
@@ -443,55 +581,142 @@ public class UGAConfiguration {
     } else {
       try {
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "maxgen" ) ) {
-          p_maxgen = StringTool.asInt32( sec.get( "maxgen" ) );
+          try {
+            maxgen( StringTool.asInt32( sec.get( "maxgen" ) ) );
+          } catch (java.lang.NumberFormatException e ) {
+            logger.error( "maxgen=integer ; "+e.toString() );
+            System.exit(2);
+          }
         }
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "report" ) ) {
-          p_report = StringTool.asInt32( sec.get( "report" ) );
-        }
+          try {
+            report( StringTool.asInt32( sec.get( "report" ) ) );
+           } catch (java.lang.NumberFormatException e ) {
+            logger.error( "report=integer ; "+e.toString() );
+            System.exit(2);
+          }
+       }
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "save" ) ) {
-          p_save = StringTool.asInt32( sec.get( "save" ) );
-        }
+          try {
+            save( StringTool.asInt32( sec.get( "save" ) ) );
+           } catch (java.lang.NumberFormatException e ) {
+            logger.error( "save=integer ; "+e.toString() );
+            System.exit(2);
+          }
+       }
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "pop" ) ) {
-          p_popSize = StringTool.asInt32( sec.get( "pop" ) );
+          try {
+            nPop( StringTool.asInt32( sec.get( "pop" ) ) );
+          } catch (java.lang.NumberFormatException e ) {
+            logger.error( "pop=integer ; "+e.toString() );
+            System.exit(2);
+          }
         }
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "tour" ) ) {
-          p_tourSize = StringTool.asInt32( sec.get( "tour" ) );
+           try {
+             nTour( StringTool.asInt32( sec.get( "tour" ) ) );
+          } catch (java.lang.NumberFormatException e ) {
+            logger.error( "tour=integer ; "+e.toString() );
+            System.exit(2);
+          }
         }
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "pcross" ) ) {
-           double[] temp = StringTool.asReal8List( sec.get( "pcross" ) );
-           if ( 2 == temp.length ) {
-            p_pCrossStart = temp[0];
-            p_pCrossFinal = temp[1];
-           }
+          String   params = sec.get( "pcross" );
+          String[] list   = StringTool.asStringList( params );
+
+          try {
+            switch ( list.length ) {
+              case 1:
+                double p = StringTool.asReal8( params );
+                pCross( p, p );
+                break;
+              case 2:
+                double po = StringTool.asReal8( list[0] );
+                double pf = StringTool.asReal8( list[1] );
+                pCross( po, pf );
+                break;
+              default:
+                logger.error( "pcross=p || [po,pf] ; must be a scalar or 2-tupple" );
+            }
+          } catch (java.lang.NumberFormatException e ) {
+            logger.error( "pcross=[real,real] ; "+e.toString() );
+            System.exit(2);
+          }
         }
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "pmutate" ) ) {
-           double[] temp = StringTool.asReal8List( sec.get( "pmutate" ) );
-           if ( 2 == temp.length ) {
-            p_pMutateStart = temp[0];
-            p_pMutateFinal = temp[1];
-           }
+          String   params = sec.get( "pmutate" );
+          String[] list   = StringTool.asStringList( params );
+
+          try {
+            switch ( list.length ) {
+              case 1:
+                double p = StringTool.asReal8( params );
+                pMutate( p, p );
+                break;
+              case 2:
+                double po = StringTool.asReal8( list[0] );
+                double pf = StringTool.asReal8( list[1] );
+                pMutate( po, pf );
+                break;
+              default:
+                logger.error( "pmutate=p || [po,pf] ; must be a scalar or 2-tupple" );
+            }
+          } catch (java.lang.NumberFormatException e ) {
+            logger.error( "pmutate=[real,real] ; "+e.toString() );
+            System.exit(2);
+          }
         }
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "smutate" ) ) {
-           double[] temp = StringTool.asReal8List( sec.get( "smutate" ) );
-           if ( 2 == temp.length ) {
-            p_sMutateStart = temp[0];
-            p_sMutateFinal = temp[1];
-           }
+          String   params = sec.get( "smutate" );
+          String[] list   = StringTool.asStringList( params );
+
+          try {
+            switch ( list.length ) {
+              case 1:
+                double p = StringTool.asReal8( params );
+                sMutate( p, p );
+                break;
+              case 2:
+                double po = StringTool.asReal8( list[0] );
+                double pf = StringTool.asReal8( list[1] );
+                sMutate( po, pf );
+                break;
+              default:
+                logger.error( "smutate=p || [po,pf] ; must be a scalar or 2-tupple" );
+            }
+          } catch (java.lang.NumberFormatException e ) {
+            logger.error( "smutate=[real,real] ; "+e.toString() );
+            System.exit(2);
+          }
         }
 
+        // -------------------------------------------------------------------------------
         if ( sec.hasKey( "bracket" ) ) {
-          p_pBracket = StringTool.asReal8( sec.get( "bracket" ) );
+          try {
+            pBracket( StringTool.asReal8( sec.get( "bracket" ) ) );
+          } catch (java.lang.NumberFormatException e ) {
+            logger.error( " bracket=integer ; "+e.toString() );
+            System.exit(2);
+          }
         }
 
-     } catch ( ConfigDB.NoSuchKey e1 ) {
+      } catch ( ConfigDB.NoSuchKey e1 ) {
         logger.error( e1.toString() );
       }
     }

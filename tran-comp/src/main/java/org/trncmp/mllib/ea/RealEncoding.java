@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                                  E N C O D I N G                                  **
+// **                              R E A L E N C O D I N G                              **
 // =======================================================================================
 // **                                                                                   **
 // **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
@@ -24,9 +24,9 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 //
-// @file Encoding.java
+// @file RealEncoding.java
 // <p>
-// Provides a common interface for UGA Encodings.
+// Provides a derived class to handle real valued encodings.
 //
 // @author Stephen W. Soliday
 // @date 2015-08-20
@@ -38,8 +38,8 @@ package org.trncmp.mllib.ea;
 import java.io.PrintStream;
 
 // =======================================================================================
-/** @class Encoding
- *  @brief Model encoding.
+/** @class RealEncoding
+ *  @brief Real valued encoding.
  *
  * Provides the model parameter encoding.
  */
@@ -75,7 +75,7 @@ public class RealEncoding extends Encoding {
    *  @return number of elements being used.
    */
   // -------------------------------------------------------------------------------------
-  public int size( ) {
+  public int size() {
     // -----------------------------------------------------------------------------------
     return data_len;
   }
@@ -112,7 +112,7 @@ public class RealEncoding extends Encoding {
    *  Clear the values of the elements.
    */
   // -------------------------------------------------------------------------------------
-  public void zero( ) {
+  public void zero() {
     // -----------------------------------------------------------------------------------
     for ( int i=0; i<data_len; i++ ) {
       data[i] = 0.0e0;
@@ -146,7 +146,7 @@ public class RealEncoding extends Encoding {
    *  Fill the Encoding with uniformly distributed random values.
    */
   // -------------------------------------------------------------------------------------
-  public void randomize( ) {
+  public void randomize() {
     // -----------------------------------------------------------------------------------
     for ( int i=0; i<data_len; i++ ) {
       data[i] = 2.0e0 * ent.uniform() - 1.0e0;
@@ -160,7 +160,7 @@ public class RealEncoding extends Encoding {
    *  Fill the string with {min max} values, evenly distributed.
    */
   // -------------------------------------------------------------------------------------
-  public void bracket( ) {
+  public void bracket() {
     // -----------------------------------------------------------------------------------
     for ( int i=0; i<data_len; i++ ) {
       data[i] = ent.bool() ? 1.0e0: -1.0e0;
@@ -216,10 +216,11 @@ public class RealEncoding extends Encoding {
   // =====================================================================================
   /** Parametric.
    *  Compute the parametric value in the range (A, B) for parameter t
-   * @param P1 array representing the t=0 value
-   * @param P1 array representing the t=1 value
-   * @param t parameter 0 <= t <= 1
-   * @return parametric value V,  A <= V <= B
+   * @param C1 array representing the t=0 dependent value
+   * @param C2 array representing the t=1 dependent value
+   * @param P1 array representing the t=0 independent value
+   * @param P2 array representing the t=1 independent value
+   * @param t independent parameter 0 <= t <= 1
    */
   // -------------------------------------------------------------------------------------
   public static void parametric( double[] C1, double[] C2,
@@ -302,6 +303,7 @@ public class RealEncoding extends Encoding {
         this.data[i] = src.data[i];
       }
     }
+    
     return count;
   }
 
@@ -309,5 +311,5 @@ public class RealEncoding extends Encoding {
 } // end class RealEncoding
 
 // =======================================================================================
-// **                                  E N C O D I N G                                  **
+// **                              R E A L E N C O D I N G                              **
 // ======================================================================== END FILE =====
