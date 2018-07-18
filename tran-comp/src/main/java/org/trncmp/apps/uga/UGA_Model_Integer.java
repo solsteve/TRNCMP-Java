@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                            U G A _ M O D E L _ R E A L                            **
+// **                         U G A _ M O D E L _ I N T E G E R                         **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
@@ -22,7 +22,7 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file UGA_Model_Real.java
+ * @file UGA_Model_Integer.java
  *  Provides interface and methods for a toy model to test the optimization of as list
  *  of real valued parameters.
  *
@@ -40,7 +40,7 @@ import org.trncmp.mllib.ea.Model;
 import org.trncmp.mllib.Entropy;
 import org.trncmp.mllib.ea.Metric;
 import org.trncmp.mllib.ea.Encoding;
-import org.trncmp.mllib.ea.RealEncoding;
+import org.trncmp.mllib.ea.IntegerEncoding;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
@@ -48,18 +48,20 @@ import org.apache.log4j.Level;
 
 
 // =======================================================================================
-public class UGA_Model_Real extends Model {
+public class UGA_Model_Integer extends Model {
   // -------------------------------------------------------------------------------------
   static final Logger logger = LogManager.getRootLogger();
 
-  protected final int TEST_LEN = 10;
+  protected final int TEST_LEN    = 10;
+  protected final int TEST_MININT = 0;
+  protected final int TEST_MAXINT = 100;
 
-  protected double[] fixed_r = new double[TEST_LEN];
+  protected int[] fixed_i = new int[TEST_LEN];
 
   protected ConfigDB config = null;
   
   // =====================================================================================
-  public UGA_Model_Real( ConfigDB cdb ) {
+  public UGA_Model_Integer( ConfigDB cdb ) {
     // -----------------------------------------------------------------------------------
     super();
     config = cdb;
@@ -88,7 +90,12 @@ public class UGA_Model_Real extends Model {
   // -------------------------------------------------------------------------------------
   public Encoding alloc_encoding( ) {
     // -----------------------------------------------------------------------------------
-    return (Encoding) new RealEncoding( TEST_LEN );
+    IntegerEncoding IE = new IntegerEncoding( TEST_LEN );
+    IE.setMin( TEST_MININT );
+    IE.setMax( TEST_MAXINT );
+    IE.randomize();
+
+    return (Encoding) IE;
   }
 
   
@@ -104,11 +111,13 @@ public class UGA_Model_Real extends Model {
     // -----------------------------------------------------------------------------------
     Entropy ent = Entropy.getInstance();
 
+    int d = TEST_MAXINT - TEST_MININT + 1;
+
     System.out.printf( "\nTEST =" );
 
     for ( int i=0; i<TEST_LEN; i++ ) {
-      fixed_r[i] = 2.0*ent.uniform() - 1.0;
-      System.out.printf( " %f", fixed_r[i] );
+      fixed_i[i] = TEST_MININT + ent.index( d );
+      System.out.printf( " %d", fixed_i[i] );
     }
     System.out.printf( "\n\n" );
 
@@ -157,7 +166,7 @@ public class UGA_Model_Real extends Model {
   // -------------------------------------------------------------------------------------
   public void display_short( Metric M, Encoding E ) {
     // -----------------------------------------------------------------------------------
-    System.out.format( "%11.4e | %s\n", M.get(0), E.format( "%f", ", " ) );
+    System.out.format( "%11.4e | %s\n", M.get(0), E.format( "%d", ", " ) );
   }
 
 
@@ -177,10 +186,10 @@ public class UGA_Model_Real extends Model {
     double mR = 0.0e0;
     double dR = 0.0e0;
 
-    RealEncoding param = (RealEncoding)E;
+    IntegerEncoding param = (IntegerEncoding)E;
 
     for ( int i=0; i<TEST_LEN; i++ ) {
-      dR = param.get(i) - fixed_r[i];
+      dR = (double)(param.get(i) - fixed_i[i]);
       mR += (dR*dR);
     }
 
@@ -226,5 +235,5 @@ public class UGA_Model_Real extends Model {
 }
 
 // =======================================================================================
-// **                            U G A _ M O D E L _ R E A L                            **
+// **                         U G A _ M O D E L _ I N T E G E R                         **
 // ======================================================================== END FILE =====

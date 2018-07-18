@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                              R E A L E N C O D I N G                              **
+// **                           I N T E G E R E N C O D I N G                           **
 // =======================================================================================
 // **                                                                                   **
 // **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
@@ -24,9 +24,9 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 //
-// @file RealEncoding.java
+// @file IntegerEncoding.java
 // <p>
-// Provides a derived class to handle real valued encodings.
+// Provides a derived class to handle integer valued encodings.
 //
 // @author Stephen W. Soliday
 // @date 2015-08-20
@@ -38,35 +38,43 @@ package org.trncmp.mllib.ea;
 import java.io.PrintStream;
 
 // =======================================================================================
-/** @class RealEncoding
- *  @brief Real valued encoding.
+/** @class IntegerEncoding
+ *  @brief Integer valued encoding.
  *
  * Provides the model parameter encoding.
  */
 // ---------------------------------------------------------------------------------------
-public class RealEncoding extends Encoding {
+public class IntegerEncoding extends Encoding {
   // -------------------------------------------------------------------------------------
 
-  /** buffer containing the real valued parameters for this RealEncoding. */
-  protected double[] data = null;
+  /** buffer containing the integer valued parameters for this IntegerEncoding. */
+  protected int[] data = null;
 
-  /** number of values in this RealEncoding. */
+  /** number of values in this IntegerEncoding. */
   protected int data_len = 0;
+
+  /** Minumum value of this parameter's elements. */
+  protected int min_int = 0;
+
+  /** Maxumum value of this parameter's elements. */
+  protected int max_int = 1000;
 
   protected org.trncmp.mllib.Entropy ent = org.trncmp.mllib.Entropy.getInstance();
 
 
   // =====================================================================================
   /** @brief Constructor.
-   *  @param n number of elements in the RealEncoding.
+   *  @param n number of elements in the IntegerEncoding.
    *
-   *  Allocate space for this RealEncoding.
+   *  Allocate space for this IntegerEncoding.
    */
   // -------------------------------------------------------------------------------------
-  public RealEncoding( int n ) {
+  public IntegerEncoding( int n ) {
     // -----------------------------------------------------------------------------------
-    data     = new double[n];
+    data     = new int[n];
     data_len = n;
+    min_int  = 0;
+    max_int  = 1000;
     randomize();
   }
 
@@ -84,11 +92,11 @@ public class RealEncoding extends Encoding {
 
   // =====================================================================================
   /** @brief Get
-   *  @param idx index of the desired RealEncoding element.
-   *  @return RealEncoding element indexed by idx.
+   *  @param idx index of the desired IntegerEncoding element.
+   *  @return IntegerEncoding element indexed by idx.
    */
   // -------------------------------------------------------------------------------------
-  public double get( int idx ) {
+  public int get( int idx ) {
     // -----------------------------------------------------------------------------------
     return data[idx];
   }
@@ -96,27 +104,57 @@ public class RealEncoding extends Encoding {
   
   // =====================================================================================
   /** @brief Set
-   *  @param idx index of the RealEncoding element to be set.
-   *  @param val value to set RealEncoding element.
+   *  @param idx index of the IntegerEncoding element to be set.
+   *  @param val value to set IntegerEncoding element.
    *  @return value to be set.
    */
   // -------------------------------------------------------------------------------------
-  public double set( int idx, double val ) {
+  public int set( int idx, int val ) {
     // -----------------------------------------------------------------------------------
     return ( data[idx] = val );
   }
 
 
   // =====================================================================================
+  /** @brief Set maximum.
+   *  @param m maximum integer value.
+   *
+   *  Set the upper bound for integer values. This will be an inclusive number.
+   */
+  // -------------------------------------------------------------------------------------
+  public void setMax( int m ) {
+    // -----------------------------------------------------------------------------------
+    max_int = m;
+  }
+
+  // =====================================================================================
+  /** @brief Set minimum.
+   *  @param m minimum integer value.
+   *
+   *  Set the lower bound for integer values. This will be an inclusive number.
+   */
+  // -------------------------------------------------------------------------------------
+  public void setMin( int m ) {
+    // -----------------------------------------------------------------------------------
+    min_int = m;
+  }
+
+
+  // =====================================================================================
   /** @brief Zero.
    *
-   *  Clear the values of the elements.
+   *  Clear the values of the elements. If zero is greater then max_int set to max_int.
+   *  If zero is less then min_int set to min_int. If zero if between min_int and max_int
+   *  then set to zero.
    */
   // -------------------------------------------------------------------------------------
   public void zero() {
     // -----------------------------------------------------------------------------------
+    int zval = 0;
+    if ( min_int > zval ) { zval = min_int; }
+    if ( max_int < zval ) { zval = max_int; }
     for ( int i=0; i<data_len; i++ ) {
-      data[i] = 0.0e0;
+      data[i] = zval;
     }    
   }
   
@@ -130,14 +168,32 @@ public class RealEncoding extends Encoding {
   public void copy( Encoding ap ) {
     // -----------------------------------------------------------------------------------
     if ( null == ap ) {
-      throw new NullPointerException("RealEncoding.copy( src==NULL )");
+      throw new NullPointerException("IntegerEncoding.copy( src==NULL )");
     }
 
-    RealEncoding E = (RealEncoding)ap;
+    IntegerEncoding E = (IntegerEncoding)ap;
 
     for ( int i=0; i<data_len; i++ ) {
       this.data[i] = E.data[i];
     }    
+  }
+
+  // =====================================================================================
+  /** @brief Gaussian.
+   *  @param E reference to an Entropy instance.
+   *  @param A minimum integer value.
+   *  @param B maximum integer value.
+   *  @param M mean integer value.
+   *  @param s standard deviation.
+   *  @return Gaussian distributed integer value.
+   */
+  // -------------------------------------------------------------------------------------
+  static int gaussian( org.trncmp.mllib.Entropy E, int A, int B, int M, double s ) {
+    // -----------------------------------------------------------------------------------
+    int x = (int) Math.floor( E.gauss( (double)A, (double)B, (double)M, s ) + 0.5 );
+    if ( A > x ) { x = A; }
+    if ( B < x ) { x = B; }
+    return x;
   }
 
   
@@ -149,8 +205,9 @@ public class RealEncoding extends Encoding {
   // -------------------------------------------------------------------------------------
   public void randomize() {
     // -----------------------------------------------------------------------------------
+    int d = max_int - min_int + 1;
     for ( int i=0; i<data_len; i++ ) {
-      data[i] = 2.0e0 * ent.uniform() - 1.0e0;
+      data[i] = min_int + ent.index( d );
     }
   }
 
@@ -164,7 +221,7 @@ public class RealEncoding extends Encoding {
   public void bracket() {
     // -----------------------------------------------------------------------------------
     for ( int i=0; i<data_len; i++ ) {
-      data[i] = ent.bool() ? 1.0e0: -1.0e0;
+      data[i] = ent.bool() ? min_int : max_int;
     }
   }
 
@@ -181,7 +238,7 @@ public class RealEncoding extends Encoding {
     double sigma = 2.0e0 * scale / N_SIGMA_SCALE;
 
     for ( int i=0; i<data_len; i++ ) {
-      data[i] = ent.gauss( -1.0e0, 1.0e0, data[i], sigma );
+      data[i] = gaussian( ent, min_int, max_int, data[i], sigma );
     }
   }
 
@@ -224,15 +281,20 @@ public class RealEncoding extends Encoding {
    * @param t independent parameter 0 <= t <= 1
    */
   // -------------------------------------------------------------------------------------
-  public static void parametric( double[] C1, double[] C2,
-                                 double[] P1, double[] P2, double t ) {
+  public static void parametric( int[] C1, int[] C2,
+                                 int[] P1, int[] P2, double t ) {
     // -----------------------------------------------------------------------------------
     int n = C1.length;
     for ( int i=0; i<n; i++ ) {
-      double a = P1[i];
-      double b = P2[i];
-      C1[i] = t * ( b - a ) + a;
-      C2[i] = t * ( a - b ) + b;
+      int x1 = (int) Math.floor( t * ( double )( P2[i] - P1[i] ) + 0.5 ) + P1[i];
+      int x2 = (int) Math.floor( (1.0-t) * ( double )( P2[i] - P1[i] ) + 0.5 ) + P1[i];
+      //      int x2 = (int) Math.floor( t * ( double )( P1[i] - P2[i] ) + 0.5 ) + P2[i];
+      if ( P1[i] > x1 ) { x1 = P1[i]; }
+      if ( P2[i] < x1 ) { x1 = P2[i]; }
+      if ( P1[i] > x2 ) { x2 = P1[i]; }
+      if ( P2[i] < x2 ) { x2 = P2[i]; }
+      C1[i] = x1;
+      C2[i] = x2;
     }
   }
 
@@ -265,10 +327,10 @@ public class RealEncoding extends Encoding {
       throw new NullPointerException("Child 2 ( NULL )");
     }
 
-    RealEncoding p1 = (RealEncoding)ap1;
-    RealEncoding p2 = (RealEncoding)ap2;
-    RealEncoding c1 = this;
-    RealEncoding c2 = (RealEncoding)ac2;
+    IntegerEncoding p1 = (IntegerEncoding)ap1;
+    IntegerEncoding p2 = (IntegerEncoding)ap2;
+    IntegerEncoding c1 = this;
+    IntegerEncoding c2 = (IntegerEncoding)ac2;
 
     parametric( c1.data, c2.data, p1.data, p2.data, ent.uniform() );
   }
@@ -291,14 +353,14 @@ public class RealEncoding extends Encoding {
       throw new NullPointerException("source ( NULL )");
     }
 
-    RealEncoding src = (RealEncoding)S;
+    IntegerEncoding src = (IntegerEncoding)S;
 
     int    count = 0;
-    double sigma = 2.0e0 * scale / N_SIGMA_SCALE;
+    double sigma = (double)(max_int - min_int + 1) *  scale / 6.0;
 
     for ( int i=0; i<data_len; i++ ) {
       if ( ent.bool( perc ) ) {
-        this.data[i] = ent.gauss( -1.0e0, 1.0e0, src.data[i], sigma );
+        this.data[i] = gaussian( ent, min_int, max_int, src.data[i], sigma );
         count++;
       } else {
         this.data[i] = src.data[i];
@@ -309,8 +371,8 @@ public class RealEncoding extends Encoding {
   }
 
 
-} // end class RealEncoding
+} // end class IntegerEncoding
 
 // =======================================================================================
-// **                              R E A L E N C O D I N G                              **
+// **                           I N T E G E R E N C O D I N G                           **
 // ======================================================================== END FILE =====
