@@ -33,31 +33,33 @@
 
 package org.trncmp.mllib.ea;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import        org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.trncmp.mllib.Entropy;
 
 // =======================================================================================
-public class EntropyTest {
+class EntropyTest {
   // -------------------------------------------------------------------------------------
 
   static final int SHORT_SAMPLES = 1000;
 
   // =====================================================================================
-  @Test public void testSeedSize() {
+  @Test
+  void testSeedSize() {
     // -----------------------------------------------------------------------------------
     Entropy ent = Entropy.getInstance();
 
     int ss = ent.seed_size();
 
-    Assert.assertTrue( 8 == ss );
+    assertTrue( 8 == ss );
   }
 
   
   // =====================================================================================
-  @Test public void testSeedSetSmall() {
+  @Test
+  void testSeedSetSmall() {
     // -----------------------------------------------------------------------------------
     Entropy ent = Entropy.getInstance();
 
@@ -77,12 +79,13 @@ public class EntropyTest {
       if ( A[i] != B[i] ) { count += 1; }
     }
 
-    Assert.assertEquals( 0, count );
+    assertEquals( 0, count );
   }
 
   
   // =====================================================================================
-  @Test public void testSeedSetSame() {
+  @Test
+  public void testSeedSetSame() {
     // -----------------------------------------------------------------------------------
     Entropy ent = Entropy.getInstance();
 
@@ -104,12 +107,13 @@ public class EntropyTest {
       if ( A[i] != B[i] ) { count += 1; }
     }
 
-    Assert.assertEquals( 0, count );
+    assertEquals( 0, count );
   }
 
   
   // =====================================================================================
-  @Test public void testSeedSetBig() {
+  @Test
+  public void testSeedSetBig() {
     // -----------------------------------------------------------------------------------
     Entropy ent = Entropy.getInstance();
 
@@ -131,7 +135,7 @@ public class EntropyTest {
       if ( A[i] != B[i] ) { count += 1; }
     }
 
-    Assert.assertEquals( 0, count );
+    assertEquals( 0, count );
   }
 
   

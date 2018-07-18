@@ -265,6 +265,18 @@ public class IntegerEncoding extends Encoding {
   }
 
 
+  // =====================================================================================
+  /** @brief Convert Encoding to String.
+   *  @param fmt edit descriptor of each element.
+   *  @return white space separated values of the Encoding elements
+   */
+  // -------------------------------------------------------------------------------------
+  public String toString() {
+    // -----------------------------------------------------------------------------------
+    return format( "%d", " " );
+  }
+
+  
 
 
 

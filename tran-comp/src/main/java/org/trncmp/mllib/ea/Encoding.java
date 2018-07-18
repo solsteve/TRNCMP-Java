@@ -111,7 +111,15 @@ public abstract class Encoding {
   // -------------------------------------------------------------------------------------
   public abstract String format( String fmt, String dlm );
 
+  // =====================================================================================
+  /** @brief Convert Encoding to String.
+   *  @param fmt edit descriptor of each element.
+   *  @return white space separated values of the Encoding elements
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract String toString();
 
+    
   // =====================================================================================
   /** @brief Crossover.
    *  @param ac2 pointer to child number two.
@@ -142,16 +150,6 @@ public abstract class Encoding {
   public abstract int mutate( Encoding S, double perc, double scale );
 
 
-  // =====================================================================================
-  /** @brief Convert Encoding to String.
-   *  @param fmt edit descriptor of each element.
-   *  @return white space separated values of the Encoding elements
-   */
-  // -------------------------------------------------------------------------------------
-  public String toString() {
-    // -----------------------------------------------------------------------------------
-    return format( "%11.4e", " " );
-  }
 
   
 } // end class Encoding

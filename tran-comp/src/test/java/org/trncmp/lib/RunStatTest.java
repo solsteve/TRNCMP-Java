@@ -33,9 +33,10 @@
 
 package org.trncmp.lib;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import        org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.trncmp.mllib.Entropy;
 
@@ -158,20 +159,22 @@ public class RunStatTest {
   }
 
   // =====================================================================================
-  @Test public void testBoxMuller() {
+  @Test
+  public void testBoxMuller() {
     // -----------------------------------------------------------------------------------
 
     double[] test1 = GenSamples( 100, 0.0, 0.2, 123456L );
     double[] test2 = GenSamples( 100, 0.0, 0.2, 123457L );
     double[] test3 = GenSamples( 100, 0.0, 0.2, 123456L );
 
-    Assert.assertFalse( compare( test1, test2 ) );
-    Assert.assertTrue(  compare( test1, test3 ) );
-    Assert.assertFalse( compare( test2, test3 ) );
+    assertFalse( compare( test1, test2 ) );
+    assertTrue(  compare( test1, test3 ) );
+    assertFalse( compare( test2, test3 ) );
   }
   
   // =====================================================================================
-  @Test public void testRunStat() {
+  @Test
+  public void testRunStat() {
     // -----------------------------------------------------------------------------------
     final long   SEED    = 314159265L;
 
@@ -191,11 +194,11 @@ public class RunStatTest {
       R1.update( test[i] );
     }
 
-    Assert.assertEquals( SAMPLES, R1.count() );
-    Assert.assertEquals( S.minv,  R1.minv(), TOL );
-    Assert.assertEquals( S.maxv,  R1.maxv(), TOL );
-    Assert.assertEquals( S.mean,  R1.mean(), TOL );
-    Assert.assertEquals( S.var,   R1.var(),  TOL );
+    assertEquals( SAMPLES, R1.count() );
+    assertEquals( S.minv,  R1.minv(), TOL );
+    assertEquals( S.maxv,  R1.maxv(), TOL );
+    assertEquals( S.mean,  R1.mean(), TOL );
+    assertEquals( S.var,   R1.var(),  TOL );
     
   }
 

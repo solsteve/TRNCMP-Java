@@ -33,9 +33,10 @@
 
 package org.trncmp.mllib.ea;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import        org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 // =======================================================================================
 public class MetricTest {
@@ -44,65 +45,69 @@ public class MetricTest {
   static final double tol = 1.0e-12;
   
   // =====================================================================================
-  @Test public void testConstruct() {
+  @Test
+  public void testConstruct() {
     // -----------------------------------------------------------------------------------
     Metric m1 = new Metric();
     Metric m2 = new Metric(3);
     Metric m3 = new Metric(m2);
-    Assert.assertEquals( 0, m1.size() );
-    Assert.assertEquals( 3, m2.size() );
-    Assert.assertEquals( 3, m3.size() );
+    assertEquals( 0, m1.size() );
+    assertEquals( 3, m2.size() );
+    assertEquals( 3, m3.size() );
   }
 
   
   // =====================================================================================
-  @Test public void testResize() {
+  @Test
+  public void testResize() {
     // -----------------------------------------------------------------------------------
     Metric m = new Metric(5);
-    Assert.assertEquals( 5, m.size() );
+    assertEquals( 5, m.size() );
 
     // same size
     m.resize(5);
-    Assert.assertEquals( 5, m.size() );
+    assertEquals( 5, m.size() );
       
     // smaller
     m.resize(2);
-    Assert.assertEquals( 2, m.size() );
+    assertEquals( 2, m.size() );
 
     // bigger
     m.resize(8);
-    Assert.assertEquals( 8, m.size() );
+    assertEquals( 8, m.size() );
   }
 
   
   // =====================================================================================
-  @Test public void testSetGet() {
+  @Test
+  public void testSetGet() {
     // -----------------------------------------------------------------------------------
     final double a   = 1.2;
     final double b   = 3.4;
     final double c   = 5.6;
       
     Metric m = new Metric(3);
-    Assert.assertEquals( 0.0e0, m.get(0), tol);
-    Assert.assertEquals( 0.0e0, m.get(1), tol );
-    Assert.assertEquals( 0.0e0, m.get(2), tol );
+    assertEquals( 0.0e0, m.get(0), tol);
+    assertEquals( 0.0e0, m.get(1), tol );
+    assertEquals( 0.0e0, m.get(2), tol );
 
     m.set( 0, a );
     m.set( 1, b );
     m.set( 2, c );
-    Assert.assertEquals( a, m.get(0), tol);
-    Assert.assertEquals( b, m.get(1), tol );
-    Assert.assertEquals( c, m.get(2), tol );
+    assertEquals( a, m.get(0), tol);
+    assertEquals( b, m.get(1), tol );
+    assertEquals( c, m.get(2), tol );
 
     m.zero();
-    Assert.assertEquals( 0.0e0, m.get(0), tol);
-    Assert.assertEquals( 0.0e0, m.get(1), tol );
-    Assert.assertEquals( 0.0e0, m.get(2), tol );
+    assertEquals( 0.0e0, m.get(0), tol);
+    assertEquals( 0.0e0, m.get(1), tol );
+    assertEquals( 0.0e0, m.get(2), tol );
   }
 
 
   // =====================================================================================
-  @Test public void testZeroCopy() {
+  @Test
+  public void testZeroCopy() {
     // -----------------------------------------------------------------------------------
     final double a   = 1.2;
     final double b   = 3.4;
@@ -110,37 +115,38 @@ public class MetricTest {
     final double d   = 7.8;
       
     Metric m1 = new Metric(4);
-    Assert.assertEquals( 4, m1.size() );
-    Assert.assertEquals( 0.0e0, m1.get(0), tol);
-    Assert.assertEquals( 0.0e0, m1.get(1), tol );
-    Assert.assertEquals( 0.0e0, m1.get(2), tol );
-    Assert.assertEquals( 0.0e0, m1.get(3), tol );
+    assertEquals( 4, m1.size() );
+    assertEquals( 0.0e0, m1.get(0), tol);
+    assertEquals( 0.0e0, m1.get(1), tol );
+    assertEquals( 0.0e0, m1.get(2), tol );
+    assertEquals( 0.0e0, m1.get(3), tol );
 
     m1.set( 0, a );
     m1.set( 1, b );
     m1.set( 2, c );
     m1.set( 3, d );
-    Assert.assertEquals( a, m1.get(0), tol);
-    Assert.assertEquals( b, m1.get(1), tol );
-    Assert.assertEquals( c, m1.get(2), tol );
-    Assert.assertEquals( d, m1.get(3), tol );
+    assertEquals( a, m1.get(0), tol);
+    assertEquals( b, m1.get(1), tol );
+    assertEquals( c, m1.get(2), tol );
+    assertEquals( d, m1.get(3), tol );
 
     Metric m2 = new Metric(2);
-    Assert.assertEquals( 2, m2.size() );
-    Assert.assertEquals( 0.0e0, m2.get(0), tol);
-    Assert.assertEquals( 0.0e0, m2.get(1), tol );
+    assertEquals( 2, m2.size() );
+    assertEquals( 0.0e0, m2.get(0), tol);
+    assertEquals( 0.0e0, m2.get(1), tol );
 
     m2.copy( m1 );
-    Assert.assertEquals( 4, m2.size() );
-    Assert.assertEquals( m1.get(0), m2.get(0), tol);
-    Assert.assertEquals( m1.get(1), m2.get(1), tol);
-    Assert.assertEquals( m1.get(2), m2.get(2), tol);
-    Assert.assertEquals( m1.get(3), m2.get(3), tol);  
+    assertEquals( 4, m2.size() );
+    assertEquals( m1.get(0), m2.get(0), tol);
+    assertEquals( m1.get(1), m2.get(1), tol);
+    assertEquals( m1.get(2), m2.get(2), tol);
+    assertEquals( m1.get(3), m2.get(3), tol);  
   }
 
   
   // =====================================================================================
-  @Test public void testCompare() {
+  @Test
+  public void testCompare() {
     // -----------------------------------------------------------------------------------
     final double a     = 1.2;
     final double b     = 3.4;
@@ -150,33 +156,34 @@ public class MetricTest {
     final double small = 1.1;
 
     Metric m1 = new Metric(3);
-    Assert.assertEquals( 3, m1.size() );
+    assertEquals( 3, m1.size() );
     m1.set( 0, a );
     m1.set( 1, b );
     m1.set( 2, c );
 
     Metric m2 = new Metric(3);
-    Assert.assertEquals( 3, m2.size() );
+    assertEquals( 3, m2.size() );
     m2.set( 0, a );
     m2.set( 1, b );
     m2.set( 2, c );
 
-    Assert.assertTrue( 0 == m1.compareTo( m2 ) );
+    assertTrue( 0 == m1.compareTo( m2 ) );
 
     m1.set( 2, small );
     m2.set( 2, big );
 
-    Assert.assertTrue( m1.compareTo( m2 ) < 0 );
+    assertTrue( m1.compareTo( m2 ) < 0 );
 
     m1.set( 2, big );
     m2.set( 2, small );
 
-    Assert.assertTrue( m1.compareTo( m2 ) > 0 );
+    assertTrue( m1.compareTo( m2 ) > 0 );
   }
 
 
   // =====================================================================================
-  @Test public void testStrinFormat() {
+  @Test
+  public void testStrinFormat() {
     // -----------------------------------------------------------------------------------
     final double a   =  1.2e-2;
     final double b   = -3.4e1;
@@ -188,18 +195,19 @@ public class MetricTest {
     final String test2 = " 0.012|-34.000| 0.560";
 
     Metric m = new Metric(3);
-    Assert.assertEquals( 3, m.size() );
+    assertEquals( 3, m.size() );
     m.set( 0, a );
     m.set( 1, b );
     m.set( 2, c );
 
-    Assert.assertEquals( test1, m.toString() );
-    Assert.assertEquals( test2, m.format( fmt, dlm ) );
+    assertEquals( test1, m.toString() );
+    assertEquals( test2, m.format( fmt, dlm ) );
   }
 
   
   // =====================================================================================
-  @Test public void testMath() {
+  @Test
+  public void testMath() {
     // -----------------------------------------------------------------------------------
     final double a   =  1.2e-2;
     final double b   = -3.4e1;
@@ -218,23 +226,23 @@ public class MetricTest {
     
 
     Metric m = new Metric(4);
-    Assert.assertEquals( 4, m.size() );
+    assertEquals( 4, m.size() );
     m.set( 0, a );
     m.set( 1, b );
     m.set( 2, c );
     m.set( 3, d );
 
-    Assert.assertEquals( sumsq, m.sumsq(), tol );
-    Assert.assertEquals( mse,   m.mse(), tol );
+    assertEquals( sumsq, m.sumsq(), tol );
+    assertEquals( mse,   m.mse(), tol );
 
     double test = m.normalize();
 
-    Assert.assertEquals( nrm, test, tol );
+    assertEquals( nrm, test, tol );
 
-    Assert.assertEquals( an, m.get(0), tol );
-    Assert.assertEquals( bn, m.get(1), tol );
-    Assert.assertEquals( cn, m.get(2), tol );
-    Assert.assertEquals( dn, m.get(3), tol );
+    assertEquals( an, m.get(0), tol );
+    assertEquals( bn, m.get(1), tol );
+    assertEquals( cn, m.get(2), tol );
+    assertEquals( dn, m.get(3), tol );
   }
 
   
