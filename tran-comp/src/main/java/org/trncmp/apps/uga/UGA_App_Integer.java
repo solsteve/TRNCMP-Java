@@ -67,13 +67,17 @@ public class UGA_App_Integer {
 
     // ----- check for an auxillary section in the ConfigDB ------------------------------
 
-    try {
-      if ( cfg.hasSection( "AUX" ) ) {
-        aux_sec = cfg.get( "AUX" );
+    if ( null != cfg ) {
+      try {
+        if ( cfg.hasSection( "AUX" ) ) {
+          aux_sec = cfg.get( "AUX" );
+        }
+      } catch( ConfigDB.NoSection e ) {
+        logger.error( e.toString() );
+        System.exit(1);
       }
-    } catch( ConfigDB.NoSection e ) {
-      logger.error( e.toString() );
-      System.exit(1);
+    } else {
+      System.exit(2);
     }
 
   }

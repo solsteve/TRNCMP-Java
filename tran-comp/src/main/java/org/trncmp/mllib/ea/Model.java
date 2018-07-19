@@ -109,27 +109,16 @@ public abstract class Model {
 
   
   // =====================================================================================
-  /** @brief Display Long.
+  /** @brief Display Short.
+   *  @param msg message to prefix.
    *  @param M   pointer to the return metrics
    *  @param E   pointer to the encoding for this model.
-   *  @param msg message sent to this model display.
-   *
-   *  Present a full representation of the model parameters and metrics.
-   */
-  // -------------------------------------------------------------------------------------
-  public abstract void display_long( String msg, Metric M, Encoding E );
-
-  
-  // =====================================================================================
-  /** @brief Display Short.
-   *  @param M pointer to the return metrics
-   *  @param E pointer to the encoding for this model.
    *
    *  Present an abbreviated representation of the variable parameters,
-   *  should be one line..
+   *  should be one line.
    */
   // -------------------------------------------------------------------------------------
-  public abstract void display_short( Metric M, Encoding E );
+  public abstract void display_short( String msg, Metric M, Encoding E );
 
   
   // =====================================================================================
@@ -170,6 +159,25 @@ public abstract class Model {
 
 
   // =====================================================================================
+  /** @brief Display.
+   *  @param msg message to prefix the display.
+   *  @param M   pointer to a uga::Metric.
+   *  @param E   pointer to a uga::Encoding.
+   *
+   *  This function may be called at anytime, but should be called once after the
+   *  evolution cycle, using the UGA::display_model( UGA::best, std::cout ) function.
+   *
+   *  You should convert the UGA representation (i.e. real -1 < x < +1) into something
+   *  meaningful to your model.
+   */
+  // -------------------------------------------------------------------------------------
+  public void display_long( String msg, Metric M, Encoding E ) {
+    // -----------------------------------------------------------------------------------
+    display_short( msg, M, E );
+  }
+
+  
+  // =====================================================================================
   /** @brief Default Constructor.
    *
    *  Used incase the used calls super()
@@ -207,12 +215,13 @@ public abstract class Model {
   public void display( String msg, Metric M,  Encoding E,  boolean use_short ) {
     // -----------------------------------------------------------------------------------
     if ( use_short ) {
-      display_short( M, E );
+      display_short( msg, M, E );
     } else {
       display_long( msg, M, E );
     }
   }
 
+  
   // =====================================================================================
   /** @brief Pre Evolve.
    *  @param BM pointer to a best  metric.

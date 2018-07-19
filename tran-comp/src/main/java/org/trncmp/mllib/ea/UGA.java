@@ -428,11 +428,11 @@ public class UGA {
       // ----- report results ------------------------------------------------------------
 
       if ( 0 == ( iGen % config.report() ) ) {
-        model.display( String.format( "%d: ", iGen ),
+        model.display( String.format( "%d", iGen ),
                        primary.best().metric,
                        primary.best().param,  true );
         
-        model.display( String.format( "%d: ", iGen ),
+        model.display( String.format( "%d", iGen ),
                        primary.worst().metric,
                        primary.worst().param, true );
         System.out.printf( "\n" );

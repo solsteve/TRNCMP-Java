@@ -146,8 +146,11 @@ public class Entropy {
   // -------------------------------------------------------------------------------------
   public int index( int max_index ) {
     // -----------------------------------------------------------------------------------
-    int i = builtin.nextInt();
-    if ( i < 0 ) i = -i;
+    int i = 0;
+    do {
+      i = builtin.nextInt();
+    } while( i < 0 );
+
     return i % max_index;
   }
 

@@ -1,8 +1,10 @@
 // ====================================================================== BEGIN FILE =====
-// **                         U G A _ M O D E L _ I N T E G E R                         **
+// **                             U G A _ M O D E L _ T S P                             **
 // =======================================================================================
 // **                                                                                   **
-// **  Copyright (c) 2018, Stephen W. Soliday                                           **
+// **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
+// **                                                                                   **
+// **  Copyright (c) 2015, Stephen W. Soliday                                           **
 // **                      stephen.soliday@trncmp.org                                   **
 // **                      http://research.trncmp.org                                   **
 // **                                                                                   **
@@ -22,46 +24,55 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file UGA_Model_Integer.java
- *  Provides interface and methods for a toy model to test the optimization of as list
- *  of real valued parameters.
+ * @file UGA_Model_TSP.java
+ *  Test model for a TSP valued Genetic Algorithm.
  *
  * @author Stephen W. Soliday
- * @date 2018-07-17
+ * @date 2015-08-24
  */
 // =======================================================================================
 
-
 package org.trncmp.apps.uga;
 
+import java.util.Scanner;
+import java.io.File;
+
 import org.trncmp.lib.ConfigDB;
+import org.trncmp.lib.Math2;
+import org.trncmp.lib.PSGraph;
+import org.trncmp.lib.PSDraw;
 
 import org.trncmp.mllib.ea.Model;
 import org.trncmp.mllib.Entropy;
 import org.trncmp.mllib.ea.Metric;
 import org.trncmp.mllib.ea.Encoding;
-import org.trncmp.mllib.ea.IntegerEncoding;
+import org.trncmp.mllib.ea.PMXEncoding;
+
+import java.io.FileNotFoundException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Level;
 
-
 // =======================================================================================
-public class UGA_Model_Integer extends Model {
+// ---------------------------------------------------------------------------------------
+public class UGA_Model_TSP extends Model {
   // -------------------------------------------------------------------------------------
+
   static final Logger logger = LogManager.getRootLogger();
 
-  protected final int TEST_LEN    = 10;
-  protected final int TEST_MININT = 0;
-  protected final int TEST_MAXINT = 100;
+  protected ConfigDB.Section cfg_sec;
 
-  protected int[] fixed_i = new int[TEST_LEN];
+  protected double[][]  weight = null;
+  protected double[]    xco    = null;
+  protected double[]    yco    = null;
+  protected int         num    = 0;
 
+  protected PMXEncoding temp   = null;
   protected ConfigDB config = null;
-  
+
   // =====================================================================================
-  public UGA_Model_Integer( ConfigDB cdb ) {
+  public UGA_Model_TSP( ConfigDB cdb ) {
     // -----------------------------------------------------------------------------------
     super();
     config = cdb;
@@ -90,45 +101,74 @@ public class UGA_Model_Integer extends Model {
   // -------------------------------------------------------------------------------------
   public Encoding alloc_encoding( ) {
     // -----------------------------------------------------------------------------------
-    IntegerEncoding IE = new IntegerEncoding( TEST_LEN );
-    IE.setMin( TEST_MININT );
-    IE.setMax( TEST_MAXINT );
-    IE.randomize();
-
-    return (Encoding) IE;
+    return (Encoding) new PMXEncoding( num );
   }
 
   
   // =====================================================================================
   /** @brief Initialize.
-   *  @param cfg pointer to a ConfigDB database object.
-   *  @return true if errors occur.
+   *  @param cfg_sec pointer to a ConfigDB database object.
    *
    *  This is where you need to initialize your model prior to evolution.
    */
   // -------------------------------------------------------------------------------------
-  public boolean config() {
+  public boolean config( ) {
     // -----------------------------------------------------------------------------------
-    Entropy ent = Entropy.getInstance();
+    String fspc = null;
+    try {
+      cfg_sec = config.get( "TSP" );
 
-    int d = TEST_MAXINT - TEST_MININT + 1;
+      fspc = cfg_sec.get( "tspfile" );
 
-    System.out.printf( "\nTEST =" );
+      Scanner input = new Scanner( new File(fspc) );
 
-    for ( int i=0; i<TEST_LEN; i++ ) {
-      fixed_i[i] = TEST_MININT + ent.index( d );
-      System.out.printf( " %d", fixed_i[i] );
+      num = input.nextInt();
+
+      System.err.printf( "Number of nodes: %d\n", num );
+
+      weight = new double[num][num];
+      for ( int r=0; r<num; r++ ) {
+        for ( int c=0; c<num; c++ ) {
+          weight[r][c] = input.nextDouble();
+        }
+      }
+
+      xco = new double[ num ];
+      yco = new double[ num ];
+
+      int idx;
+
+      for ( int i=0; i<num; i++ ) {
+        idx = input.nextInt();
+        if ( idx < num ) {
+          xco[idx] = input.nextDouble();
+          yco[idx] = input.nextDouble();
+        } else {
+          logger.error( "index on line "+(num+2+i)+" of "+fspc+" is to large" );
+          System.exit(1);
+        }
+      }
+	
+      input.close();
+
+      return false;
+    } catch( FileNotFoundException e1 ) {
+      logger.error( "Cannot find "+fspc+" - "+e1.toString() );
+      // } catch( IOException e2 ) {
+      //     logger.error( "Cannot close "+fspc+" - "+e2.toString() );
+    } catch( ConfigDB.NoSuchKey e1 ) {
+      logger.error( e1.toString() );
+    } catch( ConfigDB.NoSection e2 ) {
+      logger.error( e2.toString() );
     }
-    System.out.printf( "\n\n" );
-
-    return false;
+    return true;
   }
 
   
   // =====================================================================================
   public void save( Encoding dummy ) {
     // -----------------------------------------------------------------------------------
-    logger.warn( "Save is not implemnted here" );
+    logger.warn( "Save is not implemented here" );
   }
 
   
@@ -141,13 +181,13 @@ public class UGA_Model_Integer extends Model {
    *  This function may be called at anytime, but should be called once after the evolution
    *  cycle, using the UGA::display_model( UGA::best, std::cout ) function.
    *
-   *  You should convert the UGA representation (i.e. real -1 < x < +1) into something
+   *  You should convert the UGA representation (i.e. TSP -1 < x < +1) into something
    *  meaningful to your model.
    */
   // -------------------------------------------------------------------------------------
   public void display_short( String msg, Metric M, Encoding E ) {
     // -----------------------------------------------------------------------------------
-    System.out.format( "%s : %11.4e | %s\n", M.get(0), E.format( "%d", ", " ) );
+    System.out.format( "%s : %10.3f | %s\n", msg, M.get(0), E.format( "%d", ", " ) );
   }
 
 
@@ -164,21 +204,21 @@ public class UGA_Model_Integer extends Model {
   // -------------------------------------------------------------------------------------
   public void execute( Metric M, Encoding E ) {
     // -----------------------------------------------------------------------------------
-    double mR = 0.0e0;
-    double dR = 0.0e0;
+    PMXEncoding param = (PMXEncoding)E;
 
-    IntegerEncoding param = (IntegerEncoding)E;
+    double sum = Math2.N_ZERO;
 
-    for ( int i=0; i<TEST_LEN; i++ ) {
-      dR = (double)(param.get(i) - fixed_i[i]);
-      mR += (dR*dR);
+    for ( int i=1; i<num; i++ ) {
+      sum += weight[param.get(i-1)][param.get(i)];
     }
+    sum += weight[param.get(num-1)][param.get(0)];
 
-    M.set( 0, mR );
+    M.set( 0, sum );
   }
 
+  
   // =====================================================================================
-  /** @brief Example Metric.
+  /** @brief Example TSP Metric.
    *  @param lhs pointer to a uga::Metric object.
    *  @param rhs pointer to a uga::Metric object.
    *  @return true if the lhs set of metrics is better than the rhs set.
@@ -198,6 +238,7 @@ public class UGA_Model_Integer extends Model {
     return true;
   }
 
+  
   // =====================================================================================
   /** @brief Threshold.
    *  @param M pointer to a uga::Metric set.
@@ -210,11 +251,172 @@ public class UGA_Model_Integer extends Model {
   public boolean meetsThreshold( Metric M ) {
     // -----------------------------------------------------------------------------------
     double x = M.get(0);
-    if ( 1e-14 > x ) { return true; }
+    if ( 1.0e-14 > x ) { return true; }
     return false;
   }
+
+  
+  // =====================================================================================
+  /** @brief Find.
+   *  @param dst pointer to a destination encoding.
+   *  @param src pointer to a encoding.
+   *  @param t value to test for.
+   *  @return index where t was found.
+   *
+   *  Copy every element from src into dst, and return the index that holds t.
+   */
+  // -------------------------------------------------------------------------------------
+  protected static int copy_find( PMXEncoding dst, PMXEncoding src, int t ) {
+    // -----------------------------------------------------------------------------------
+    int m = src.size();
+    int r = 0;
+    for ( int j=0; j<m; j++ ) {
+      int s = src.get( j );
+      if ( t == s ) { r = j; }
+      dst.set( j, s );
+    } 
+    return r;
+  }
+
+  
+  // =====================================================================================
+  /** @brief Pre-process.
+   *  @param A pointer to an array of encodings.
+   *  @param n number of encodings in the array.
+   *
+   *  Apply this algorithm to every member of the population.
+   */
+  // -------------------------------------------------------------------------------------
+  public void pre_process( Encoding[] A, int n ) {
+    // -----------------------------------------------------------------------------------
+    if ( null == temp ) { temp = (PMXEncoding)alloc_encoding(); }
+
+    int m = temp.size();
+
+    for ( int i=0; i<n; i++ ) {
+      int z = copy_find( temp, (PMXEncoding)(A[i]), 0 );
+    
+      for ( int j=0; j<m; j++ ) {
+        ((PMXEncoding)(A[i])).set( j, temp.get( (j + z) % m ) );
+      }
+    }
+  }
+
+  
+  // =====================================================================================
+  /** @brief Run After..
+   *  @param BM pointer to the best metric.
+   *  @param BE pointer to the best encoding.
+   *  @param WM pointer to the worst metric.
+   *  @param WE pointer to the worst encoding.
+   *
+   *  Apply this algorithm after the max-gen has been reached (or the threshold trips).
+   */
+  // -------------------------------------------------------------------------------------
+  public void run_after( Metric dum1, Encoding BE,
+                         Metric dum2, Encoding dum3 ) {
+    // -----------------------------------------------------------------------------------
+
+    double minX = xco[0];
+    double maxX = xco[0];
+    double minY = yco[0];
+    double maxY = yco[0];
+
+    for ( int i=1; i<num; i++ ) {
+      if ( xco[i] < minX ) { minX = xco[i]; }
+      if ( xco[i] > maxX ) { maxX = xco[i]; }
+      if ( yco[i] < minY ) { minY = yco[i]; }
+      if ( yco[i] > maxY ) { maxY = yco[i]; }
+    }
+
+    double difX = maxX - minX;
+    double difY = maxY - minY;
+
+    double width  = 9.0;
+    double height = (width * difY / difX) * 1.5;
+
+    PSGraph ps = new PSGraph(1);
+
+    PSDraw pd = new PSDraw( width, height, minX, minY, maxX, maxY );
+
+    //pd.drawBorder();
+
+    difX /= 300.0;
+    difY /= 100.0;
+
+    for ( int i=0; i<num; i++ ) {
+      pd.drawEllipse( xco[i], yco[i], difX, difY, 0.0 );
+    }
+
+    int p1, p2;
+
+    if ( null == temp ) { temp = (PMXEncoding)alloc_encoding(); }
+
+    try {
+      String optfile = cfg_sec.get( "optpath" );
+
+      Scanner input = new Scanner( new File( optfile ) );
+
+      int on = input.nextInt();
+      
+      int[] path = new int[on];
+      for ( int i=0; i<on; i++ ) {
+        path[i] = input.nextInt();
+        temp.set( i, path[i] );
+      }
+
+      pd.setRGB( 1.0, 0.5, 2.0 );
+
+      for ( int i=1; i<num; i++ ) {
+        p1 = path[i-1];
+        p2 = path[i];
+	
+        pd.drawLine( xco[p1], yco[p1], xco[p2], yco[p2] );
+      }
+      p1 = path[num-1];
+      p2 = path[0];
+      pd.drawLine( xco[p1], yco[p1], xco[p2], yco[p2] );
+
+    } catch( FileNotFoundException e1 ) {
+      logger.error( e1.toString() );
+    } catch( ConfigDB.NoSuchKey e ) {}
+
+    pd.setRGB( 0.0, 0.0, 1.0 );
+
+    PMXEncoding param = (PMXEncoding)BE;
+
+    for ( int i=1; i<num; i++ ) {
+      p1 = param.get(i-1);
+      p2 = param.get(i);
+
+      pd.drawLine( xco[p1], yco[p1], xco[p2], yco[p2] );
+    }
+    p1 = param.get(num-1);
+    p2 = param.get(0);
+    pd.drawLine( xco[p1], yco[p1], xco[p2], yco[p2] );
+
+    ps.add( pd, 0, 1.0, 2.0 );
+
+    try {
+      String pfile = cfg_sec.get( "plot" );
+      ps.pswrite( pfile );
+    } catch( ConfigDB.NoSuchKey e) {
+      ps.pswrite( "tsp.ps" );
+    }
+
+    // ----- display optimal -------------------------------------------------------------
+
+    Metric M = alloc_metric();
+
+    execute( M, temp );
+
+    display_long( "Optimal", M, temp );
+  }
+
+  
 }
 
+
 // =======================================================================================
-// **                         U G A _ M O D E L _ I N T E G E R                         **
+// **                             U G A _ M O D E L _ T S P                             **
 // ======================================================================== END FILE =====

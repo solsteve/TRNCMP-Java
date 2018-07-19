@@ -119,34 +119,15 @@ public class UGA_Model_Real extends Model {
   // =====================================================================================
   public void save( Encoding dummy ) {
     // -----------------------------------------------------------------------------------
-    logger.warn( "Save is not implemnted here" );
+    logger.warn( "Save is not implemented here" );
   }
 
   
   // =====================================================================================
   /** @brief Display.
-   *  @param msg message to prefix the display.
+   *  @param msg message to prefix.
    *  @param M   pointer to a uga::Metric.
    *  @param E   pointer to a uga::Encoding.
-   *
-   *  This function may be called at anytime, but should be called once after the
-   *  evolution cycle, using the UGA::display_model( UGA::best, std::cout ) function.
-   *
-   *  You should convert the UGA representation (i.e. real -1 < x < +1) into something
-   *  meaningful to your model.
-   */
-  // -------------------------------------------------------------------------------------
-  public void display_long( String msg, Metric M, Encoding E ) {
-    // -----------------------------------------------------------------------------------
-    System.out.format( "%s: ", msg );
-    display_short( M, E );
-  }
-
-  
-  // =====================================================================================
-  /** @brief Display.
-   *  @param M pointer to a uga::Metric.
-   *  @param E pointer to a uga::Encoding.
    *
    *  This function may be called at anytime, but should be called once after the evolution
    *  cycle, using the UGA::display_model( UGA::best, std::cout ) function.
@@ -155,9 +136,9 @@ public class UGA_Model_Real extends Model {
    *  meaningful to your model.
    */
   // -------------------------------------------------------------------------------------
-  public void display_short( Metric M, Encoding E ) {
+  public void display_short( String msg, Metric M, Encoding E ) {
     // -----------------------------------------------------------------------------------
-    System.out.format( "%11.4e | %s\n", M.get(0), E.format( "%f", ", " ) );
+    System.out.format( "%s : %11.4e | %s\n", msg, M.get(0), E.format( "%f", ", " ) );
   }
 
 

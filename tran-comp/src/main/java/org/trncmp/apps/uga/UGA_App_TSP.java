@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                              U G A _ A P P _ R E A L                              **
+// **                               U G A _ A P P _ T S P                               **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
@@ -22,8 +22,8 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file UGA_App_Real.java
- *  Provides a basic template for executing a genetic algorithm with real value encoding.
+ * @file UGA_App_TSP.java
+ *  Provides a basic template for executing an ordered Genetic Algorithm using the TSP.
  *  <p>
  *
  * @author Stephen W. Soliday
@@ -44,7 +44,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Level;
 
 // =======================================================================================
-public class UGA_App_Real {
+public class UGA_App_TSP {
   // -------------------------------------------------------------------------------------
   static final Logger logger = LogManager.getRootLogger();
   
@@ -52,14 +52,23 @@ public class UGA_App_Real {
   protected ConfigDB.Section aux_sec = null;
 
   // =====================================================================================
-  public UGA_App_Real( String[] args ) {
+  public UGA_App_TSP( String[] args ) {
     // -----------------------------------------------------------------------------------
+
+    AppOptions.cli_map TSP_CLI[] = {
+      //               name    section cfgkey     required default description
+      AppOptions.INIT( "city", "TSP",  "tspfile", true,    null,   "path to the TSP data" ),
+      AppOptions.INIT( "plot", "TSP",  "plot",    false,   null,   "path to a plot file for the results" ),
+      AppOptions.INIT( "opt",  "TSP",  "optpath", false,   null,   "path to the known optimal path" )
+    };
 
     // ----- set up the ConfigDB ---------------------------------------------------------
 
     AppOptions.init( UGA.DEFAULT_CLI );
+    AppOptions.addOptions( TSP_CLI );
+
     AppOptions.setHelp( "help" );
-    AppOptions.setConfigBase( "real" );
+    AppOptions.setConfigBase( "TSP" );
     AppOptions.setOptConfigFilename( "cfg" );
     AppOptions.setCommandLine( args );
 
@@ -86,7 +95,7 @@ public class UGA_App_Real {
   public int run() {
     // -----------------------------------------------------------------------------------
 
-    Model model = (Model) new UGA_Model_Real( cfg );
+    Model model = (Model) new UGA_Model_TSP( cfg );
 
     UGA uga = UGA.factory( model ).config( cfg ).build();
 
@@ -139,12 +148,12 @@ public class UGA_App_Real {
 
     LogManager.getRootLogger().setLevel((Level) Level.INFO);
 
-    System.exit( (new UGA_App_Real( args )).run() );
+    System.exit( (new UGA_App_TSP( args )).run() );
   }
   
 } // end class UGA_App_Real
 
 
 // =======================================================================================
-// **                              U G A _ A P P _ R E A L                              **
+// **                               U G A _ A P P _ T S P                               **
 // ======================================================================== END FILE =====
