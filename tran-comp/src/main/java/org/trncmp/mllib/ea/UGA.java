@@ -35,6 +35,7 @@ package org.trncmp.mllib.ea;
 
 import org.trncmp.lib.Math2;
 import org.trncmp.lib.AppOptions;
+import org.trncmp.lib.StopWatch;
 
 import org.trncmp.lib.ConfigDB;
 import org.trncmp.lib.StringTool;
@@ -358,6 +359,8 @@ public class UGA {
     int tourSize = config.nTour();
     int maxgen   = config.maxgen();
 
+    int num_procs = 8;
+
     // ----- initialize population -------------------------------------------------------
 
     Encoding[] encode_array = new Encoding[ popSize ];
@@ -368,7 +371,10 @@ public class UGA {
   
     model.pre_process( encode_array, popSize );
 
-    primary.score();
+    //primary.score();
+
+    new ModelExecutor( model, num_procs, popSize ).runAll( primary );
+
     Population.ScoreReturn SR = primary.genStats( true );
 
     // ===================================================================================
@@ -381,6 +387,8 @@ public class UGA {
     int iGen;
 
     logger.debug("UGA: Begin Evolution");
+
+    StopWatch swatch = new StopWatch();
 
     for ( iGen=0; iGen<maxgen; iGen++ ) {
       double t = ( ( ( double )iGen )/( ( double )maxgen ) );
@@ -413,7 +421,10 @@ public class UGA {
 
       model.pre_process( encode_array, popSize );
 
-      primary.score();
+      // primary.score();
+
+      new ModelExecutor( model, num_procs, popSize ).runAll( primary );
+
       SR = primary.genStats( false );
 
       int     badIndex = SR.worstIndex;
@@ -450,7 +461,17 @@ public class UGA {
       }
     }
 
-    logger.debug("UGA: End Evolution");
+    // ===================================================================================
+    // -----              U G A   M a i n   E v o l u t i o n   L o o p              -----
+    // ===================================================================================
+
+    double elapsed = swatch.seconds();
+
+    
+    
+    logger.info(
+        String.format("UGA: End Evolution - %d population members %d generations %g seconds.",
+                      popSize, maxgen, elapsed ) );
 
     model.run_after( primary.best().metric,  primary.best().param,
                      primary.worst().metric, primary.worst().param );

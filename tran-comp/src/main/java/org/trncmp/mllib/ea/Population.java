@@ -272,6 +272,21 @@ class Population {
 
   
   // =====================================================================================
+  /** @brief Score Sequentially.
+   *
+   *  Score the entire population sequentially.
+   */
+  // -------------------------------------------------------------------------------------
+  private void score_sequential() {
+    // -----------------------------------------------------------------------------------
+    for ( int i=0; i<count; i++ ) {
+      PopulationMember test = member[i];
+      model.execute( test.metric, test.param );
+    }
+  }
+
+
+  // =====================================================================================
   /** @brief Score.
    *
    *  Score the entire population.
@@ -279,10 +294,7 @@ class Population {
   // -------------------------------------------------------------------------------------
   public void score() {
     // -----------------------------------------------------------------------------------
-    for ( int i=0; i<count; i++ ) {
-      PopulationMember test = member[i];
-      model.execute( test.metric, test.param );
-    }
+    score_sequential();
   }
 
 

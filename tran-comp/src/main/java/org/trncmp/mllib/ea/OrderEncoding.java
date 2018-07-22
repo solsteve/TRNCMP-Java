@@ -154,7 +154,7 @@ public abstract class OrderEncoding extends Encoding {
   // -------------------------------------------------------------------------------------
   public void randomize() {
     // -----------------------------------------------------------------------------------
-    noise( 1.0 );
+    ent.scramble( data, 2*data_len );
   }
 
   
@@ -194,23 +194,7 @@ public abstract class OrderEncoding extends Encoding {
     // -----------------------------------------------------------------------------------
     noise_count = ( int ) Math.floor( ( double )data_len * 2.0 * scale );
 
-    int a=0;
-    int b=1;
-    try {
-    for ( int i=0; i<noise_count; i++ ) {
-      do {
-        a = ent.index( data_len );
-        b = ent.index( data_len );
-      } while( a == b );
-      int  t  = data[a];
-      data[a] = data[b];
-      data[b] = t;
-    }
-    } catch (java.lang.ArrayIndexOutOfBoundsException e) {
-      System.out.format( "\n%s\n\n", e.toString() );
-      System.out.format( "LOOP:%d LEN:%d A:%d B:%d\n\n", noise_count, data_len, a, b );
-      System.exit(1);
-    }
+    ent.scramble( data, noise_count );
   }
 
 
@@ -252,8 +236,6 @@ public abstract class OrderEncoding extends Encoding {
 
 
 
-
-
   // =====================================================================================
   /** @brief Mutation.
    *  @param S      pointer to original Encoding.
@@ -265,20 +247,10 @@ public abstract class OrderEncoding extends Encoding {
    *        to perform Mutation.
    */
   // -------------------------------------------------------------------------------------
-  public int mutate( Encoding S, double perc, double scale ) {
-    // -----------------------------------------------------------------------------------
-    if ( null == S ) {
-      throw new NullPointerException("source ( NULL )");
-    }
-
-    copy( S );
-    noise( perc );
-    
-    return noise_count;
-  }
+  public abstract int mutate( Encoding S, double perc, double scale );
 
 
-  // =====================================================================================
+ // =====================================================================================
   /** @brief Crossover.
    *  @param ac2 pointer to child number two.
    *  @param ap1 pointer to parent number one.

@@ -194,7 +194,56 @@ public class PMXEncoding extends OrderEncoding {
 
     }
 
-}
+  // =====================================================================================
+  /** @brief Mutation.
+   *  @param S      pointer to original Encoding.
+   *  @param perc   percentage of elements that get mutated.
+   *  @param scale  scale of the noise
+   *  @return number of elements mutated.
+   *
+   *  @note The go/no-go decision was made higher up. At this point we are going
+   *        to perform Mutation.
+   */
+  // -------------------------------------------------------------------------------------
+  public int mutate( Encoding S, double perc, double scale ) {
+    // -----------------------------------------------------------------------------------
+    if ( null == S ) {
+      throw new NullPointerException("source ( NULL )");
+    }
+
+    copy( S );
+
+    int count = ( int ) Math.floor( ( double )data_len * perc );
+    int dist  = ( int ) Math.floor( ( double )data_len * scale / 4.0 );
+    if ( 1 > dist ) { dist = 1; }
+
+    int a=0;
+    int b=1;
+    try {
+      for ( int i=0; i<count; i++ ) {
+        a = ent.index( data_len );
+        int j = ent.index( dist ) + 1;
+        if ( ent.bool() ) {
+          b = (data_len + a - j) % data_len;
+        } else {
+          b = (a + j) % data_len;
+        }
+        int  t  = data[a];
+        data[a] = data[b];
+        data[b] = t;
+      }
+    } catch (java.lang.ArrayIndexOutOfBoundsException e) {
+      System.out.format( "\n%s\n\n", e.toString() );
+      System.out.format( "LOOP:%d DIST:%d LEN:%d A:%d B:%d\n\n",
+                         count, dist, data_len, a, b );
+      System.exit(1);
+    }
+
+    return noise_count;
+  }
+
+
+ }
 
 // =======================================================================================
 // **                               P M X E N C O D I N G                               **

@@ -222,6 +222,36 @@ public class Entropy {
     return x;
   }
 
+  // =====================================================================================
+  /** @brief Scramble Array.
+   *  @param ary pointer to an array.
+   *  @param exc number of exchanges to perform
+   *
+   *  Exchange random elements of the array.
+   */
+  // -------------------------------------------------------------------------------------
+  public void scramble( int[] ary, int exc ) {
+    // -----------------------------------------------------------------------------------
+    int n=ary.length;
+    int a=0;
+    int b=1;
+    try {
+      for ( int i=0; i<exc; i++ ) {
+        do {
+          a = index( n );
+          b = index( n );
+        } while( a == b );
+        int t  = ary[a];
+        ary[a] = ary[b];
+        ary[b] = t;
+      }
+    } catch (java.lang.ArrayIndexOutOfBoundsException e) {
+      System.out.format( "\n%s\n\n", e.toString() );
+      System.out.format( "LOOP:%d LEN:%d A:%d B:%d\n\n", exc, n, a, b );
+      System.exit(1);
+    }
+  }
+
 
 } // end class Entropy
 

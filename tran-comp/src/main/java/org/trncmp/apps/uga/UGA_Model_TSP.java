@@ -41,6 +41,7 @@ import org.trncmp.lib.ConfigDB;
 import org.trncmp.lib.Math2;
 import org.trncmp.lib.PSGraph;
 import org.trncmp.lib.PSDraw;
+import org.trncmp.lib.PSColor;
 
 import org.trncmp.mllib.ea.Model;
 import org.trncmp.mllib.Entropy;
@@ -365,7 +366,7 @@ public class UGA_Model_TSP extends Model {
         temp.set( i, path[i] );
       }
 
-      pd.setRGB( 1.0, 0.5, 2.0 );
+      pd.setRGB( PSColor.red );
 
       for ( int i=1; i<num; i++ ) {
         p1 = path[i-1];
@@ -381,20 +382,23 @@ public class UGA_Model_TSP extends Model {
       logger.error( e1.toString() );
     } catch( ConfigDB.NoSuchKey e ) {}
 
-    pd.setRGB( 0.0, 0.0, 1.0 );
+    pd.setRGB( PSColor.blue );
 
     PMXEncoding param = (PMXEncoding)BE;
 
+    System.out.print( param.get(0) );
     for ( int i=1; i<num; i++ ) {
+      System.out.print( " "+param.get(i) );
       p1 = param.get(i-1);
       p2 = param.get(i);
 
       pd.drawLine( xco[p1], yco[p1], xco[p2], yco[p2] );
     }
+    System.out.println( "" );
     p1 = param.get(num-1);
     p2 = param.get(0);
     pd.drawLine( xco[p1], yco[p1], xco[p2], yco[p2] );
-
+    
     ps.add( pd, 0, 1.0, 2.0 );
 
     try {

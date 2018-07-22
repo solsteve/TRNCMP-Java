@@ -34,12 +34,10 @@ EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint
 #EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint:unchecked
 
 all:
-	./mkversion.sh
 	mvn $(EXTRAS) compile
 	cat ALIAS
 
 jar:
-	./mkversion.sh
 	@echo $(JAVA_HOME)
 	@echo $(PATH)
 	mvn $(EXTRAS) package
@@ -47,7 +45,6 @@ jar:
 	cat ALIAS
 
 assembly:
-	./mkversion.sh
 	mvn $(EXTRAS) assembly:assembly
 
 clean:
@@ -64,15 +61,12 @@ distclean: fullclean
 	rm -rf trncmp trncmp.tar
 
 test:
-	./mkversion.sh
 	mvn test
 
 check:
-	./mkversion.sh
 	mvn test
 
 install:
-	./mkversion.sh
 	mvn install
 
 #/ =======================================================================================
