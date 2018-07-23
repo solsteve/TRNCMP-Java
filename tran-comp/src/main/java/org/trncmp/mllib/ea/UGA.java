@@ -87,6 +87,7 @@ public class UGA {
     AppOptions.INIT( "save",    "UGA", "save",    true,  "0",            "save interval 0=no save"   ),
     AppOptions.INIT( "old",     "AUX", "oldpop",  false, null,           "path to old population"    ),
     AppOptions.INIT( "new",     "AUX", "newpop",  false, null,           "path to new population"    ),
+    AppOptions.INIT( "mp",      "MP",  "cpu",     false, null,           "max threads"    ),
   };
 
 
@@ -359,7 +360,7 @@ public class UGA {
     int tourSize = config.nTour();
     int maxgen   = config.maxgen();
 
-    int num_procs = 8;
+    int num_procs = config.nCPU();
 
     // ----- initialize population -------------------------------------------------------
 

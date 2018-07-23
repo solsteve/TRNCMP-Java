@@ -47,6 +47,8 @@ public class UGAConfiguration {
   // -------------------------------------------------------------------------------------
   static final Logger logger = LogManager.getRootLogger();
 
+  static final int DEF_NCPU = 4;
+
   /** Display an abbreviated report if users model supports it. */
   private boolean p_fullReport = false;
 
@@ -86,6 +88,8 @@ public class UGAConfiguration {
   /** Percentage of population bracketed during randomization */
   private double p_pBracket = 0.25;
 
+  /** Maximum number of concurrent threads that are available */
+  private int p_nCPU = 4;
 
   private Model model = null;
 
@@ -386,11 +390,26 @@ public class UGAConfiguration {
   }
 
 
+  // =====================================================================================
+  /** @brief Set maximum number of concurrent threads.
+   *  @param n maximum number of concurrent threads.
+   *  @return Pointer to this UGAConfiguration object.
+   *
+   *  Maximum number of concurrent threads.
+   */
+  // -------------------------------------------------------------------------------------
+  public UGAConfiguration nCPU( int n ) {
+    // -----------------------------------------------------------------------------------
+    p_nCPU = n;
+
+    return this;
+  }
 
 
 
 
 
+  
 
   // =====================================================================================
   /** @brief Get full report flag.
@@ -561,6 +580,17 @@ public class UGAConfiguration {
   }
 
 
+  // =====================================================================================
+  /** @brief Get maximum number of concurrent threads.
+   *  @return maximum number of concurrent threads.
+   *
+   *  Maximum number of concurrent threads.
+   */
+  // -------------------------------------------------------------------------------------
+  public int nCPU() {
+    // -----------------------------------------------------------------------------------
+    return p_nCPU;
+  }
 
 
 
@@ -716,7 +746,7 @@ public class UGAConfiguration {
           }
         }
 
-      } catch ( ConfigDB.NoSuchKey e1 ) {
+     } catch ( ConfigDB.NoSuchKey e1 ) {
         logger.error( e1.toString() );
       }
     }
@@ -737,7 +767,17 @@ public class UGAConfiguration {
       logger.error( "UGA.Builder.config(NULL) - ConfigBD" );
     } else {
       try {
-        return config( cdb.get( "UGA" ) );
+        int cn = DEF_NCPU;
+        if ( cdb.hasSection( "MP" ) ) {
+          try {
+            cn = StringTool.asInt32( cdb.get( "MP", "cpu" ) );
+          } catch( ConfigDB.NoSuchKey e1 ) {
+            logger.warn( "[MP] section found but no kye cpu=, using default cpu="+cn );
+          }
+        } else {
+          logger.debug( "Using default MP.cpu="+cn );
+        }
+        return config( cdb.get( "UGA" ) ).nCPU( cn );
       } catch ( ConfigDB.NoSection e2 ) {
         logger.error( e2.toString() );
       }
