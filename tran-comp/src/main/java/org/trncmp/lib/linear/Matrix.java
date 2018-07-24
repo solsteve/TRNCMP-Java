@@ -33,9 +33,11 @@
 package org.trncmp.lib.linear;
 
 import org.trncmp.lib.Math2;
-import org.apache.log4j.*;
 
 import org.apache.commons.math3.linear.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class Matrix {
@@ -44,7 +46,7 @@ public class Matrix {
     public int        nr = 0;
     public int        nc = 0;
 
-     private static final Logger logger = LogManager.getRootLogger();
+     private static final Logger logger = LogManager.getLogger();
    
     // ===================================================================================
     private static int check_dims( int nr1, int nc1, int nr2, int nc2 ) {

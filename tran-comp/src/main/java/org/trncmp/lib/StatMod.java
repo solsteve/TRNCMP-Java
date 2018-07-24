@@ -35,15 +35,17 @@ package org.trncmp.lib;
 
 import java.io.*;
 import org.trncmp.lib.linear.*;
-import org.apache.log4j.*;
 
 import org.hipparchus.linear.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class StatMod {
   // -------------------------------------------------------------------------------------
 
-  private static final Logger logger = LogManager.getRootLogger();
+  private static final Logger logger = LogManager.getLogger();
   private static final Dice   dd     = Dice.getInstance();
 
   private static final double c_epsilon = 1.0e-8;

@@ -31,12 +31,14 @@
 // =======================================================================================
 
 package org.trncmp.lib;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class LeastSquares {
     // -----------------------------------------------------------------------------------
-    private static final Logger logger = LogManager.getRootLogger();
+    private static final Logger logger = LogManager.getLogger();
 
     // ===================================================================================
     public static class RetVal {

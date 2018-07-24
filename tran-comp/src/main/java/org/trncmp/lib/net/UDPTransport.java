@@ -36,13 +36,15 @@ package org.trncmp.lib.net;
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
-import org.apache.log4j.*;
 import java.nio.charset.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class UDPTransport {
   // -------------------------------------------------------------------------------------
-  protected static final Logger logger = LogManager.getRootLogger();
+  protected static final Logger logger = LogManager.getLogger();
 
   protected static final Charset CHAR_SET = StandardCharsets.UTF_8;
 

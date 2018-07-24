@@ -38,7 +38,8 @@ import java.io.*;
 import org.trncmp.lib.*;
 import org.trncmp.lib.linear.*;
 
-import org.apache.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class jtest_pca {
@@ -201,8 +202,6 @@ public class jtest_pca {
   // =====================================================================================
   public static void main(String[] args) {
     // -----------------------------------------------------------------------------------
-    LogManager.getRootLogger().setLevel((Level) Level.WARN);
-
     jtest_pca JT = new jtest_pca();
 
     JT.build_tables();

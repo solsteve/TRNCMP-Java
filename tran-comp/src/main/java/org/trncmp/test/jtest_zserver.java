@@ -48,7 +48,6 @@ import org.apache.activemq.command.ActiveMQQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.zeromq.ZMQ;
-import org.apache.log4j.*;
 
 // =======================================================================================
 public class jtest_zserver implements ExceptionListener {
@@ -186,8 +185,7 @@ public class jtest_zserver implements ExceptionListener {
   // =====================================================================================
   public static void main(String[] args) {
     // -----------------------------------------------------------------------------------
-    LogManager.getRootLogger().setLevel((Level) Level.INFO);
-    jtest_zserver JT = new jtest_zserver();
+     jtest_zserver JT = new jtest_zserver();
     JT.test03();
   }
   

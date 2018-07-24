@@ -38,13 +38,15 @@ package org.trncmp.lib;
 
 import org.trncmp.lib.linear.Matrix;
 import java.io.*;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class Statistics {
   // -----------------------------------------------------------------------------------
 
-  private static final Logger logger = LogManager.getRootLogger();
+  private static final Logger logger = LogManager.getLogger();
 
   // ===================================================================================
   static public class single {

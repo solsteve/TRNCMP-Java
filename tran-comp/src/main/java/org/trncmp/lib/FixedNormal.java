@@ -35,12 +35,14 @@
 package org.trncmp.lib;
 
 import org.trncmp.lib.*;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class FixedNormal {
   // -------------------------------------------------------------------------------------
-  private static final Logger logger = LogManager.getRootLogger();
+  private static final Logger logger = LogManager.getLogger();
 
   protected boolean fixed      = true;
   protected double  mean_value = 0.5;

@@ -38,12 +38,13 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
 
-import org.apache.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class TCPRequestResponse {
   // -------------------------------------------------------------------------------------
-  protected static final Logger logger = LogManager.getRootLogger();
+  protected static final Logger logger = LogManager.getLogger();
 
 
   // =====================================================================================

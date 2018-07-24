@@ -2,33 +2,36 @@
 // **                             U G A _ M O D E L _ T S P                             **
 // =======================================================================================
 // **                                                                                   **
-// **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
-// **                                                                                   **
-// **  Copyright (c) 2015, Stephen W. Soliday                                           **
-// **                      stephen.soliday@trncmp.org                                   **
-// **                      http://research.trncmp.org                                   **
+// **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
+// **                      One Wall Street #1, Burlington, MA 01803                     **
 // **                                                                                   **
 // **  -------------------------------------------------------------------------------  **
 // **                                                                                   **
-// **  This program is free software: you can redistribute it and/or modify it under    **
-// **  the terms of the GNU General Public License as published by the Free Software    **
-// **  Foundation, either version 3 of the License, or (at your option)                 **
-// **  any later version.                                                               **
+// **  This file, and associated source code, is not free software; you may not         **
+// **  redistribute it and/or modify it. This file is part of a research project        **
+// **  that is in a development phase. No part of this research has been publicly       **
+// **  distributed. Research and development for this project has been at the sole      **
+// **  cost in both time and funding by L3 Technologies Advanced Programs.              **
 // **                                                                                   **
-// **  This program is distributed in the hope that it will be useful, but WITHOUT      **
-// **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    **
-// **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.   **
-// **                                                                                   **
-// **  You should have received a copy of the GNU General Public License along with     **
-// **  this program. If not, see <http://www.gnu.org/licenses/>.                        **
+// **  Any reproduction of computer software or portions thereof marked with this       **
+// **  legend must also reproduce the markings.  Any person who has been provided       **
+// **  access to such software must promptly notify L3 Technologies Advanced Programs.  **
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
  * @file UGA_Model_TSP.java
- *  Test model for a TSP valued Genetic Algorithm.
+ * <p>
+ * Test model for a TSP valued Genetic Algorithm.
+ *
+ * @date 2018-07-20
+ *
+ * ---------------------------------------------------------------------------------------
+ *
+ * @note This code was ported from a C++ version contained in the TRNCMP
+ *       Machine learning Research Library. (formerly SolLib)
  *
  * @author Stephen W. Soliday
- * @date 2015-08-24
+ * @date 2015-08-16
  */
 // =======================================================================================
 
@@ -51,16 +54,15 @@ import org.trncmp.mllib.ea.PMXEncoding;
 
 import java.io.FileNotFoundException;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 // ---------------------------------------------------------------------------------------
 public class UGA_Model_TSP extends Model {
   // -------------------------------------------------------------------------------------
 
-  static final Logger logger = LogManager.getRootLogger();
+  static final Logger logger = LogManager.getLogger();
 
   protected ConfigDB.Section cfg_sec;
 

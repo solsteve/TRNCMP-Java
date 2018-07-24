@@ -2,35 +2,37 @@
 // **                              R E A L E N C O D I N G                              **
 // =======================================================================================
 // **                                                                                   **
-// **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
-// **                                                                                   **
-// **  Copyright (c) 2015, Stephen W. Soliday                                           **
-// **                      stephen.soliday@trncmp.org                                   **
-// **                      http://research.trncmp.org                                   **
+// **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
+// **                      One Wall Street #1, Burlington, MA 01803                     **
 // **                                                                                   **
 // **  -------------------------------------------------------------------------------  **
 // **                                                                                   **
-// **  This program is free software: you can redistribute it and/or modify it under    **
-// **  the terms of the GNU General Public License as published by the Free Software    **
-// **  Foundation, either version 3 of the License, or (at your option)                 **
-// **  any later version.                                                               **
+// **  This file, and associated source code, is not free software; you may not         **
+// **  redistribute it and/or modify it. This file is part of a research project        **
+// **  that is in a development phase. No part of this research has been publicly       **
+// **  distributed. Research and development for this project has been at the sole      **
+// **  cost in both time and funding by L3 Technologies Advanced Programs.              **
 // **                                                                                   **
-// **  This program is distributed in the hope that it will be useful, but WITHOUT      **
-// **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    **
-// **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.   **
-// **                                                                                   **
-// **  You should have received a copy of the GNU General Public License along with     **
-// **  this program. If not, see <http://www.gnu.org/licenses/>.                        **
+// **  Any reproduction of computer software or portions thereof marked with this       **
+// **  legend must also reproduce the markings.  Any person who has been provided       **
+// **  access to such software must promptly notify L3 Technologies Advanced Programs.  **
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
-//
-// @file RealEncoding.java
-// <p>
-// Provides a derived class to handle real valued encodings.
-//
-// @author Stephen W. Soliday
-// @date 2015-08-20
-//
+/**
+ * @file RealEncoding.java
+ * <p>
+ * Provides a derived class to handle real valued encodings.
+ *
+ * @date 2018-07-11
+ *
+ * ---------------------------------------------------------------------------------------
+ *
+ * @note This code was ported from a C++ version contained in the TRNCMP
+ *       Machine learning Research Library. (formerly SolLib)
+ *
+ * @author Stephen W. Soliday
+ * @date 2015-08-09
+ */
 // =======================================================================================
 
 package org.trncmp.mllib.ea;

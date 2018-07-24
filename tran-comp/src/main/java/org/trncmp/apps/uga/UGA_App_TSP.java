@@ -2,32 +2,36 @@
 // **                               U G A _ A P P _ T S P                               **
 // =======================================================================================
 // **                                                                                   **
-// **  Copyright (c) 2018, Stephen W. Soliday                                           **
-// **                      stephen.soliday@trncmp.org                                   **
-// **                      http://research.trncmp.org                                   **
+// **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
+// **                      One Wall Street #1, Burlington, MA 01803                     **
 // **                                                                                   **
 // **  -------------------------------------------------------------------------------  **
 // **                                                                                   **
-// **  This program is free software: you can redistribute it and/or modify it under    **
-// **  the terms of the GNU General Public License as published by the Free Software    **
-// **  Foundation, either version 3 of the License, or (at your option)                 **
-// **  any later version.                                                               **
+// **  This file, and associated source code, is not free software; you may not         **
+// **  redistribute it and/or modify it. This file is part of a research project        **
+// **  that is in a development phase. No part of this research has been publicly       **
+// **  distributed. Research and development for this project has been at the sole      **
+// **  cost in both time and funding by L3 Technologies Advanced Programs.              **
 // **                                                                                   **
-// **  This program is distributed in the hope that it will be useful, but WITHOUT      **
-// **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    **
-// **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.   **
-// **                                                                                   **
-// **  You should have received a copy of the GNU General Public License along with     **
-// **  this program. If not, see <http://www.gnu.org/licenses/>.                        **
+// **  Any reproduction of computer software or portions thereof marked with this       **
+// **  legend must also reproduce the markings.  Any person who has been provided       **
+// **  access to such software must promptly notify L3 Technologies Advanced Programs.  **
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
  * @file UGA_App_TSP.java
- *  Provides a basic template for executing an ordered Genetic Algorithm using the TSP.
- *  <p>
+ * <p>
+ * Provides a basic template for executing an ordered Genetic Algorithm using the TSP.
+ *
+ * @date 2018-07-20
+ *
+ * ---------------------------------------------------------------------------------------
+ *
+ * @note This code was ported from a C++ version contained in the TRNCMP
+ *       Machine learning Research Library. (formerly SolLib)
  *
  * @author Stephen W. Soliday
- * @date 2018-07-17
+ * @date 2015-08-16
  */
 // =======================================================================================
 
@@ -39,14 +43,13 @@ import org.trncmp.mllib.ea.UGA;
 import org.trncmp.lib.ConfigDB;
 import org.trncmp.lib.AppOptions;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class UGA_App_TSP {
   // -------------------------------------------------------------------------------------
-  static final Logger logger = LogManager.getRootLogger();
+  static final Logger logger = LogManager.getLogger();
   
   protected ConfigDB         cfg     = null;
   protected ConfigDB.Section aux_sec = null;
@@ -145,8 +148,6 @@ public class UGA_App_TSP {
   // =====================================================================================
   public static void main( String[] args ) {
     // -----------------------------------------------------------------------------------
-
-    LogManager.getRootLogger().setLevel((Level) Level.INFO);
 
     System.exit( (new UGA_App_TSP( args )).run() );
   }

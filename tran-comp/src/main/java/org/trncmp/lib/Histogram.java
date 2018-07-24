@@ -33,7 +33,9 @@
 // =======================================================================================
 
 package org.trncmp.lib;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 class Histogram {
@@ -44,7 +46,7 @@ class Histogram {
     protected int[]    bin   = null;
     protected double[] ctr   = null;
 
-    private static final Logger logger = LogManager.getRootLogger();
+    private static final Logger logger = LogManager.getLogger();
 
     // ===================================================================================
     /** @brief Contructor.

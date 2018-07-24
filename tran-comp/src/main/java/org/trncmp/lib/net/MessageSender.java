@@ -41,7 +41,6 @@ import org.apache.activemq.command.ActiveMQQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.zeromq.ZMQ;
-import org.apache.log4j.*;
 
 // =======================================================================================
 public class MessageSender extends Thread {

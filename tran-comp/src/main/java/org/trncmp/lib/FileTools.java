@@ -34,13 +34,15 @@
 
 package org.trncmp.lib;
 import java.nio.ByteBuffer;
-    import java.io.*;
-import org.apache.log4j.*;
+import java.io.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class FileTools {
     // -----------------------------------------------------------------------------------
-    private static final Logger logger = LogManager.getRootLogger();
+    private static final Logger logger = LogManager.getLogger();
 
     private static long[] uid = { -1, -1 };
     private static long t_count =  0;

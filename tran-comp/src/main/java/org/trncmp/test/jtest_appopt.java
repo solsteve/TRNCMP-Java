@@ -36,12 +36,14 @@ package org.trncmp.test;
 import org.trncmp.lib.AppOptions;
 import org.trncmp.lib.ConfigDB;
 import org.trncmp.lib.StringTool;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 class jtest_appopt {
     // -----------------------------------------------------------------------------------
-    private static final Logger logger = LogManager.getRootLogger();
+    private static final Logger logger = LogManager.getLogger();
 
     // ===================================================================================
     public static void main( String[] args ) {

@@ -41,12 +41,16 @@ import java.io.*;
 import org.trncmp.lib.linear.Vector;
 import org.trncmp.lib.linear.Matrix;
 import org.apache.commons.math3.linear.*;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class Eigen {
     // -----------------------------------------------------------------------------------
     
+    private static final Logger logger = LogManager.getLogger();
+
     public Vector eval  = null;      // Eigen values  (real)
     public Matrix evec  = null;      // Eigen vectors
     public int order = 0;     // Dimensions
@@ -55,8 +59,6 @@ public class Eigen {
     public Matrix U    = null;
     public Matrix V    = null;
     public Matrix work = null;
-
-    private static final Logger logger = LogManager.getRootLogger();
 
 	 
 

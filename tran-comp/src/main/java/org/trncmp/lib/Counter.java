@@ -31,13 +31,15 @@
 // =======================================================================================
 
 package org.trncmp.lib;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class Counter {
     // -----------------------------------------------------------------------------------
 
-    private static final Logger logger = LogManager.getRootLogger();
+    private static final Logger logger = LogManager.getLogger();
 
     protected int[] buffer         = null; /**< Buffer to hold digits.                  */
     protected int   counting_base  = 0;    /**< base of radix of this counter.          */

@@ -46,13 +46,14 @@ import java.net.SocketTimeoutException;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.apache.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class ControlReceiver extends Thread {
   // -------------------------------------------------------------------------------------
 
-  private final Logger logger = LogManager.getRootLogger();
+  private final Logger logger = LogManager.getLogger();
 
   private boolean               running            = false;
   private List<ControlListener> ctrl_list          = null;

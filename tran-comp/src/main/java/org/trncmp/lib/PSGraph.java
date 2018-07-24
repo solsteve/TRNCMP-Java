@@ -34,23 +34,25 @@ package org.trncmp.lib;
 
 import java.io.*;
 import java.util.*;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 // ---------------------------------------------------------------------------------------
 public class PSGraph {
-    // -----------------------------------------------------------------------------------
-  private static final Logger logger = LogManager.getRootLogger();
+  // -----------------------------------------------------------------------------------
+  private static final Logger logger = LogManager.getLogger();
 
-    protected PSPage[] page  = null;
-    protected int   num_page = -1;
+  protected PSPage[] page  = null;
+  protected int   num_page = -1;
 
-    public static final int NORMAL = 10;
-    public static final int BOLD   = 11;
-    public static final int ITALIC = 12;
+  public static final int NORMAL = 10;
+  public static final int BOLD   = 11;
+  public static final int ITALIC = 12;
 
-    // ===================================================================================
-    /** @brief Initialize.
+  // ===================================================================================
+  /** @brief Initialize.
      *  @param n number of pages.
      */
     // -----------------------------------------------------------------------------------

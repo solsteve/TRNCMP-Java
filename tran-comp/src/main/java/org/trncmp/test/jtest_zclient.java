@@ -42,7 +42,6 @@ import org.apache.activemq.command.ActiveMQQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.zeromq.ZMQ;
-import org.apache.log4j.*;
 
 // =======================================================================================
 public class jtest_zclient {
@@ -136,7 +135,6 @@ public class jtest_zclient {
   // =====================================================================================
   public static void main(String[] args) {
     // -----------------------------------------------------------------------------------
-    LogManager.getRootLogger().setLevel((Level) Level.INFO);
     jtest_zclient JT = new jtest_zclient();
     JT.test03();
   }

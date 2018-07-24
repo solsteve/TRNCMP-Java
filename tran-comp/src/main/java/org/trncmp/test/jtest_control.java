@@ -34,14 +34,15 @@ package org.trncmp.test;
 
 import  org.trncmp.lib.*;
 
-import org.apache.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 // ---------------------------------------------------------------------------------------
 public class jtest_control {
   // -------------------------------------------------------------------------------------
 
-  public Logger logger = LogManager.getRootLogger();
+  public Logger logger = LogManager.getLogger();
 
 
   // =====================================================================================

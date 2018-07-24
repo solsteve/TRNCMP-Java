@@ -18,4 +18,9 @@
     <module>thirdparty-parent</module>
     <module>tran-comp</module>
   </modules>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  
 </project>

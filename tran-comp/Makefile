@@ -49,6 +49,7 @@ assembly:
 
 clean:
 	mvn clean
+	rm -f *.tmp
 
 fullclean: clean
 	./clean.sh

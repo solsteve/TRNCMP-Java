@@ -33,13 +33,15 @@
 // =======================================================================================
 
 package org.trncmp.lib;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class Dice {
   // -------------------------------------------------------------------------------------
 
-  private static final Logger logger = LogManager.getRootLogger();
+  private static final Logger logger = LogManager.getLogger();
 
   private static int     dice_singleton_entropy_type = Entropy.NO_ENGINE;
   private static Dice    dice_singleton_instance     = null;

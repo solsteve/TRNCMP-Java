@@ -32,7 +32,6 @@
 package org.trncmp.test;
 
 import  org.trncmp.lib.*;
-import org.apache.log4j.*;
 
 // =======================================================================================
 // ---------------------------------------------------------------------------------------
@@ -65,8 +64,6 @@ public class jtest_psgraph {
   public static void main( String[] args ) {
     // -------------------------------------------------------------------------------
 
-    Logger logger = LogManager.getRootLogger();
-      
     Test01();
 
     PSGraph ps = new PSGraph(2);

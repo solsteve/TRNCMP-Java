@@ -32,19 +32,21 @@
 // =======================================================================================
 
 package org.trncmp.lib;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class Entropy {
     // -----------------------------------------------------------------------------------
+    
+    private static final Logger logger = LogManager.getLogger();
 
     public static final int BUILTIN_ENGINE    =  1;
     public static final int SIMPLE_LCG_ENGINE =  2;
     
     public static final int DEFAULT_ENGINE    =  2;
     public static final int NO_ENGINE         = -1;
-    
-    private static final Logger logger = LogManager.getRootLogger();
     private EntropyEngine eng    = null;
 
     // ===================================================================================

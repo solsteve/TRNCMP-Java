@@ -33,13 +33,15 @@ package org.trncmp.lib;
 
 import java.io.*;
 import java.util.*;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 // ---------------------------------------------------------------------------------------
 public class PSDraw extends PSWindow {
     // -----------------------------------------------------------------------------------
-  private static final Logger logger = LogManager.getRootLogger();
+  private static final Logger logger = LogManager.getLogger();
 
     protected int         id            = -1;
 

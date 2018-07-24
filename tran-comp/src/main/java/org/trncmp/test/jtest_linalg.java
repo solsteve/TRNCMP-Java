@@ -36,13 +36,15 @@ package org.trncmp.test;
 import org.trncmp.lib.Dice;
 import org.trncmp.lib.linear.*;
 import org.trncmp.lib.Math2;
-import org.apache.log4j.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
 public class jtest_linalg extends octave_utest {
   // -------------------------------------------------------------------------------------
 
-  public static final Logger logger = LogManager.getRootLogger();
+  public static final Logger logger = LogManager.getLogger();
 
   // =====================================================================================
   public static Matrix RandomPosDef( int n ) {
@@ -73,8 +75,6 @@ public class jtest_linalg extends octave_utest {
   // =====================================================================================
   public static void main(String[] args) {
     // -----------------------------------------------------------------------------------
-    LogManager.getRootLogger().setLevel((Level) Level.WARN);
-
     Dice dd = Dice.getInstance();
 
     dd.seed_set();
