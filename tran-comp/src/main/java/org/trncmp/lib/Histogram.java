@@ -38,7 +38,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
-class Histogram {
+public class Histogram {
     // -----------------------------------------------------------------------------------
 
     protected int      nbin  = 0;
