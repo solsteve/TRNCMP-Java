@@ -169,7 +169,7 @@ public class KDTree {
     int       len  = list.length;
 
     if ( 0 < len ) {
-      int midx = fold_list( list dim );
+      int midx = fold_list( list, dim );
       if ( 0 <= midx ) {
         node = new kd_node_t( list[midx] );
         int nj = (dim + 1) % max_dim;
@@ -183,6 +183,8 @@ public class KDTree {
         }
       }
     }
+
+    return node;
   }
 
 
