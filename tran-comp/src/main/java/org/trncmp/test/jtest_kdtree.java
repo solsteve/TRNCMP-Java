@@ -45,26 +45,34 @@ public class jtest_kdtree {
   // =====================================================================================
   public static void main(String[] args) {
     // -----------------------------------------------------------------------------------
-    double[][] test1 = {{2,3}, {5,4}, {9,6}, {4,7}, {8,1}, {7,1}};
-    double[][] test = {{2,3}, {5,4}, {9,6}, {4,7}, {1,5}, {8,1}, {7,1}};
-    int        len  = test.length;
-    double[][] a = null;
-    double[][] b = null;
-    System.out.println(array.toString(test));
+    double[][] list1 = {{2,3}, {5,4}, {9,6}, {4,7}, {8,1}, {7,2}};
+    double[][] list2 = {{30,40}, {5,25}, {10,12}, {70,70}, {50,30}, {35,45}};
+
+    double[] test1 = {9,2};
+    double[] test2 = {72,72};
+
     System.out.println();
-
-    int m = KDTree.fold_list( test, 0 );
-
+    System.out.println("-------------------------------------------------------");
+    System.out.println();
     
-    a = KDTree.slice( test, 0, m-1 );
-    System.out.println(array.toString(a));
+    KDTree wiki = new KDTree( list1 );
+    
     System.out.println();
-    System.out.println(array.toString(test[m]));
+    System.out.println("-------------------------------------------------------");
     System.out.println();
-    b = KDTree.slice( test, m+1, len-1 );
-    System.out.println(array.toString(b));
-    System.out.println();
+    wiki.print( System.out, "%4.1f" );
+    int i1 = KDTree.exhaustive_search( list1, test1 );
+    System.out.println("Match "+array.toString(list1[i1], "%4.1f") );
 
+
+    KDTree cmu = new KDTree( list2 );
+    
+    System.out.println();
+    System.out.println("-------------------------------------------------------");
+    System.out.println();
+    cmu.print( System.out, "%4.1f" );
+    int i2 = KDTree.exhaustive_search( list2, test2 );
+    System.out.println("Match "+array.toString(list2[i2], "%4.1f") );
 
     
   }

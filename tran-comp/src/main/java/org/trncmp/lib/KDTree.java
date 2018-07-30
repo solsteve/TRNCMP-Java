@@ -34,6 +34,11 @@
 
 package org.trncmp.lib;
 
+import java.io.PrintStream;
+
+import org.trncmp.lib.array;
+
+
 // =======================================================================================
 public class KDTree {
   // -------------------------------------------------------------------------------------
@@ -89,106 +94,115 @@ public class KDTree {
     double d2 = 0.0e0;
     for ( int i=0; i<n; i++ ) {
       double d = a[i] - b[i];
-      d += (d*d);
+      d2 += (d*d);
     }
     return d2;
   }
 
-  
   // =====================================================================================
-  public static void swap( double[] a, double[] b ) {
+  protected static void insert( kd_node_t root_node, kd_node_t leaf_node, int dim, int max_dim ) {
     // -----------------------------------------------------------------------------------
-    int n = a.length;
-    for ( int i=0; i<n; i++ ) {
-      double t = a[i];
-      a[i] = b[i];
-      b[i] = t;
-    }
-  }
 
-
-  // =====================================================================================
-  public static double[][] slice( double[][] src, int start, int end ) {
-    // -----------------------------------------------------------------------------------
-    int n = src[0].length;
-    int k = end-start+1;
-    double[][] dst = new double[k][n];
-    for ( int i=0; i<k; i++ ) {
-      for ( int j=0; j<n; j++ ) {
-        dst[i][j] = src[start+i][j];
-      }
-    }
-    return dst;
-  }
-
-  
-  // =====================================================================================
-  public static int fold_list( double[][] list, int dim ) {
-    // -----------------------------------------------------------------------------------
-    int n = list.length;
-
-    if ( 1 == n ) return -1;
-
-    int left   = 0;
-    int middle = n/2;
-    int right  = n - 1;
-
-    //if ( 1==n%2 ) middle += 1;
-    
-    while ( left < right ) {
-      double pivot = list[middle][dim];
-      swap( list[middle], list[right] );
-
-      int pos = left;
-      for ( int i=left; i<right; i++ ) {
-        if ( list[i][dim] < pivot ) {
-            swap( list[i], list[pos] );
-            pos += 1;
-        }
-      }
-
-      swap( list[right], list[pos] );
-
-      if ( pos == middle ) break;
-
-      if ( pos < middle ) {
-        left = pos + 1;
+    if ( leaf_node.x[dim] < root_node.x[dim] ) {
+      if ( null == root_node.left ) {
+        root_node.left = leaf_node;
       } else {
-        right = pos - 1;
+        insert( root_node.left, leaf_node, (dim+1)%max_dim, max_dim );
+      }
+    } else {
+      if ( leaf_node.x[dim] > root_node.x[dim] ) {
+        if ( null == root_node.right ) {
+          root_node.right = leaf_node;
+        } else {
+          insert( root_node.right, leaf_node, (dim+1)%max_dim, max_dim );
+        }
+      } else {
+        System.err.println( "Duplicate node" );
       }
     }
-    
-    return middle;
+
   }
 
 
   // =====================================================================================
-  public static kd_node_t build_tree( double[][] list, int dim, int max_dim ) {
+  public void insert( double[] x ) {
     // -----------------------------------------------------------------------------------
-    kd_node_t node = null;
-    int       len  = list.length;
+    kd_node_t node = new kd_node_t( x );
+    
+    if ( null == root ) {
+      root = node;
+    } else {
+      insert( root, node, 0, x.length );
+    }
+  }
 
-    if ( 0 < len ) {
-      int midx = fold_list( list, dim );
-      if ( 0 <= midx ) {
-        node = new kd_node_t( list[midx] );
-        int nj = (dim + 1) % max_dim;
-        if (0 < midx ) {
-          double[][] left_list = slice( list, 0, midx-1 );
-          node.left = build_tree( left_list, nj, max_dim );
-        }
-        if (midx < len ) {
-          double[][] right_list = slice( list, 0, midx-1 );
-          node.right = build_tree( right_list, nj, max_dim );
-        }
+  // =====================================================================================
+  public void insert( double[][] list ) {
+    // -----------------------------------------------------------------------------------
+    int samples = list.length;
+    for ( int i=0; i<samples; i++ ) {
+      insert( list[i] );
+    }
+  }
+
+  // =====================================================================================
+  public KDTree() {
+    // -----------------------------------------------------------------------------------
+    root = null;
+  }
+
+  // =====================================================================================
+  public KDTree( double[] x ) {
+    // -----------------------------------------------------------------------------------
+    root = null;
+    insert( x );
+  }
+
+  // =====================================================================================
+  public KDTree( double[][] list ) {
+    // -----------------------------------------------------------------------------------
+    root = null;
+    insert( list );
+  }
+
+
+  // =====================================================================================
+  public static int exhaustive_search( double[][] list, double[] x ) {
+    // -----------------------------------------------------------------------------------
+    double min_d2 = distSQ( list[0], x );
+    int    min_id = 0;
+
+    int samples = list.length;
+    for ( int i=1; i<samples; i++ ) {
+      double d2 = distSQ( list[i], x );
+      if ( d2 < min_d2 ) {
+        min_d2 = d2;
+        min_id = i;
       }
     }
-
-    return node;
+    return min_id;
   }
 
 
 
+  
+  // =====================================================================================
+  static protected void recursive_print( kd_node_t node, PrintStream ps, String fmt ) {
+    // -----------------------------------------------------------------------------------
+    if ( null != node ) {
+        recursive_print( node.left,  ps, fmt );
+      
+        ps.println(array.toString(node.x, fmt) );
+
+         recursive_print( node.right, ps, fmt );
+     }
+  }
+
+  // =====================================================================================
+  public void print( PrintStream ps, String fmt ) {
+    // -----------------------------------------------------------------------------------
+    recursive_print( root,  ps, fmt );
+  }
 
   
 
