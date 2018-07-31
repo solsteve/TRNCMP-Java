@@ -35,46 +35,158 @@ package org.trncmp.test;
 
 import org.trncmp.lib.KDTree;
 import org.trncmp.lib.array;
+import org.trncmp.lib.Math2;
+import org.trncmp.lib.Dice;
+
 
 // =======================================================================================
 public class jtest_kdtree {
   // -------------------------------------------------------------------------------------
 
+  public static final int KDIMS   = 5;
+  public static final int SAMPLES = 1000000;
+  
+
+  // =====================================================================================
+  public static String ary_print( double[] point, String fmt ) {
+    // -----------------------------------------------------------------------------------
+    return "(" + array.toString( point, fmt, ", " ) + ")";
+  }
+
+  // =====================================================================================
+  public static String ary_print( double[][] list, String fmt ) {
+    // -----------------------------------------------------------------------------------
+    return array.toString( list, fmt );
+  }
+
+
+
+
+  
+
+  // =====================================================================================
+  public static void print_results( String name, double[] test, double[] found,
+                                    double dist, int visit, int len, int true_idx,
+                                    double true_dist, double[] true_found, String fmt ) {
+    // -----------------------------------------------------------------------------------
+
+    System.out.format( "\n>> %s\n", name );
+    System.out.format( "searching for %s\n",
+                       ary_print( test,  fmt ) );
+    System.out.format( "found %s dist %s0\n",
+                       ary_print( found, fmt ),
+                       String.format( fmt, dist ) );
+    System.out.format( "seen %d nodes out of %d\n\n", visit, len );
+    System.out.format( "Exhaustive idx: %d dist: %s %s\n\n",
+                       true_idx,
+                       String.format( fmt, true_dist ),
+                       ary_print( true_found, fmt ) );
+  }
+
+  // =====================================================================================
+  public static void wiki_test() {
+    // -----------------------------------------------------------------------------------
+    double[]   test_point = {9,2};
+    double[][] list       = {{2,3}, {5,4}, {9,6}, {4,7}, {8,1}, {7,2}};
+    double[]   found      = null;
+    double[]   e_found    = null;
+    double     dist, e_dist;
+    int        e_idx;
+    // -----------------------------------------------------------------------------------
+
+    KDTree tree = new KDTree( list );
+
+    found = tree.search( test_point );
+    dist  = Math.sqrt( Math2.dist2( test_point, found ) );
+    
+    e_idx   = KDTree.exhaustive_search( list, test_point );
+    e_found = list[e_idx];
+    e_dist  = Math.sqrt( Math2.dist2( test_point, e_found ) );
+
+
+    print_results( "Wiki", test_point, found,
+                   dist, tree.getVisit(), list.length,
+                   e_idx, e_dist, e_found, "%7.4f" );
+  }
+
+  // =====================================================================================
+  public static void cmu_test() {
+    // -----------------------------------------------------------------------------------
+    double[]   test_point = {72,72};
+    double[][] list       = {{30,40}, {5,25}, {10,12}, {70,70}, {50,30}, {35,45}};
+    double[]   found      = null;
+    double[]   e_found    = null;
+    double     dist, e_dist;
+    int        e_idx;
+    // -----------------------------------------------------------------------------------
+
+    KDTree tree = new KDTree( list );
+
+    found = tree.search( test_point );
+    dist  = Math.sqrt( Math2.dist2( test_point, found ) );
+    
+    e_idx   = KDTree.exhaustive_search( list, test_point );
+    e_found = list[e_idx];
+    e_dist  = Math.sqrt( Math2.dist2( test_point, e_found ) );
+
+
+    print_results( "CMU", test_point, found,
+                   dist, tree.getVisit(), list.length,
+                   e_idx, e_dist, e_found, "%7.4f" );
+  }
 
 
   // =====================================================================================
+  public static void million_test() {
+    // -----------------------------------------------------------------------------------
+    double[]   test_point = null;
+    double[][] list       = null;
+    double[]   found      = null;
+    double[]   e_found    = null;
+    double     dist, e_dist;
+    int        e_idx;
+    // -----------------------------------------------------------------------------------
+
+    Dice dd = Dice.getInstance();
+
+    dd.seed_set();
+    
+    test_point = new double[ KDIMS ];
+    for ( int j=0; j<KDIMS; j++ ) {
+      test_point[j] = Math.floor(dd.uniform() * 10000.0) / 1000.0;
+    }
+
+    list = new double[ SAMPLES ][ KDIMS ];
+    for ( int i=0; i<SAMPLES; i++ ) {
+      for ( int j=0; j<KDIMS; j++ ) {
+        list[i][j] = Math.floor(dd.uniform() * 10000.0) / 1000.0;
+      }
+    }
+    
+    // -----------------------------------------------------------------------------------
+
+    KDTree tree = new KDTree( list );
+
+    found = tree.search( test_point );
+    dist  = Math.sqrt( Math2.dist2( test_point, found ) );
+    
+    e_idx   = KDTree.exhaustive_search( list, test_point );
+    e_found = list[e_idx];
+    e_dist  = Math.sqrt( Math2.dist2( test_point, e_found ) );
+
+
+    print_results( "Million", test_point, found,
+                   dist, tree.getVisit(), list.length,
+                   e_idx, e_dist, e_found, "%7.4f" );
+  }
+
+
+  
+  // =====================================================================================
   public static void main(String[] args) {
     // -----------------------------------------------------------------------------------
-    double[][] list1 = {{2,3}, {5,4}, {9,6}, {4,7}, {8,1}, {7,2}};
-    double[][] list2 = {{30,40}, {5,25}, {10,12}, {70,70}, {50,30}, {35,45}};
-
-    double[] test1 = {9,2};
-    double[] test2 = {72,72};
-
-    System.out.println();
-    System.out.println("-------------------------------------------------------");
-    System.out.println();
-    
-    KDTree wiki = new KDTree( list1 );
-    
-    System.out.println();
-    System.out.println("-------------------------------------------------------");
-    System.out.println();
-    wiki.print( System.out, "%4.1f" );
-    int i1 = KDTree.exhaustive_search( list1, test1 );
-    System.out.println("Match "+array.toString(list1[i1], "%4.1f") );
-
-
-    KDTree cmu = new KDTree( list2 );
-    
-    System.out.println();
-    System.out.println("-------------------------------------------------------");
-    System.out.println();
-    cmu.print( System.out, "%4.1f" );
-    int i2 = KDTree.exhaustive_search( list2, test2 );
-    System.out.println("Match "+array.toString(list2[i2], "%4.1f") );
-
-    
+    wiki_test();
+    cmu_test();
   }
 
 } // end class jtest_kdtest

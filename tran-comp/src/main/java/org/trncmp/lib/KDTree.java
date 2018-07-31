@@ -73,31 +73,23 @@ public class KDTree {
       right = null;
     }
 
-  } // end class KDTree.kd_note_t
+  } // end class KDTree.kd_node_t
 
 
 
   /** Root node in this tree */
-  kd_node_t root = null;
+  protected kd_node_t root = null;
 
-  // =====================================================================================
-  public static boolean isNotZero( double a ) {
-    // -----------------------------------------------------------------------------------
-    return ( 0 == Double.compare(0.0e0, a) ? false : true );
-  }
+  /** Nodes visited durring search */
+  protected int nodes_visited = 0;
 
+  /** Nodes in the tree */
+  protected int nodes_in_tree = 0;
+
+
+  public int getVisit() { return nodes_visited; };
+  public int inTree()   { return nodes_in_tree; };
   
-  // =====================================================================================
-  public static double distSQ( double[] a, double[] b ) {
-    // -----------------------------------------------------------------------------------
-    int n = a.length;
-    double d2 = 0.0e0;
-    for ( int i=0; i<n; i++ ) {
-      double d = a[i] - b[i];
-      d2 += (d*d);
-    }
-    return d2;
-  }
 
   // =====================================================================================
   protected static void insert( kd_node_t root_node, kd_node_t leaf_node, int dim, int max_dim ) {
@@ -128,6 +120,7 @@ public class KDTree {
   public void insert( double[] x ) {
     // -----------------------------------------------------------------------------------
     kd_node_t node = new kd_node_t( x );
+    nodes_in_tree += 1;
     
     if ( null == root ) {
       root = node;
@@ -165,16 +158,85 @@ public class KDTree {
     insert( list );
   }
 
+  // =====================================================================================
+  protected static class holder {
+    // -----------------------------------------------------------------------------------
+    public kd_node_t node = null;
+    public double    dist = 0.0e0;
+    public holder() { node = null; dist = 1.0e30; }
+  } // end class holder
+    
+
+  // =====================================================================================
+  protected static void recursive_search( KDTree tree, holder best,
+                                          kd_node_t root, kd_node_t nd,
+                                          int dim, int max_dim ) {
+    // -----------------------------------------------------------------------------------
+
+    if ( null != root ) {
+      double d   = Math2.dist2( root.x, nd.x );
+      double dx  = root.x[dim] - nd.x[dim];
+      double dx2 = dx*dx;
+
+      if ( ( null == best.node ) || ( d < best.dist ) ) {
+        best.node = root;
+        best.dist = d;
+      }
+
+      if ( Math2.isNotZero( best.dist ) ) { // account for an exact match
+        int next_dim = (dim + 1) % max_dim;
+        
+        if ( 0.0e0 < dx ) {
+          recursive_search( tree, best, root.left,  nd, next_dim, max_dim );
+        } else {
+          recursive_search( tree, best, root.right, nd, next_dim, max_dim );
+        }
+
+        if ( dx2 < best.dist ) {
+        if ( 0.0e0 < dx ) {
+          recursive_search( tree, best, root.right, nd, next_dim, max_dim );
+        } else {
+          recursive_search( tree, best, root.left,  nd, next_dim, max_dim );
+        }
+        }
+
+      }
+    }
+  }
+
+  
+  // =====================================================================================
+  public double[] search( double[] test_point ) {
+    // -----------------------------------------------------------------------------------
+    int      max_dim = test_point.length;
+    double[] match   = null;
+
+    nodes_visited = 0;
+
+    kd_node_t test_node = new kd_node_t( test_point );
+    holder found = new holder();
+    recursive_search( this, found, this.root, test_node, 0, max_dim );
+
+    if ( null != found.node ) {
+      match = new double[ max_dim ];
+      for ( int i=0; i<max_dim; i++ ) {
+        match[i] = found.node.x[i];
+      }
+    }
+    
+    return match;
+  }
+
 
   // =====================================================================================
   public static int exhaustive_search( double[][] list, double[] x ) {
     // -----------------------------------------------------------------------------------
-    double min_d2 = distSQ( list[0], x );
+    double min_d2 = Math2.dist2( list[0], x );
     int    min_id = 0;
 
     int samples = list.length;
     for ( int i=1; i<samples; i++ ) {
-      double d2 = distSQ( list[i], x );
+      double d2 = Math2.dist2( list[i], x );
       if ( d2 < min_d2 ) {
         min_d2 = d2;
         min_id = i;
@@ -203,6 +265,23 @@ public class KDTree {
     // -----------------------------------------------------------------------------------
     recursive_print( root,  ps, fmt );
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   
 
