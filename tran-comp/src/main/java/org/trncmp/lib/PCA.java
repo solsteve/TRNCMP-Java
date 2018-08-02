@@ -40,8 +40,6 @@ import java.io.*;
 
 import org.trncmp.lib.linear.*;
 
-import org.apache.log4j.*;
-
 import org.hipparchus.linear.*;
 
 // =======================================================================================

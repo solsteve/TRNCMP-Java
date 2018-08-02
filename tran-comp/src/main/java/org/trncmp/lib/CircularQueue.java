@@ -35,14 +35,9 @@ package org.trncmp.lib;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 // =======================================================================================
 public class CircularQueue<E> {
   // -------------------------------------------------------------------------------------
-  private static final Logger logger = LogManager.getLogger();
-
   private int                      max_elements = 0;
   private ConcurrentLinkedDeque<E> queue        = null;
 

@@ -32,7 +32,6 @@
 // =======================================================================================
 
 package org.trncmp.lib;
-import org.apache.log4j.*;
 
 // =======================================================================================
 public class jtest_dice {
@@ -147,8 +146,6 @@ public class jtest_dice {
     static boolean main() {
 	// -------------------------------------------------------------------------------	
 
-	//TLogger.getInstance().setConsoleLevel( TLogger.WARNING );
-	
 	test02();
 	
 	return true;

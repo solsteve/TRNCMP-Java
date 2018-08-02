@@ -14,11 +14,10 @@ MAIN_CLASS=org.trncmp.test.jtest_${1}
 shift
 
 if [ -e target/lib-1.2.0-SNAPSHOT.jar ]; then
-    java -Djava.net.preferIPv4Stack=true -cp target/lib-1.2.0-SNAPSHOT.jar ${MAIN_CLASS} $*
+    java -Djava.net.preferIPv4Stack=true -cp target/uber-lib-1.2.0-SNAPSHOT.jar ${MAIN_CLASS} $*
     exit $?
 else
     echo "You need to do a:  make jar"
 fi
 
 exit -1
-

@@ -30,8 +30,8 @@
 #/
 #/ =======================================================================================
 
-EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint
-#EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint:unchecked
+#EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint
+EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint:unchecked
 
 all:
 	mvn $(EXTRAS) compile

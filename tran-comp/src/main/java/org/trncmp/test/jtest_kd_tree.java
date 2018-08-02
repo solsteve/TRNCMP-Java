@@ -23,7 +23,7 @@
 // ----- Modification History ------------------------------------------------------------
 /**
  * @file jtest_kdtree.java
- *  Provides Test the KDTree class.
+ *  Provides Test the KD_Tree class.
  *  <p>
  *
  * @author Stephen W. Soliday
@@ -33,14 +33,14 @@
 
 package org.trncmp.test;
 
-import org.trncmp.lib.KDTree;
+import org.trncmp.lib.KD_Tree;
 import org.trncmp.lib.array;
 import org.trncmp.lib.Math2;
 import org.trncmp.lib.Dice;
 
 
 // =======================================================================================
-public class jtest_kdtree {
+public class jtest_kd_tree {
   // -------------------------------------------------------------------------------------
 
   public static final int KDIMS   = 5;
@@ -53,6 +53,7 @@ public class jtest_kdtree {
     return "(" + array.toString( point, fmt, ", " ) + ")";
   }
 
+  
   // =====================================================================================
   public static String ary_print( double[][] list, String fmt ) {
     // -----------------------------------------------------------------------------------
@@ -60,6 +61,22 @@ public class jtest_kdtree {
   }
 
 
+  // =====================================================================================
+  public static int exhaustive_search( double[][] list, double[] x ) {
+    // -----------------------------------------------------------------------------------
+    double min_d2 = Math2.dist2( list[0], x );
+    int    min_id = 0;
+
+    int samples = list.length;
+    for ( int i=1; i<samples; i++ ) {
+      double d2 = Math2.dist2( list[i], x );
+      if ( d2 < min_d2 ) {
+        min_d2 = d2;
+        min_id = i;
+      }
+    }
+    return min_id;
+  }
 
 
   
@@ -88,23 +105,29 @@ public class jtest_kdtree {
     // -----------------------------------------------------------------------------------
     double[]   test_point = {9,2};
     double[][] list       = {{2,3}, {5,4}, {9,6}, {4,7}, {8,1}, {7,2}};
-    double[]   found      = null;
+    KD_Tree.node found     = null;
     double[]   e_found    = null;
     double     dist, e_dist;
     int        e_idx;
     // -----------------------------------------------------------------------------------
 
-    KDTree tree = new KDTree( list );
+    KD_Tree tree = new KD_Tree( );
+    int n = list.length;
+    for ( int i=0; i<n; i++ ) {
+      tree.insert( new KD_Tree.node( list[i] ) );
+    }
 
-    found = tree.search( test_point );
-    dist  = Math.sqrt( Math2.dist2( test_point, found ) );
+    KD_Tree.node test_node = new KD_Tree.node( test_point );
+
+    found = tree.search( test_node );
+    dist  = Math.sqrt( Math2.dist2( test_point, found.x ) );
     
-    e_idx   = KDTree.exhaustive_search( list, test_point );
+    e_idx   = exhaustive_search( list, test_point );
     e_found = list[e_idx];
     e_dist  = Math.sqrt( Math2.dist2( test_point, e_found ) );
 
 
-    print_results( "Wiki", test_point, found,
+    print_results( "Wiki", test_point, found.x,
                    dist, tree.getVisit(), list.length,
                    e_idx, e_dist, e_found, "%7.4f" );
   }
@@ -114,23 +137,29 @@ public class jtest_kdtree {
     // -----------------------------------------------------------------------------------
     double[]   test_point = {72,72};
     double[][] list       = {{30,40}, {5,25}, {10,12}, {70,70}, {50,30}, {35,45}};
-    double[]   found      = null;
+    KD_Tree.node  found      = null;
     double[]   e_found    = null;
     double     dist, e_dist;
     int        e_idx;
     // -----------------------------------------------------------------------------------
 
-    KDTree tree = new KDTree( list );
+    KD_Tree tree = new KD_Tree( );
+    int n = list.length;
+    for ( int i=0; i<n; i++ ) {
+      tree.insert( new KD_Tree.node( list[i] ) );
+    }
 
-    found = tree.search( test_point );
-    dist  = Math.sqrt( Math2.dist2( test_point, found ) );
+    KD_Tree.node test_node = new KD_Tree.node( test_point );
+
+    found = tree.search( test_node );
+    dist  = Math.sqrt( Math2.dist2( test_point, found.x ) );
     
-    e_idx   = KDTree.exhaustive_search( list, test_point );
+    e_idx   = exhaustive_search( list, test_point );
     e_found = list[e_idx];
     e_dist  = Math.sqrt( Math2.dist2( test_point, e_found ) );
 
 
-    print_results( "CMU", test_point, found,
+    print_results( "CMU", test_point, found.x,
                    dist, tree.getVisit(), list.length,
                    e_idx, e_dist, e_found, "%7.4f" );
   }
@@ -141,7 +170,7 @@ public class jtest_kdtree {
     // -----------------------------------------------------------------------------------
     double[]   test_point = null;
     double[][] list       = null;
-    double[]   found      = null;
+    KD_Tree.node   found      = null;
     double[]   e_found    = null;
     double     dist, e_dist;
     int        e_idx;
@@ -165,17 +194,23 @@ public class jtest_kdtree {
     
     // -----------------------------------------------------------------------------------
 
-    KDTree tree = new KDTree( list );
+    KD_Tree tree = new KD_Tree( );
+    int n = list.length;
+    for ( int i=0; i<n; i++ ) {
+      tree.insert( new KD_Tree.node( list[i] ) );
+    }
 
-    found = tree.search( test_point );
-    dist  = Math.sqrt( Math2.dist2( test_point, found ) );
+    KD_Tree.node test_node = new KD_Tree.node( test_point );
+
+    found = tree.search( test_node );
+    dist  = Math.sqrt( Math2.dist2( test_point, found.x ) );
     
-    e_idx   = KDTree.exhaustive_search( list, test_point );
+    e_idx   = exhaustive_search( list, test_point );
     e_found = list[e_idx];
     e_dist  = Math.sqrt( Math2.dist2( test_point, e_found ) );
 
 
-    print_results( "Million", test_point, found,
+    print_results( "Million", test_point, found.x,
                    dist, tree.getVisit(), list.length,
                    e_idx, e_dist, e_found, "%7.4f" );
   }
