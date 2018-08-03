@@ -74,6 +74,8 @@ public class UGA {
   /** Intermediate population. */
   private Population working = null;
 
+  //** Model execution queue
+  private ModelExecutor model_exec = null;
 
   // -------------------------------------------------------------------------------------
 
@@ -126,8 +128,13 @@ public class UGA {
       System.exit(1);
     }
 
-    primary = new Population( config.nPop(), model );
-    working = new Population( config.nPop(), model );
+    int n_pop = config.nPop();
+    int n_cpu = config.nCPU();
+
+    primary = new Population( n_pop, model );
+    working = new Population( n_pop, model );
+
+    model_exec = new ModelExecutor( model, n_cpu, n_pop );
   }
 
   
@@ -363,8 +370,6 @@ public class UGA {
     int tourSize = config.nTour();
     int maxgen   = config.maxgen();
 
-    int num_procs = config.nCPU();
-
     // ----- initialize population -------------------------------------------------------
 
     Encoding[] encode_array = new Encoding[ popSize ];
@@ -377,7 +382,7 @@ public class UGA {
 
     //primary.score();
 
-    new ModelExecutor( model, num_procs, popSize ).runAll( primary );
+    model_exec.execute( primary );
 
     Population.ScoreReturn SR = primary.genStats( true );
 
@@ -427,7 +432,7 @@ public class UGA {
 
       // primary.score();
 
-      new ModelExecutor( model, num_procs, popSize ).runAll( primary );
+      model_exec.execute( primary );
 
       SR = primary.genStats( false );
 

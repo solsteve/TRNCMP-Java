@@ -29,121 +29,104 @@
 
 package org.trncmp.mllib.ea;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
+
 // =======================================================================================
 public class ModelExecutor {
   // -------------------------------------------------------------------------------------
 
-  protected Model       model      = null;
-  protected Population  pop        = null;
-  protected int         num_thread = 0;
-  protected TaskGroup[] group      = null;
-  
+  protected final ExecutorService pool;
+  protected Model      model     = null;
+  protected int        num_proc  = 0;
+  protected Task[] tasks     = null;
+  protected int        num_tasks = 0;
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  public ModelExecutor( Model m, int n, int np ) {
+  static class Task implements Runnable {
     // -----------------------------------------------------------------------------------
-    model      = m;
-    num_thread = n;
+    protected final Model            model;
+    protected       PopulationMember member  = null;
+    protected       CountDownLatch   counter = null;
 
-    group = new TaskGroup[n];
-    for ( int i=0; i<num_thread; i++ ) {
-      group[i] = new TaskGroup( model, np );
-    }
-
-  }
-
-  
-  // =====================================================================================
-  // Block until all tasks are complete.
-  // -------------------------------------------------------------------------------------
-  public void runAll( Population pop ) {
-    // -----------------------------------------------------------------------------------
-    int num = pop.size();
-    for ( int i=0; i<num; i++ ) {
-      group[i % num_thread].add( pop.get(i) );
-    }
-
-    for ( int i=0; i<num_thread; i++ ) {
-      group[i].start();
-    }
-
-    try {
-      for ( int i=0; i<num_thread; i++ ) {
-        group[i].join();
-      }
-    } catch( InterruptedException e ) {
-    }
-  }
-
-
-
-
-
-
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  static class TaskGroup extends Thread {
-    // -----------------------------------------------------------------------------------
-
-    protected Model              model    = null;
-    protected PopulationMember[] pop_list = null;
-    protected int                max_task = 0;
-    protected int                num_task = 0;
     
     // ===================================================================================
     // -----------------------------------------------------------------------------------
-    public TaskGroup( Model m, int n ) {
+    public Task( Model mod ) {
       // ---------------------------------------------------------------------------------
-      model    = m;
-      max_task = n;
-      num_task = 0;
-
-      pop_list = new PopulationMember[n];
-      for ( int i=0; i<n; i++ ) {
-        pop_list[i] = null;
-      }
+      model = mod;
     }
 
     // ===================================================================================
-    /** @brief Clear.
-     *
-     *  Clear the pointers from the list.
-     */
     // -----------------------------------------------------------------------------------
-    public void clear() {
+    public void setMember( PopulationMember M ) {
       // ---------------------------------------------------------------------------------
-      for ( int i=0; i<max_task; i++ ) {
-        pop_list[i] = null;
-      }
-      num_task = 0;
+      member = M;
     }
-      
+    
     // ===================================================================================
-    /** @brief Add.
-     *  @param m pointer to a PopulationMember.
-     *
-     *  Add a PopulationMember pointer to the list.
-     */
     // -----------------------------------------------------------------------------------
-    public void add( PopulationMember m ) {
+    public void setCounter( CountDownLatch C ) {
       // ---------------------------------------------------------------------------------
-      pop_list[ num_task ] = m;
-      num_task += 1;
+      counter = C;
     }
-      
+
     // ===================================================================================
     // -----------------------------------------------------------------------------------
     public void run() {
       // ---------------------------------------------------------------------------------
-      for ( int i=0; i<num_task; i++ ) {
-        PopulationMember test = pop_list[i];
-        model.execute( test.metric, test.param );
+      if ( null != member ) {
+        model.execute( member.metric, member.param );
+        counter.countDown();
       }
     }
-
+  
   } // end class ModelExecutor.Task
 
+  
+  // =====================================================================================
+  /** @brief Constructor.
+   *  @param mod pointer to a fitness model.
+   *  @param np  number of processors
+   */
+  // -------------------------------------------------------------------------------------
+  public ModelExecutor( Model mod, int np, int nt ) {
+    // -----------------------------------------------------------------------------------
+    model     = mod;
+    num_proc  = np;
+    pool      = Executors.newFixedThreadPool( np );
+
+    num_tasks = nt;
+    tasks = new ModelExecutor.Task[ num_tasks ];
+    for ( int i=0; i<num_tasks; i++ ) {
+      tasks[i] = new ModelExecutor.Task( model );
+    }  
+  }
+
+  // =====================================================================================
+  /** @brief Execute.
+   *  @param pop reference to a population.
+   *
+   *  Blocks until all tasks are complete.
+   */
+  // -------------------------------------------------------------------------------------
+  public void execute( Population pop ) {
+    // -----------------------------------------------------------------------------------
+    CountDownLatch counter = new CountDownLatch(num_tasks);
+
+    for ( int i=0; i<num_tasks; i++ ) {
+      tasks[i].setMember( pop.get(i) );
+      tasks[i].setCounter( counter );
+      pool.execute( tasks[i] );
+    }
+
+    try {
+      counter.await();
+    } catch( InterruptedException e ) {
+    }
+  }
 
 } // end class ModelExecutor
 

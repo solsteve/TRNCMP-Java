@@ -58,6 +58,7 @@ public class TestPool {
 
     TestMember[] pop1 = new TestMember[NUM_TASKS];
     TestMember[] pop2 = new TestMember[NUM_TASKS];
+    TestMember[] pop3 = new TestMember[NUM_TASKS];
     
     TestModel model = new TestModel(TASK_LOAD);
     
@@ -67,6 +68,10 @@ public class TestPool {
 
     for ( int i=0; i<NUM_TASKS; i++ ) {
       pop2[i] = new TestMember( 2000+i );
+    }
+
+    for ( int i=0; i<NUM_TASKS; i++ ) {
+      pop3[i] = new TestMember( 3000+i );
     }
 
     TestPool test = new TestPool( model, NUM_TASKS );
@@ -79,6 +84,10 @@ public class TestPool {
     System.out.format( "\n** START GEN 2\n\n" );
     test.execute( pop2 );
     System.out.format( "\n** END   GEN 2\n\n" );
+    
+    System.out.format( "\n** START GEN 3\n\n" );
+    test.execute( pop3 );
+    System.out.format( "\n** END   GEN 3\n\n" );
     
     test.close();
   }
