@@ -7,7 +7,7 @@ package org.trncmp.apps.map;
 public class MapTest {
 
 
-ImageIcon image = new ImageIcon(this.getClass().getResource("INF1.png"));
+  //ImageIcon image = new ImageIcon(this.getClass().getResource("INF1.png"));
 
 
 
