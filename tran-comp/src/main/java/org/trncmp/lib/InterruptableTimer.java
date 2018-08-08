@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                          T R I A N G L E F U Z Z Y S E T                          **
+// **                        I N T E R R U P T A B L E T I M E R                        **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -19,157 +19,106 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file TriangleFuzzySet.java
- * <p>
- * Provides the interface and methods for a triangular shaped fuzzy set.
+ * @brief   Interruptable Timer.
+ * @file    InterruptableTimer.java
  *
- * @date 2018-08-06
+ * @details Provides the interface and procedures for providing an interruptable timer.
+ *          This timer may be instantly interrupted. Use this in favor of Thread.sleep()
+ *          with very long durrations.
  *
- * ---------------------------------------------------------------------------------------
- *
- * @note This code was ported from a C++ version contained in the TRNCMP
- *       Machine learning Research Library. (formerly SolLib)
- *
- * @author Stephen W. Soliday
- * @date 2014-06-27
+ * @date    2018-08-07
  */
 // =======================================================================================
 
-package org.trncmp.mllib.fuzzy;
-
-
+package org.trncmp.lib;
 
 // =======================================================================================
-public class TriangleFuzzySet extends FuzzySet {
+public class InterruptableTimer {
   // -------------------------------------------------------------------------------------
-  
-  /** Left extreme of this fuzzy set */
-  protected double L;
-  
-  /** Point of maximum membership extreme of this fuzzy set */
-  protected double C;
-  
-  /** Right extreme of this fuzzy set */
-  protected double R;
-
-  protected double LD;
-  protected double RD;
-  protected double D1;
-  protected double D2;
-
-
-  public static class Builder extends FuzzySet.Builder<Builder> {
-
-    private double left_extreme   = -1.0;
-    private double center_value   =  0.0;
-    private double right_extreme  =  1.0;
-
-    public Builder( double ctr ) {
-      center_value = ctr;
-      left_extreme  = center_value - 1.0;
-      right_extreme = center_value + 1.0;
-    }
-
-    public Builder left  ( double _l ) { left_extreme  = _l; return this; }
-    public Builder right ( double _r ) { right_extreme = _r; return this; }
-    
-
-    @Override public TriangleFuzzySet build() {
-      return new TriangleFuzzySet(this);
-    }
-
-    @Override protected Builder self() { return this; }
-
-    
-  } // end class TriangleFuzzySet.Builder
-
+  private   Thread  thread      = null;
+  protected boolean forced_stop = true;
 
   // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  private TriangleFuzzySet(Builder builder) {
+  static public class Stopped extends Exception {
     // -----------------------------------------------------------------------------------
-    super(builder);
-    set( builder.left_extreme,
-         builder.center_value,
-         builder.right_extreme );
-  }
-
-  public double getLeft()   { return L; }
-  public double getCenter() { return C; }
-  public double getRight()  { return R; }
+    public Stopped(String message) { super(message); }
+  } // end class InterruptableTimer.Stopped
 
   // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public void set( double _l, double _c, double _r ) {
+  static protected class TimerThread extends Thread {
     // -----------------------------------------------------------------------------------
-    L = _l;
-    C = _c;
-    R = _r;
+    protected InterruptableTimer parent   = null;
+    protected long               duration = 0L;
 
-    LD = C - L;
-    RD = R - C;
-    D1 = R - L;
-    D2 = C - 2.0*L + R;
-  }
-
-  // =====================================================================================
-  /** @brief Membership.
-   *  @param x crisp value.
-   *  @return degree of membership.
-   *
-   *  Compute the degree of membership in this set based on the crisp value.
-   *  The domain is all real numbers. The range is 0 to 1 inclusive.
-   */
-  // -------------------------------------------------------------------------------------
-  public double mu( double x ) {
-    // -----------------------------------------------------------------------------------
-    if ( x < C ) {
-      if ( x > L ) {
-        return (x - L)/LD;
-      } else {
-        return 0.0;        }
+    // ===================================================================================
+    public TimerThread( InterruptableTimer p, long d ) {
+      // ---------------------------------------------------------------------------------
+      parent   = p;
+      duration = d;
     }
-    if ( x > C ) {
-      if ( x < R ) {
-        return (R - x)/RD;
-      } else {
-        return 0.0;
+
+    // ===================================================================================
+    public void run() {
+      // ---------------------------------------------------------------------------------
+      try {
+        Thread.sleep( duration );
+      } catch( InterruptedException e ) {
+        parent.forced_stop = true;
       }
     }
-
-    return 1.0;
-  }
+ 
+  } // end InterruptableTimer.TimerThread
 
   // =====================================================================================
-  /** @brief Area.
-   *  @param degree degree of membership.
-   *  @return area.
+  public InterruptableTimer() {
+    // -----------------------------------------------------------------------------------
+  }
+  
+  // =====================================================================================
+  /** @brief Sleep.
+   *  @param seconds sleep for seconds.
    *
-   *  Compute the area based on the degree of membership in this set. 
-   *  The domain is 0 to 1 inclusive.
+   *  Sleep for a duration measured in floating-point seconds.
    */
   // -------------------------------------------------------------------------------------
-  public double area( double degree ) {
+  public void sleep( double seconds ) throws InterruptableTimer.Stopped {
     // -----------------------------------------------------------------------------------
-    return 0.5*degree*(degree*D1 + D2);
+    sleep( (long)Math.floor( seconds * 1000.0 + 0.5 ) );
+  }
+  
+  // =====================================================================================
+  /** @brief Sleep.
+   *
+   *  Interrupt this timer immediately.
+   */
+  // -------------------------------------------------------------------------------------
+  public void interrupt() {
+    // -----------------------------------------------------------------------------------
+    if ( null != thread ) { thread.interrupt(); }
+  }
+    
+  // =====================================================================================
+  /** @brief Sleep.
+   *  @param milliseconds sleep for milliseconds.
+   *
+   *  Sleep for a duration measured in integer milliseconds.
+   */
+  // -------------------------------------------------------------------------------------
+  public void sleep( long milliseconds ) throws InterruptableTimer.Stopped {
+    // -----------------------------------------------------------------------------------
+    forced_stop = false;
+    thread = new TimerThread(this, milliseconds);
+    thread.start();
+    try {
+      thread.join();
+    } catch( InterruptedException e ) {
+      forced_stop = true;
+    }
+    if ( forced_stop ) { throw new InterruptableTimer.Stopped("timer interrupted"); }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-  
-
-} // end class TriangleFuzzySet
-
+} // end class InterruptableTimer
 
 // =======================================================================================
-// **                          T R I A N G L E F U Z Z Y S E T                          **
-// ======================================================================== END FILE =====
+// **                        I N T E R R U P T A B L E T I M E R                        **
+// =========================================================================== END FILE ==

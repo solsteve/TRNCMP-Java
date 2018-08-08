@@ -178,7 +178,7 @@ public class RunStatTest {
     // -----------------------------------------------------------------------------------
     final long   SEED    = 314159265L;
 
-    final int    SAMPLES = 100000;
+    final int    SAMPLES = 10000;
     final double MEAN    = 7.0;
     final double SIGMA   = 0.2;
 

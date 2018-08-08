@@ -232,11 +232,11 @@ public class IntegerEncodingTest {
     int LOW       =  MID_POINT-BUMP;
     int HIGH      =  MID_POINT+BUMP;
 
-    System.out.format( "LOW:         %d\n", LOW );
-    System.out.format( "count_lower: %d\n", count_lower );
-    System.out.format( "MID POINT:   %d\n", MID_POINT );
-    System.out.format( "count_upper: %d\n", count_upper );
-    System.out.format( "HIGH:        %d\n", HIGH );
+    //System.out.format( "LOW:         %d\n", LOW );
+    //System.out.format( "count_lower: %d\n", count_lower );
+    //System.out.format( "MID POINT:   %d\n", MID_POINT );
+    //System.out.format( "count_upper: %d\n", count_upper );
+    //System.out.format( "HIGH:        %d\n", HIGH );
     
     assertTrue( LOW  < count_lower );
     assertTrue( LOW  < count_upper );
