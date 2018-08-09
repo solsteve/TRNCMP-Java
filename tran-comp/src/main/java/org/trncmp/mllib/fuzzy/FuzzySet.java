@@ -70,6 +70,31 @@ public abstract class FuzzySet {
   // -------------------------------------------------------------------------------------
   public abstract double mu( double x );
 
+  
+  // =====================================================================================
+  /** @brief Area.
+   *  @param degree degree of membership.
+   *  @return area.
+   *
+   *  Compute the area based on the degree of membership in this set. 
+   *  The domain is 0 to 1 inclusive.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract double area( double degree );
+
+
+  // =====================================================================================
+  /** @brief Centroid.
+   *  @param degree degree of membership.
+   *  @return centroid.
+   *
+   *  Compute the area based on the degree of membership in this set. 
+   *  The domain is 0 to 1 inclusive.
+   */
+  // -------------------------------------------------------------------------------------
+  public abstract double centroid( double degree );
+  
+
 } // end class AbstractFuzzySet
 
 
