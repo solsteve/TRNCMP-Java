@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                     L E F T T R A P E Z O I D F U Z Z Y S E T                     **
+// **                     L E F T T R A P E Z O I D F U N C T I O N                     **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -21,7 +21,7 @@
 /**
  * @file LeftTrapezoidFunction.java
  * <p>
- * Provides the interface and methods for a left trapezoid shaped fuzzy set.
+ * Provides the interface and methods for a left trapezoid shaped fuzzy function.
  *
  * @date 2018-08-08
  *
@@ -156,5 +156,5 @@ public class LeftTrapezoidFunction extends Function {
 
 
 // =======================================================================================
-// **                     L E F T T R A P E Z O I D F U Z Z Y S E T                     **
+// **                     L E F T T R A P E Z O I D F U N C T I O N                     **
 // ======================================================================== END FILE =====

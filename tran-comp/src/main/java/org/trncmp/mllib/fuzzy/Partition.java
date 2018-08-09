@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                                  F U N C T I O N                                  **
+// **                                 P A R T I T I O N                                 **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -19,11 +19,11 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file Function.java
+ * @file Partition.java
  * <p>
- * Provides an abstract fuzzy function.
+ * Provides an interface and methods for a fuzzy partition.
  *
- * @date 2018-08-06
+ * @date 2018-08-09
  *
  * ---------------------------------------------------------------------------------------
  *
@@ -39,68 +39,31 @@ package org.trncmp.mllib.fuzzy;
 
 
 // =======================================================================================
-public abstract class Function {
+public abstract class Partition {
   // -------------------------------------------------------------------------------------
 
+  protected Function[] function = null;
+  protected int        num_func = 0;
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  abstract static class Builder<T extends Builder<T>> {
-    // -----------------------------------------------------------------------------------
-
-    abstract Function build();
-
-    protected abstract T self();
-    
-  } // end class Function.Builder
-  
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  Function(Builder<?> builder) {
+  public Partition( double[] ctrs ) {
     // -----------------------------------------------------------------------------------
   }
 
-  public abstract double getLeft();
-  public abstract double getCenter();
-  public abstract double getRight();
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public Partition( int n, double minv, double maxv ) {
+    // -----------------------------------------------------------------------------------
+  }
 
   // =====================================================================================
-  /** @brief Copy.
-   *  @param p pointer to a source Encoding.
-   *
-   *  Perform an element by element copy of the source Encoding.
-   */
   // -------------------------------------------------------------------------------------
-  public abstract double mu( double x );
-
-  
-  // =====================================================================================
-  /** @brief Area.
-   *  @param degree degree of membership.
-   *  @return area.
-   *
-   *  Compute the area based on the degree of membership in this set. 
-   *  The domain is 0 to 1 inclusive.
-   */
-  // -------------------------------------------------------------------------------------
-  public abstract double area( double degree );
-
-
-  // =====================================================================================
-  /** @brief Centroid.
-   *  @param degree degree of membership.
-   *  @return centroid.
-   *
-   *  Compute the area based on the degree of membership in this set. 
-   *  The domain is 0 to 1 inclusive.
-   */
-  // -------------------------------------------------------------------------------------
-  public abstract double centroid( double degree );
   
 
-} // end class Function
+} // end class Partition
 
 
 // =======================================================================================
-// **                                  F U N C T I O N                                  **
+// **                                 P A R T I T I O N                                 **
 // ======================================================================== END FILE =====

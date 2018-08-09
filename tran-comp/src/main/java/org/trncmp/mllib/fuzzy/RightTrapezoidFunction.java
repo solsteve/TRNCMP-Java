@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                    R I G H T T R A P E Z O I D F U Z Z Y S E T                    **
+// **                    R I G H T T R A P E Z O I D F U N C T I O N                    **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -21,7 +21,7 @@
 /**
  * @file TriangleFunction.java
  * <p>
- * Provides the interface and methods for a right trapezoid shaped fuzzy set.
+ * Provides the interface and methods for a right trapezoid shaped fuzzy function.
  *
  * @date 2018-08-08
  *
@@ -156,5 +156,5 @@ public class RightTrapezoidFunction extends Function {
 
 
 // =======================================================================================
-// **                    R I G H T T R A P E Z O I D F U Z Z Y S E T                    **
+// **                    R I G H T T R A P E Z O I D F U N C T I O N                    **
 // ======================================================================== END FILE =====

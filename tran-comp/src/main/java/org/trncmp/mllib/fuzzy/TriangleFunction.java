@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                          T R I A N G L E F U Z Z Y S E T                          **
+// **                          T R I A N G L E F U N C T I O N                          **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -21,7 +21,7 @@
 /**
  * @file TriangleFunction.java
  * <p>
- * Provides the interface and methods for a triangular shaped fuzzy set.
+ * Provides the interface and methods for a triangular shaped fuzzy function.
  *
  * @date 2018-08-06
  *
@@ -176,5 +176,5 @@ public class TriangleFunction extends Function {
 
 
 // =======================================================================================
-// **                          T R I A N G L E F U Z Z Y S E T                          **
+// **                          T R I A N G L E F U N C T I O N                          **
 // ======================================================================== END FILE =====
