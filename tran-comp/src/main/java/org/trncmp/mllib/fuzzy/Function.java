@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                    R I G H T T R A P E Z O I D F U Z Z Y S E T                    **
+// **                                  F U Z Z Y S E T                                  **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -19,11 +19,11 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file TriangleFuzzySet.java
+ * @file AbstractFunction.java
  * <p>
- * Provides the interface and methods for a right trapezoid shaped fuzzy set.
+ * Provides an abstract fuzzy set
  *
- * @date 2018-08-08
+ * @date 2018-08-06
  *
  * ---------------------------------------------------------------------------------------
  *
@@ -40,84 +40,39 @@ package org.trncmp.mllib.fuzzy;
 
 
 // =======================================================================================
-public class RightTrapezoidFuzzySet extends FuzzySet {
+public abstract class Function {
   // -------------------------------------------------------------------------------------
-  
-  /** Left extreme of this fuzzy set */
-  protected double L;
-  
-  /** Point of maximum membership extreme of this fuzzy set */
-  protected double C;
-  
-  protected double W;
-
-  public static class Builder extends FuzzySet.Builder<Builder> {
-
-    private double left_extreme   = -1.0;
-    private double center_value   =  0.0;
-
-    public Builder( double ctr ) {
-      center_value  = ctr;
-      left_extreme  = center_value - 1.0;
-    }
-
-    public Builder left  ( double _l ) { left_extreme  = _l; return this; }
-    
-
-    @Override public RightTrapezoidFuzzySet build() {
-      return new RightTrapezoidFuzzySet(this);
-    }
-
-    @Override protected Builder self() { return this; }
-
-    
-  } // end class RightTrapezoidFuzzySet.Builder
 
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  private RightTrapezoidFuzzySet(Builder builder) {
+  abstract static class Builder<T extends Builder<T>> {
     // -----------------------------------------------------------------------------------
-    super(builder);
-    set( builder.left_extreme,
-         builder.center_value );
+
+    abstract Function build();
+
+    protected abstract T self();
+    
+  } // end class Function.Builder
+  
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  Function(Builder<?> builder) {
+    // -----------------------------------------------------------------------------------
   }
 
-  public double getLeft()   { return L; }
-  public double getCenter() { return C; }
+  public abstract double getLeft();
+  public abstract double getCenter();
+  public abstract double getRight();
 
   // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public void set( double _l, double _c ) {
-    // -----------------------------------------------------------------------------------
-    L = _l;
-    C = _c;
-
-    W  = C - L;
-  }
-  
-
-  // =====================================================================================
-  /** @brief Membership.
-   *  @param x crisp value.
-   *  @return degree of membership.
+  /** @brief Copy.
+   *  @param p pointer to a source Encoding.
    *
-   *  Compute the degree of membership in this set based on the crisp value.
-   *  The domain is all real numbers. The range is 0 to 1 inclusive.
+   *  Perform an element by element copy of the source Encoding.
    */
   // -------------------------------------------------------------------------------------
-  public double mu( double x ) {
-    // -----------------------------------------------------------------------------------
-    if ( x < C ) {
-      if ( x > L ) {
-        return (x - L)/W;
-      } else {
-        return 0.0;
-      }
-    }
-
-    return 1.0;
-  }
+  public abstract double mu( double x );
 
   
   // =====================================================================================
@@ -129,10 +84,7 @@ public class RightTrapezoidFuzzySet extends FuzzySet {
    *  The domain is 0 to 1 inclusive.
    */
   // -------------------------------------------------------------------------------------
-  public double area( double degree ) {
-    // -----------------------------------------------------------------------------------
-    return 5.0e-1*(3.0e0 - degree)*W*degree;
-  }
+  public abstract double area( double degree );
 
 
   // =====================================================================================
@@ -144,16 +96,12 @@ public class RightTrapezoidFuzzySet extends FuzzySet {
    *  The domain is 0 to 1 inclusive.
    */
   // -------------------------------------------------------------------------------------
-  public double centroid( double degree ) {
-    // -----------------------------------------------------------------------------------
-    return ( 9.0e0*(3.0e0*C + L) - (4.0e0*W*degree + 1.2e1*L)*degree )
-        / (1.2e1*(3.0e0 - degree));
-  }
-
+  public abstract double centroid( double degree );
   
-} // end class RightTrapezoidFuzzySet
+
+} // end class Function
 
 
 // =======================================================================================
-// **                    R I G H T T R A P E Z O I D F U Z Z Y S E T                    **
+// **                                  F U Z Z Y S E T                                  **
 // ======================================================================== END FILE =====

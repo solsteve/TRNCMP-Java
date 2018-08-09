@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                                  F U Z Z Y S E T                                  **
+// **                          T R I A N G L E F U Z Z Y S E T                          **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -19,9 +19,9 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file AbstractFuzzySet.java
+ * @file TriangleFunction.java
  * <p>
- * Provides an abstract fuzzy set
+ * Provides the interface and methods for a triangular shaped fuzzy set.
  *
  * @date 2018-08-06
  *
@@ -40,35 +40,105 @@ package org.trncmp.mllib.fuzzy;
 
 
 // =======================================================================================
-public abstract class FuzzySet {
+public class TriangleFunction extends Function {
   // -------------------------------------------------------------------------------------
-
-
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  abstract static class Builder<T extends Builder<T>> {
-    // -----------------------------------------------------------------------------------
-
-    abstract FuzzySet build();
-
-    protected abstract T self();
-    
-  } // end class FuzzySet.Builder
   
+  /** Left extreme of this fuzzy set */
+  protected double L;
+  
+  /** Point of maximum membership extreme of this fuzzy set */
+  protected double C;
+  
+  /** Right extreme of this fuzzy set */
+  protected double R;
+
+  protected double LD;
+  protected double RD;
+  protected double W;
+
+
+  public static class Builder extends Function.Builder<Builder> {
+
+    private double left_extreme   = -1.0;
+    private double center_value   =  0.0;
+    private double right_extreme  =  1.0;
+
+    public Builder( double ctr ) {
+      center_value = ctr;
+      left_extreme  = center_value - 1.0;
+      right_extreme = center_value + 1.0;
+    }
+
+    public Builder left  ( double _l ) { left_extreme  = _l; return this; }
+    public Builder right ( double _r ) { right_extreme = _r; return this; }
+    
+
+    @Override public TriangleFunction build() {
+      return new TriangleFunction(this);
+    }
+
+    @Override protected Builder self() { return this; }
+
+    
+  } // end class TriangleFunction.Builder
+
+
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  FuzzySet(Builder<?> builder) {
+  private TriangleFunction(Builder builder) {
     // -----------------------------------------------------------------------------------
+    super(builder);
+    set( builder.left_extreme,
+         builder.center_value,
+         builder.right_extreme );
   }
 
+  public double getLeft()   { return L; }
+  public double getCenter() { return C; }
+  public double getRight()  { return R; }
+
   // =====================================================================================
-  /** @brief Copy.
-   *  @param p pointer to a source Encoding.
+  // -------------------------------------------------------------------------------------
+  public void set( double _l, double _c, double _r ) {
+    // -----------------------------------------------------------------------------------
+    L = _l;
+    C = _c;
+    R = _r;
+
+    LD = C - L;
+    RD = R - C;
+    W  = R - L;
+  }
+  
+
+  // =====================================================================================
+  /** @brief Membership.
+   *  @param x crisp value.
+   *  @return degree of membership.
    *
-   *  Perform an element by element copy of the source Encoding.
+   *  Compute the degree of membership in this set based on the crisp value.
+   *  The domain is all real numbers. The range is 0 to 1 inclusive.
    */
   // -------------------------------------------------------------------------------------
-  public abstract double mu( double x );
+  public double mu( double x ) {
+    // -----------------------------------------------------------------------------------
+    if ( x < C ) {
+      if ( x > L ) {
+        return (x - L)/LD;
+      } else {
+        return 0.0;
+      }
+    }
+    if ( x > C ) {
+      if ( x < R ) {
+        return (R - x)/RD;
+      } else {
+        return 0.0;
+      }
+    }
+
+    return 1.0;
+  }
 
   
   // =====================================================================================
@@ -80,7 +150,10 @@ public abstract class FuzzySet {
    *  The domain is 0 to 1 inclusive.
    */
   // -------------------------------------------------------------------------------------
-  public abstract double area( double degree );
+  public double area( double degree ) {
+    // -----------------------------------------------------------------------------------
+    return 5.0e-1*W*degree*(2.0e0-degree);
+  }
 
 
   // =====================================================================================
@@ -92,12 +165,16 @@ public abstract class FuzzySet {
    *  The domain is 0 to 1 inclusive.
    */
   // -------------------------------------------------------------------------------------
-  public abstract double centroid( double degree );
-  
+  public double centroid( double degree ) {
+    // -----------------------------------------------------------------------------------
+    return (3.0e0*(L+R) - (3.0e0*(R-C+L) - (R-2.0e0*C+L)*degree)*degree )
+        / (3.0e0*(2.0e0-degree));
+  }
 
-} // end class AbstractFuzzySet
+  
+} // end class TriangleFunction
 
 
 // =======================================================================================
-// **                                  F U Z Z Y S E T                                  **
+// **                          T R I A N G L E F U Z Z Y S E T                          **
 // ======================================================================== END FILE =====

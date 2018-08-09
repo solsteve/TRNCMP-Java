@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                     L E F T T R A P E Z O I D F U Z Z Y S E T                     **
+// **                    R I G H T T R A P E Z O I D F U Z Z Y S E T                    **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -19,9 +19,9 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file LeftTrapezoidFuzzySet.java
+ * @file TriangleFunction.java
  * <p>
- * Provides the interface and methods for a left trapezoid shaped fuzzy set.
+ * Provides the interface and methods for a right trapezoid shaped fuzzy set.
  *
  * @date 2018-08-08
  *
@@ -40,60 +40,61 @@ package org.trncmp.mllib.fuzzy;
 
 
 // =======================================================================================
-public class LeftTrapezoidFuzzySet extends FuzzySet {
+public class RightTrapezoidFunction extends Function {
   // -------------------------------------------------------------------------------------
+  
+  /** Left extreme of this fuzzy set */
+  protected double L;
   
   /** Point of maximum membership extreme of this fuzzy set */
   protected double C;
   
-  /** Right extreme of this fuzzy set */
-  protected double R;
-
   protected double W;
 
-  public static class Builder extends FuzzySet.Builder<Builder> {
+  public static class Builder extends Function.Builder<Builder> {
 
+    private double left_extreme   = -1.0;
     private double center_value   =  0.0;
-    private double right_extreme  =  1.0;
 
     public Builder( double ctr ) {
       center_value  = ctr;
-      right_extreme = center_value + 1.0;
+      left_extreme  = center_value - 1.0;
     }
 
-    public Builder right ( double _r ) { right_extreme = _r; return this; }
+    public Builder left  ( double _l ) { left_extreme  = _l; return this; }
     
 
-    @Override public LeftTrapezoidFuzzySet build() {
-      return new LeftTrapezoidFuzzySet(this);
+    @Override public RightTrapezoidFunction build() {
+      return new RightTrapezoidFunction(this);
     }
 
     @Override protected Builder self() { return this; }
 
     
-  } // end class LeftTrapezoidFuzzySet.Builder
+  } // end class RightTrapezoidFunction.Builder
 
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  private LeftTrapezoidFuzzySet(Builder builder) {
+  private RightTrapezoidFunction(Builder builder) {
     // -----------------------------------------------------------------------------------
     super(builder);
-    set( builder.center_value,
-         builder.right_extreme );
+    set( builder.left_extreme,
+         builder.center_value );
   }
 
+  public double getLeft()   { return L; }
   public double getCenter() { return C; }
-  public double getRight()  { return R; }
+  public double getRight()  { return 5.0e-1*(3.0e0*C-L); }
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  public void set( double _c, double _r ) {
+  public void set( double _l, double _c ) {
     // -----------------------------------------------------------------------------------
+    L = _l;
     C = _c;
-    R = _r;
 
-    W = R - C;
+    W  = C - L;
   }
   
 
@@ -108,9 +109,9 @@ public class LeftTrapezoidFuzzySet extends FuzzySet {
   // -------------------------------------------------------------------------------------
   public double mu( double x ) {
     // -----------------------------------------------------------------------------------
-    if ( x > C ) {
-      if ( x < R ) {
-        return (R - x)/W;
+    if ( x < C ) {
+      if ( x > L ) {
+        return (x - L)/W;
       } else {
         return 0.0;
       }
@@ -131,7 +132,7 @@ public class LeftTrapezoidFuzzySet extends FuzzySet {
   // -------------------------------------------------------------------------------------
   public double area( double degree ) {
     // -----------------------------------------------------------------------------------
-    return 5.0e-1*W*degree*(3.0e0-degree);
+    return 5.0e-1*(3.0e0 - degree)*W*degree;
   }
 
 
@@ -146,14 +147,14 @@ public class LeftTrapezoidFuzzySet extends FuzzySet {
   // -------------------------------------------------------------------------------------
   public double centroid( double degree ) {
     // -----------------------------------------------------------------------------------
-    return ( 9.0e0*(3.0e0*C + R) - (1.2e1*R - 4.0e0*W*degree)*degree )
+    return ( 9.0e0*(3.0e0*C + L) - (4.0e0*W*degree + 1.2e1*L)*degree )
         / (1.2e1*(3.0e0 - degree));
   }
 
   
-} // end class TriangleFuzzySet
+} // end class RightTrapezoidFunction
 
 
 // =======================================================================================
-// **                     L E F T T R A P E Z O I D F U Z Z Y S E T                     **
+// **                    R I G H T T R A P E Z O I D F U Z Z Y S E T                    **
 // ======================================================================== END FILE =====
