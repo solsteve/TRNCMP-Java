@@ -65,7 +65,7 @@ public abstract class Function {
   public abstract double getRight();
 
   // =====================================================================================
-  /** @brief Copy.
+  /** @brief Mu.
    *  @param p pointer to a source Encoding.
    *
    *  Perform an element by element copy of the source Encoding.
