@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                      T R I A N G L E F U Z Z Y S E T T E S T                      **
+// **                                     G R O U P                                     **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
@@ -19,11 +19,11 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file TriangleFuzzySetTest.java
+ * @file Group.java
  * <p>
- * Provides the interface and methods for a triangular shaped fuzzy set.
+ * Provides the interface and methods for a group of fuzzy partitions.
  *
- * @date 2018-08-06
+ * @date 2018-08-12
  *
  * ---------------------------------------------------------------------------------------
  *
@@ -37,46 +37,42 @@
 
 package org.trncmp.mllib.fuzzy;
 
-import        org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 // =======================================================================================
-public class TriangleFuzzySetTest {
+public class Group {
   // -------------------------------------------------------------------------------------
 
-  static final double epsilon = 1.0e-8;
-  
+  protected Partition[] partitions = null;
+  protected int         num_part   = 0;
+
+  public Group() {};
+
+  public Partition part     ( int p )        { return partitions[p]; }
+  public Function  function ( int p, int f ) { return partitions[p].function(f); }
+
   // =====================================================================================
-  @Test
-  public void testMu() {
+  // -------------------------------------------------------------------------------------
+  public void fuzzify( double[] mu, double[] x ) {
     // -----------------------------------------------------------------------------------
-    Function set = new TriangleFunction(3.0,7.0,15.0);
-
-    double[][] test = {
-      {  2.0, 0.00 },
-      {  2.9999, 0.00 },
-      {  3.0, 0.00 },
-      {  4.0, 0.25 },
-      {  5.0, 0.50 },
-      {  6.0, 0.75 },
-      {  7.0, 1.00 },
-      {  9.0, 0.75 },
-      { 11.0, 0.50 },
-      { 13.0, 0.25 },
-      { 15.0, 0.00 },
-      { 15.9999, 0.00 },
-      { 16.0, 0.00 }
-    };
-
-    for ( int i=0; i<test.length; i++ ) {
-      assertEquals( set.mu( test[i][0] ), test[i][1], epsilon );
+    int idx = 0;
+    for ( int i=0; i<num_part; i++ ) {
+      partitions[i].mu( mu, idx, x[i] );
+      idx += partitions[i].size();
     }
-
   }
 
-} // end class TriangleFuzzySetTest
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public void defuzzify( double[] x, double[] mu ) {
+    // -----------------------------------------------------------------------------------
+    int idx = 0;
+    for ( int i=0; i<num_part; i++ ) {
+      x[i] = partitions[i].coa( mu, idx );
+      idx += partitions[i].size();
+    }
+  }
+
+} //end class Group
 
 // =======================================================================================
-// **                      T R I A N G L E F U Z Z Y S E T T E S T                      **
+// **                                 P A R T I T I O N                                 **
 // ======================================================================== END FILE =====

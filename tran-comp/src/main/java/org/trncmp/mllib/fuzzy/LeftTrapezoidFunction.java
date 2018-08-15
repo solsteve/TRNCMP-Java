@@ -38,7 +38,6 @@
 package org.trncmp.mllib.fuzzy;
 
 
-
 // =======================================================================================
 public class LeftTrapezoidFunction extends Function {
   // -------------------------------------------------------------------------------------
@@ -51,42 +50,20 @@ public class LeftTrapezoidFunction extends Function {
 
   protected double W;
 
-  public static class Builder extends Function.Builder<Builder> {
-
-    private double center_value   =  0.0;
-    private double right_extreme  =  1.0;
-
-    public Builder( double ctr ) {
-      center_value  = ctr;
-      right_extreme = center_value + 1.0;
-    }
-
-    public Builder right ( double _r ) { right_extreme = _r; return this; }
-    
-
-    @Override public LeftTrapezoidFunction build() {
-      return new LeftTrapezoidFunction(this);
-    }
-
-    @Override protected Builder self() { return this; }
-
-    
-  } // end class LeftTrapezoidFunction.Builder
-
-
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  private LeftTrapezoidFunction(Builder builder) {
+  public LeftTrapezoidFunction( double _c, double _r ) {
     // -----------------------------------------------------------------------------------
-    super(builder);
-    set( builder.center_value,
-         builder.right_extreme );
+    super(Type.LEFTTRAP);
+    set( _c, _r );
   }
 
-  public double getLeft()   { return 5.0e-1*(3.0e0*C - R); }
-  public double getCenter() { return C; }
-  public double getRight()  { return R; }
+  
+  @Override public double getLeft()   { return 5.0e-1*(3.0e0*C - R); }
+  @Override public double getCenter() { return C; }
+  @Override public double getRight()  { return R; }
 
+  
   // =====================================================================================
   // -------------------------------------------------------------------------------------
   public void set( double _c, double _r ) {
@@ -103,11 +80,11 @@ public class LeftTrapezoidFunction extends Function {
    *  @param x crisp value.
    *  @return degree of membership.
    *
-   *  Compute the degree of membership in this set based on the crisp value.
+   *  Compute the degree of membership in this function based on a crisp value x.
    *  The domain is all real numbers. The range is 0 to 1 inclusive.
    */
   // -------------------------------------------------------------------------------------
-  public double mu( double x ) {
+  @Override public double mu( double x ) {
     // -----------------------------------------------------------------------------------
     if ( x > C ) {
       if ( x < R ) {
@@ -123,35 +100,86 @@ public class LeftTrapezoidFunction extends Function {
   
   // =====================================================================================
   /** @brief Area.
-   *  @param degree degree of membership.
+   *  @param d degree of membership.
    *  @return area.
    *
-   *  Compute the area based on the degree of membership in this set. 
-   *  The domain is 0 to 1 inclusive.
+   *  Compute the area under the degree of membership for this fuzzy function.
+   *  The domain is 0 to 1 inclusive. The range is 0 to max area for this function.
    */
   // -------------------------------------------------------------------------------------
-  public double area( double degree ) {
+  @Override public double area( double d ) {
     // -----------------------------------------------------------------------------------
-    return 5.0e-1*W*degree*(3.0e0-degree);
+    return 5.0e-1*W*d*(3.0e0-d);
   }
 
 
   // =====================================================================================
-  /** @brief Centroid.
-   *  @param degree degree of membership.
-   *  @return centroid.
+  /** @brief Center of area.
+   *  @param d degree of membership.
+   *  @return center of area.
    *
-   *  Compute the area based on the degree of membership in this set. 
-   *  The domain is 0 to 1 inclusive.
+   *  Compute the center of area based on the degree of membership in this fuzzy function. 
+   *  The domain is 0 to 1 inclusive. The range is (left) to (right) inclusive.
    */
   // -------------------------------------------------------------------------------------
-  public double centroid( double degree ) {
+  @Override public double coa( double d ) {
     // -----------------------------------------------------------------------------------
-    return ( 9.0e0*(3.0e0*C + R) - (1.2e1*R - 4.0e0*W*degree)*degree )
-        / (1.2e1*(3.0e0 - degree));
+    return ( 9.0e0*(3.0e0*C + R) - (1.2e1*R - 4.0e0*W*d)*d )
+        / (1.2e1*(3.0e0 - d));
+  }
+
+
+  // =====================================================================================
+  /** @brief To String.
+   *  @param fmt edit descriptor.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override public String toString( String fmt ) {
+    // -----------------------------------------------------------------------------------
+    return String.format( "L(%s,%s)",
+                          String.format( fmt, C ),
+                          String.format( fmt, R ) );
+  }
+  
+
+  // =====================================================================================
+  /** @brief Load.
+   *  @param src source array.
+   *  @param offset start index for source data.
+   *  @return next index for available data.
+   *
+   *  Read the parameters for this function from a source array starting at the
+   *  provided offset.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override public int load( double[] src, int offset ) {
+    // -----------------------------------------------------------------------------------
+    double a = src[offset];
+    double b = src[offset+1];
+    set( a, b );
+    return offset + 2;
   }
 
   
+  // =====================================================================================
+  /** @brief Store.
+   *  @param src source array.
+   *  @param offset start index for destination data.
+   *  @return next index for available data.
+   *
+   *  Read the parameters for this function from a source array starting at the
+   *  provided offset.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override public int store( double[] dst, int offset ) {
+    // -----------------------------------------------------------------------------------
+    dst[offset] = getCenter();
+    dst[offset+1] = getRight();
+    return offset + 2;
+    
+  }
+  
+    
 } // end class TriangleFunction
 
 
