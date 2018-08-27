@@ -2,7 +2,7 @@
 // **                            J T E S T _ F U Z Z Y S E T                            **
 // =======================================================================================
 // **                                                                                   **
-// **  Copyright (c) 2015, Stephen W. Soliday                                           **
+// **  Copyright (c) 2018, Stephen W. Soliday                                           **
 // **                      stephen.soliday@trncmp.org                                   **
 // **                      http://research.trncmp.org                                   **
 // **                                                                                   **
