@@ -80,9 +80,11 @@ public interface MathConstants {
     final double N_LPI_E     = Math.log(N_E)/N_LN_PI;    //<  Log_pi(E)
 
     final double N_2PI       = N_TWO*N_PI;               //<  2*Pi
+    final double N_2PI_3     = N_TWO*N_PI/N_THREE;       //<  2*Pi
     final double N_3PI       = N_THREE*N_PI;             //<  3*Pi
     final double N_4PI       = N_FOUR*N_PI;              //<  4*Pi
     final double N_PI_2      = Math.acos(N_ZERO);        //<  Pi/2
+    final double N_PI_3      = N_PI/N_THREE;             //<  Pi/3
     final double N_PI_4      = N_HALF*N_PI_2;            //<  Pi/4
     final double N_3PI_2     = N_THREE*N_PI_2;           //<  3*Pi/2
     final double N_3PI_4     = N_THREE*N_PI_4;           //<  3*Pi/4

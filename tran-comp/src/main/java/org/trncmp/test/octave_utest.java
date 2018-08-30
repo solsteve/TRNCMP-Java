@@ -33,6 +33,8 @@
 
 package org.trncmp.test;
 
+import org.trncmp.lib.octave;
+
 import org.trncmp.lib.Dice;
 import org.trncmp.lib.linear.Vec2;
 import org.trncmp.lib.linear.Vec3;
@@ -234,6 +236,12 @@ public class octave_utest {
     static public void oprint( String label, Matrix M ) {
 	// -------------------------------------------------------------------------------
 	System.out.println( label + "=" + M.octave_toString("%.15f") );
+    }
+
+    // ===================================================================================
+    static public void oprint( String label, double[][] M ) {
+	// -------------------------------------------------------------------------------
+      System.out.println( label + "=" + octave.toString(M, "%.15f") );
     }
 
     // ===================================================================================
