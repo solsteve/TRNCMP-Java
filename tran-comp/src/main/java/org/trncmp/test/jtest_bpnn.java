@@ -112,33 +112,35 @@ public class jtest_bpnn {
   static void TrainNet() {
     // -----------------------------------------------------------------------------------
 
-    int max_gen  = 100000;
-    int report   =  10000;
+    int num_rep  = 100;
+    int report   =  1000;
     double eta   = 0.36;
-    double alpha = 0.80;
+    double alpha = 0.5;
 
-    BPNN net = new BPNN.Builder().io(num_input,num_output).build();
+    BPNN net = new BPNN.Builder().io(num_input,num_output).hidden(num_input*num_output).build();
 
     Dice.getInstance().seed_set();
 
     net.init_weights( eta );
 
     net.reset();
-    
-    for ( int g=0; g<max_gen; g++ ) {
-      double err = 0.0e0;
-      for ( int i=0; i<num_sample; i++ ) {
-        net.forward_pass( iris_input[i] );
-        err += net.backwards_pass( iris_input[i], iris_output[i] );
-      }
-      net.update( alpha );
 
-      if ( 0 == ( g % report ) ) {
-        System.out.format( "%d\t%g\n", g, err );
+    int g = 0;
+    double err = 0.0e0;
+    for ( int k=0; k<num_rep; k++ ) {
+      for ( int j=0; j<report; j++ ) {
+        err = 0.0e0;
+        for ( int i=0; i<num_sample; i++ ) {
+          net.forward_pass( iris_input[i] );
+          err += net.backwards_pass( iris_input[i], iris_output[i] );
+        }
+        net.update( alpha/(double)num_sample );
+        g += 1;
       }
+      System.out.format( "%d\t%g\n", g, err );
     }
     
-  }
+}
 
 
   // =====================================================================================

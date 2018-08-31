@@ -363,7 +363,7 @@ public class BPNN {
         s += ( d2[fwd] * w2[fwd][node] );
       }
       //               |<-- derivative of activation --->|
-      d1[node]   = s * ( a1[node] * ( 1.0e0 - a1[node] ) );
+      d1[node]   = s * a1[node] * ( a1[node] * ( 1.0e0 - a1[node] ) );
       dB1[node] += d1[node];
       for ( int con=0; con<nInp; con++ ) {
         dW1[node][con] += ( d1[node] * x[con] );
