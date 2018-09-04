@@ -31,7 +31,7 @@
 #/ =======================================================================================
 
 #EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint
-EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint:unchecked
+EXTRAS = ${CODEBUILD_OPTS} -DcompilerArgument=-Xlint:unchecked -Dmaven.test.skip=true
 
 all:
 	mvn $(EXTRAS) compile

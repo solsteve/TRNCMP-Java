@@ -41,6 +41,7 @@ import java.util.Scanner;
 
 import org.trncmp.mllib.nn.BPNN;
 import org.trncmp.lib.Dice;
+import org.trncmp.lib.Math2;
 
 // =======================================================================================
 // ---------------------------------------------------------------------------------------
@@ -109,6 +110,28 @@ public class jtest_bpnn {
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
+  static void BuildNet() {
+    // -----------------------------------------------------------------------------------
+    double eta   = 0.36;
+
+    BPNN net = new BPNN.Builder()
+        .io(num_input,num_output)
+        .hidden(num_input*num_output)
+        .build();
+
+    Dice.getInstance().seed_set();
+    net.init_weights( eta );
+    net.write( "test.init.net" );
+
+    BPNN net2 = new BPNN.Builder()
+        .file( "test.init.net" )
+        .build();
+
+    net.compare( System.out, net2 );
+  }
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
   static void TrainNet() {
     // -----------------------------------------------------------------------------------
 
@@ -117,11 +140,11 @@ public class jtest_bpnn {
     double eta   = 0.36;
     double alpha = 0.5;
 
-    BPNN net = new BPNN.Builder().io(num_input,num_output).hidden(num_input*num_output).build();
+    BPNN net = new BPNN.Builder()
+        .file( "test.init.net" )
+        .build();
 
     Dice.getInstance().seed_set();
-
-    net.init_weights( eta );
 
     net.reset();
 
@@ -139,8 +162,47 @@ public class jtest_bpnn {
       }
       System.out.format( "%d\t%g\n", g, err );
     }
-    
+
+    net.write( "test.ftrained.net" );
 }
+
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  static void ValidateNet() {
+    // -----------------------------------------------------------------------------------
+
+    BPNN net = new BPNN.Builder()
+        .file( "test.ftrained.net" )
+        .build();
+
+    double[] test = new double[num_output];
+
+    double err = 0.0e0;
+    for ( int i=0; i<num_sample; i++ ) {
+      net.execute( test, iris_input[i] );
+      
+      for ( int j=0; j<num_output; j++ ) {
+        System.out.format( "%4.2f ", iris_output[i][j] );
+      }
+
+      System.out.format( "==" );
+      
+      for ( int j=0; j<num_output; j++ ) {
+        if ( test[j] < 0.5 ) {
+          test[j] = 0.0e0;
+        } else {
+          test[j] = 1.0e0;
+        }
+        System.out.format( " %4.2f", test[j] );
+      }
+      System.out.format( "\n" );
+
+      err += Math2.sumsq( iris_output[i], test );
+    }
+
+    System.out.format( "%d: %g\n", num_sample, err / (double)num_sample );
+  }
 
 
   // =====================================================================================
@@ -148,7 +210,12 @@ public class jtest_bpnn {
     // -----------------------------------------------------------------------------------
 
     ReadData();
+
+    BuildNet();
+    
     TrainNet();
+
+    ValidateNet();
     
     System.exit(0);
   }

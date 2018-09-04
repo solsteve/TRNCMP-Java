@@ -25,9 +25,10 @@
  * @file PCA.java
  *  Provides interface and methods to perform Principle Component Analysis.
  *  <p>
- * Uses single value decomposition where    S = U*A*Vt
- *                                              p = Vt*(x-mu)    transform
- *                                              x = U*p + mu     recover
+ * Uses single value decomposition where    X = U*S*Vt
+ *                                          p = Vt*(x-mu)    transform
+ *                                          x = U*p + mu     recover
+ * and eigen value decomposition
  *
  * @author Stephen W. Soliday
  * @date 2018-04-20
@@ -188,17 +189,16 @@ public class PCA {
   // -------------------------------------------------------------------------------------
   public void compileFromCovariance( double[][] cov, double[] mean ) {
     // -----------------------------------------------------------------------------------
-    num_var = cov.length;
 
     covariance = new Array2DRowRealMatrix( cov );
 
-    SingularValueDecomposition svd = new SingularValueDecomposition( covariance );
+    EigenDecomposition eig = new EigenDecomposition( covariance );
 
-    mu = new ArrayRealVector( mean );
-    
-    variance = svd.getSingularValues();
-    fwdR     = svd.getVT();
-    rvsR     = svd.getU();
+    num_var  = cov.length;
+    mu       = new ArrayRealVector( mean );
+    variance = eig.getRealEigenvalues();
+    fwdR     = eig.getV();
+    rvsR     = eig.getVT();
   }
 
   // =====================================================================================

@@ -49,6 +49,7 @@ import java.util.Scanner;
 
 import org.trncmp.lib.Dice;
 import org.trncmp.lib.FileTools;
+import org.trncmp.lib.Math2;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -481,7 +482,7 @@ public class BPNN {
       for ( int j=0; j<nInp; j++ ) {
         ps.format( " %17.10e", w1[i][j] );
       }
-      ps.format( "\n", w1[i][nInp] );
+      ps.format( "\n" );
     }
     
     for ( int i=0; i<nOut; i++ ) {
@@ -489,12 +490,23 @@ public class BPNN {
       for ( int j=0; j<nHid; j++ ) {
         ps.format( " %17.10e", w2[i][j] );
       }
-      ps.format( "\n", w2[i][nHid] );
+      ps.format( "\n" );
     }
     
     ps.close();
     
     return 0;
+  }
+
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public void compare( PrintStream ps, BPNN that ) {
+    // -----------------------------------------------------------------------------------
+    ps.format( "B1: %g\n", Math2.sumsq( this.b1, that.b1 ) );
+    ps.format( "W1: %g\n", Math2.sumsq( this.w1, that.w1 ) );
+    ps.format( "B2: %g\n", Math2.sumsq( this.b2, that.b2 ) );
+    ps.format( "W2: %g\n", Math2.sumsq( this.w2, that.w2 ) );
   }
   
 
