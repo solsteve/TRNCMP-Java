@@ -420,7 +420,7 @@ public class StatMod {
       // ---------------------------------------------------------------------------------
       for ( int i=0; i<n_var; i++ ) {
         do {
-          work_vec[i] = Math.sqrt(pca.getVariance(i))*dd.normal();
+          work_vec[i] = Math.sqrt(pca.getPrinciple(i))*dd.normal();
         } while ( ( work_vec[i] < min_axis[i] ) ||
                   ( work_vec[i] > max_axis[i] ) );
       }

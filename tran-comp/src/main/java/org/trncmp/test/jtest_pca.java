@@ -137,8 +137,9 @@ public class jtest_pca {
   public void plot( String fspc, double[][] data ) {
     // -----------------------------------------------------------------------------------
     PrintStream ps = FileTools.openWrite( fspc );
+    ps.format( "X,Y\n" );
     for ( int i=0; i<num_sample; i++ ) {
-      ps.format( "%.6f %.6f\n", data[i][0], data[i][1] );
+      ps.format( "%.6f, %.6f\n", data[i][0], data[i][1] );
     }
     ps.close();
   }
@@ -179,8 +180,9 @@ public class jtest_pca {
     }
 
     
-    plot( "/tmp/test.pca.dat", table_pca );
-    plot( "/tmp/test.rec.dat", table_rec );
+    plot( "/tmp/test.pca.csv", table_pca );
+    plot( "/tmp/test.org.csv", table_orig );
+    plot( "/tmp/test.rec.csv", table_rec );
 
     double mse = 0.0e0;
     for ( int i=0; i<num_sample; i++ ) {
@@ -190,9 +192,81 @@ public class jtest_pca {
       mse += ( (dx*dx) + (dy*dy) + (dz*dz) );
     }
 
-    System.out.println( "MSE="+mse );
+    System.out.println( "\nFinal MSE = "+mse );
   }
 
+  // =====================================================================================
+  public void test02() {
+    // -----------------------------------------------------------------------------------
+    double[][] y = {{7.0, 4.0, 6.0},
+                    {8.0, 8.0, 7.0},
+                    {5.0, 9.0, 7.0},
+                    {8.0, 4.0, 1.0},
+                    {3.0, 6.0, 5.0},
+                    {2.0, 3.0, 5.0},
+                    {4.0, 2.0, 3.0},
+                    {8.0, 5.0, 1.0},
+                    {7.0, 9.0, 3.0},
+                    {8.0, 5.0, 2.0}};
+
+    double[][] yt = {{7.0, 8.0, 5.0, 8.0, 3.0, 2.0, 4.0, 8.0, 7.0, 8.0},
+                     {4.0, 8.0, 9.0, 4.0, 6.0, 3.0, 2.0, 5.0, 9.0, 5.0},
+                     {6.0, 7.0, 7.0, 1.0, 5.0, 5.0, 3.0, 1.0, 3.0, 2.0}};
+
+    double[][] test = { { 5.3333333333,  1.5555555556, -1.8888888889},
+                        { 1.5555555556,  6.0555555556,  2.2222222222},
+                        {-1.8888888889,  2.2222222222,  5.3333333333 }};
+    
+    double[][] C1 = Math2.covariance( y );
+    double[][] C2 = Math2.covariance( yt );
+
+    System.out.println( Math2.sumsq( test, C1 ) );
+    System.out.println( "" );
+    System.out.println( Math2.sumsq( test, C2 ) );
+
+    PCA P1 = new PCA();
+    PCA P2 = new PCA();
+
+    double[] mean = Math2.mean( y, 0 );
+
+    P1.compileFromSamples( y );
+    P2.compileFromCovariance( C1, mean );
+
+    System.out.println("\n======================\n");
+
+    System.out.println( "\nBy Data\n" );
+    P1.report( System.out );
+    
+    System.out.println("\n----------------------\n");
+
+    System.out.println( "\nBy Covariance\n" );
+    P2.report( System.out );
+
+    System.out.println("\n======================\n");
+
+
+    int nS = y.length;
+    int nV = y[0].length;
+
+    double[][] x  = new double[nS][nV];
+    double[][] y2 = new double[nS][nV];
+
+    P1.transform( x, y );
+    P1.recover( y2, x );
+
+    System.out.println( "cov(x)=\n"+array.toString( Math2.covariance(x), "%11.6f" ) );
+
+    System.out.println( "MSE = "+Math2.sumsq( y, y2 ) );
+   
+    P2.transform( x, y );
+    P2.recover( y2, x );
+
+    System.out.println( "cov(x)=\n"+array.toString( Math2.covariance(x), "%11.6f" ) );
+
+    System.out.println( "MSE = "+Math2.sumsq( y, y2 ) );
+   
+  }
+  
   // =====================================================================================
   public static void main(String[] args) {
     // -----------------------------------------------------------------------------------
@@ -200,6 +274,7 @@ public class jtest_pca {
 
     JT.build_tables();
 
+    JT.test02();
     JT.test01();
 
     System.exit(0);

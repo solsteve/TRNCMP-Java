@@ -1924,9 +1924,134 @@ public class Math2 implements MathConstants {
   }
 
 
+  // ===================================================================================
+  /** @brief Mean.
+   *  @param data array of data.
+   *  @param dim dimension to find the mean.
+   *  @param return covariance.
+   *
+   *  If dim=0 then the mean is computed down the rows.
+   */
+  // -----------------------------------------------------------------------------------
+  public static double[] mean( double[][] data, int dim ) {
+    // ---------------------------------------------------------------------------------
+    int nr = data.length;
+    int nc = data[0].length;
 
+    double[]   mu  = null;
 
+    if ( dim == 0 ) {
+      mu  = new double[nc];
+
+      for ( int j=0; j<nc; j++ ) {
+        mu[j] = 0.0e0;
+      }
+      
+      for ( int i=0; i<nr; i++ ) {
+        for ( int j=0; j<nc; j++ ) {
+          mu[j] += data[i][j];
+        }
+      }
+
+      for ( int j=0; j<nc; j++ ) {
+        mu[j] /= (double)nr;
+      }
+
+    } else {
+      mu  = new double[nr];
     
+      for ( int i=0; i<nr; i++ ) {
+        double s = 0.0e0;
+        for ( int j=0; j<nc; j++ ) {
+          s += data[i][j];
+        }
+        mu[i] = s / (double)nc;
+      }
+
+    }
+
+    return mu;
+  }
+
+
+
+  // ===================================================================================
+  /** @brief Covariance.
+   *  @param data array of data.
+   *  @param return covariance.
+   *
+   *  It is assumed that the number of samples is greater than the number of variables.
+   */
+  // -----------------------------------------------------------------------------------
+  public static double[][] covariance( double[][] data ) {
+    // ---------------------------------------------------------------------------------
+    int nr = data.length;
+    int nc = data[0].length;
+
+    double[][] cov = null;
+    double[]   mu  = null;
+
+    if ( nr > nc ) {
+      cov = new double[nc][nc];
+      mu  = new double[nc];
+
+      for ( int j=0; j<nc; j++ ) {
+        mu[j] = 0.0e0;
+      }
+      
+      for ( int i=0; i<nr; i++ ) {
+        for ( int j=0; j<nc; j++ ) {
+          mu[j] += data[i][j];
+        }
+      }
+
+      for ( int j=0; j<nc; j++ ) {
+        mu[j] /= (double)nr;
+      }
+
+      for ( int i=0; i<nc; i++ ) {
+        for ( int j=i; j<nc; j++ ) {
+          double s = 0.0e0;
+          for ( int k=0; k<nr; k++ ) {
+            double di = data[k][i] - mu[i];
+            double dj = data[k][j] - mu[j];
+            s += ( di*dj );
+          }
+          cov[i][j] = s / (double)(nr-1);
+          cov[j][i] = s / (double)(nr-1);
+        }
+      }
+
+    } else {
+      cov = new double[nr][nr];
+      mu  = new double[nr];
+    
+      for ( int i=0; i<nr; i++ ) {
+        double s = 0.0e0;
+        for ( int j=0; j<nc; j++ ) {
+          s += data[i][j];
+        }
+        mu[i] = s / (double)nc;
+      }
+
+      for ( int i=0; i<nr; i++ ) {
+        for ( int j=i; j<nr; j++ ) {
+          double s = 0.0e0;
+          for ( int k=0; k<nc; k++ ) {
+            double di = data[i][k] - mu[i];
+            double dj = data[j][k] - mu[j];
+            s += ( di*dj );
+          }
+          cov[i][j] = s / (double)(nc-1);
+          cov[j][i] = s / (double)(nc-1);
+        }
+      }
+      
+    }
+
+    return cov;
+  }
+
 }
 
 // =======================================================================================

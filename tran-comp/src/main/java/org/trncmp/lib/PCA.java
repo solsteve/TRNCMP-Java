@@ -25,10 +25,6 @@
  * @file PCA.java
  *  Provides interface and methods to perform Principle Component Analysis.
  *  <p>
- * Uses single value decomposition where    X = U*S*Vt
- *                                          p = Vt*(x-mu)    transform
- *                                          x = U*p + mu     recover
- * and eigen value decomposition
  *
  * @author Stephen W. Soliday
  * @date 2018-04-20
@@ -37,22 +33,25 @@
 
 package org.trncmp.lib;
 
-import java.io.*;
+import java.io.PrintStream;
 
-import org.trncmp.lib.linear.*;
+import org.hipparchus.linear.ArrayRealVector;
+import org.hipparchus.linear.RealVector;
+import org.hipparchus.linear.Array2DRowRealMatrix;
+import org.hipparchus.linear.RealMatrix;
+import org.hipparchus.linear.SingularValueDecomposition;
 
-import org.hipparchus.linear.*;
 
 // =======================================================================================
 public class PCA {
   // -------------------------------------------------------------------------------------
 
-  protected int        num_var    = 0;       /** Number of variables           */
-  protected RealVector mu         = null;    /** Sample mean                   */
-  protected RealMatrix covariance = null;    /** Sample covariance             */
-  protected double[]   variance   = null;    /** Principle axis variance       */
-  protected RealMatrix fwdR       = null;    /** Forward transformation matrix */
-  protected RealMatrix rvsR       = null;    /** Recover transformation matrix */
+  protected int        num_var    = 0;                /** Number of variables           */
+  protected RealVector mu         = null;             /** Sample mean                   */
+  protected RealVector variance   = null;             /** Principle axis variance       */
+  protected RealMatrix covariance = null;             /** Covariance                    */
+  protected RealMatrix fwdTrans   = null;             /** Transformation matrix         */
+  protected RealMatrix rvsTrans   = null;             /** Reverse Transformation matrix */
 
   
   // =====================================================================================
@@ -99,24 +98,34 @@ public class PCA {
 
 
   // =====================================================================================
-  /** @brief Get Covariance.
-   *  @return the covariance.
+  /** @brief Get Principle Vectors.
+   *  @return the principle vectors.
    */
   // -------------------------------------------------------------------------------------
-  public double[][] getRotation() {
+  public double[][] getForwardTransform() {
     // -----------------------------------------------------------------------------------
-    return rvsR.getData();
+    return fwdTrans.getData();
+  }
+
+  // =====================================================================================
+  /** @brief Get Tranpose of Principle Vectors.
+   *  @return the transpose of the principle vectors.
+   */
+  // -------------------------------------------------------------------------------------
+  public double[][] getReverseTransform() {
+    // -----------------------------------------------------------------------------------
+    return rvsTrans.getData();
   }
 
 
   // =====================================================================================
-  /** @brief Get Variance.
+  /** @brief Get Principle Components.
    *  @return the variance of the principle axes.
    */
   // -------------------------------------------------------------------------------------
-  public double[] getVariance() {
+  public double[] getPrinciple() {
     // -----------------------------------------------------------------------------------
-    return variance;
+    return variance.toArray();
   }
 
 
@@ -126,9 +135,9 @@ public class PCA {
    *  @return the indexed variance of a principle axis.
    */
   // -------------------------------------------------------------------------------------
-  public double getVariance( int index ) {
+  public double getPrinciple( int index ) {
     // -----------------------------------------------------------------------------------
-    return variance[index];
+    return variance.getEntry(index);
   }
 
 
@@ -137,8 +146,7 @@ public class PCA {
    *  @param data sample data.
    *
    *  Ingest a table of data. Each row is one sample. Columns are the correlated
-   *  variables. Generate the mean vector, the covariance matrix and the forward and
-   *  reverse transformation matrices.
+   *  variables.
    */
   // -------------------------------------------------------------------------------------
   public void compileFromSamples( double[][] data ) {
@@ -146,37 +154,37 @@ public class PCA {
     int num_sample = data.length;
     num_var        = data[0].length;
 
-    double[] mean = new double[ num_var ];
+    // ----- compute the mean ------------------------------------------------------------
+    
+    mu = new ArrayRealVector( Math2.mean( data, 0 ) );
 
+    // ----- create matrix from the mean centered data -----------------------------------
+    
+    RealMatrix A = new Array2DRowRealMatrix( num_sample, num_var );
+
+    for ( int i=0; i<num_sample; i++ ) {
+      for ( int j=0; j<num_var; j++ ) {
+        A.setEntry( i, j, data[i][j] - mu.getEntry(j) );
+      }
+    }
+
+    // ----- perform singular decomposition on the mean shifted data --------------------
+
+    SingularValueDecomposition USV = new SingularValueDecomposition( A );
+
+    fwdTrans = USV.getVT();
+    rvsTrans = USV.getV();
+
+    double[] sv = USV.getSingularValues();
     for ( int j=0; j<num_var; j++ ) {
-      mean[j] = 0.0e0;
-      for ( int i=0; i<num_sample; i++ ) {
-        mean[j] += data[i][j];
-      }
-      mean[j] /= (double) num_sample;
+      double x = sv[j];
+      sv[j] = x*x/(double)(num_sample-1);
     }
+    variance = new ArrayRealVector( sv );
 
-    double[][] M = new double[num_var][num_var];
+    // ----- recover the covariance -----------------------------------------------------
 
-    double fnm1 = (double)(num_sample - 1);
-            
-    for ( int i=0; i<num_var; i++ ) {
-      double iMean = mean[i];
-      for ( int j=i; j<num_var; j++ ) {
-        double jMean = mean[j];
-        double c_sum = Math2.N_ZERO;
-        for ( int k=0; k<num_sample; k++ ) {
-          double x = data[k][i] - iMean;
-          double y = data[k][j] - jMean;
-          c_sum += ( x * y );
-        }
-        c_sum /= fnm1;
-        M[i][j] = c_sum;
-        M[j][i] = c_sum;
-      }
-    }
-
-    compileFromCovariance( M, mean );
+    covariance = new Array2DRowRealMatrix( Math2.covariance( data ) );
   }
 
   // =====================================================================================
@@ -190,15 +198,17 @@ public class PCA {
   public void compileFromCovariance( double[][] cov, double[] mean ) {
     // -----------------------------------------------------------------------------------
 
+    num_var = cov.length;
+    
     covariance = new Array2DRowRealMatrix( cov );
+    mu  = new ArrayRealVector( mean );
 
-    EigenDecomposition eig = new EigenDecomposition( covariance );
+    SingularValueDecomposition USV = new SingularValueDecomposition( covariance );
+    
+    fwdTrans = USV.getUT();
+    rvsTrans = USV.getU();
 
-    num_var  = cov.length;
-    mu       = new ArrayRealVector( mean );
-    variance = eig.getRealEigenvalues();
-    fwdR     = eig.getV();
-    rvsR     = eig.getVT();
+    variance = new ArrayRealVector( USV.getSingularValues() );
   }
 
   // =====================================================================================
@@ -211,12 +221,31 @@ public class PCA {
   // -------------------------------------------------------------------------------------
   public void transform( double[] out, double[] in ) {
     // -----------------------------------------------------------------------------------
-
-    RealVector A = new ArrayRealVector(in).subtract( mu );
-    
-    RealVector V = fwdR.operate( A );
+    RealVector y = new ArrayRealVector( num_var );
     for ( int i=0; i<num_var; i++ ) {
-      out[i] = V.getEntry(i);
+      y.setEntry( i, in[i] - mu.getEntry( i ) );
+    }
+    RealVector x = fwdTrans.operate(y);
+
+    for ( int i=0; i<num_var; i++ ) {
+      out[i] = x.getEntry(i);
+    }
+  }
+  
+
+  // =====================================================================================
+  /** @brief Forward Transform.
+   *  @param out output matrix.
+   *  @param in  input matrix.
+   *
+   *  Mean shift the matrix to the origin. Rotate it to align the principle axes.
+   */
+  // -------------------------------------------------------------------------------------
+  public void transform( double[][] out, double[][] in ) {
+    // -----------------------------------------------------------------------------------
+    int n = out.length;
+    for ( int i=0; i<n; i++ ) {
+      transform( out[i], in[i] );
     }
   }
   
@@ -231,12 +260,26 @@ public class PCA {
   // -------------------------------------------------------------------------------------
   public void recover( double[] out, double[] in ) {
     // -----------------------------------------------------------------------------------
-
-    RealVector A = new ArrayRealVector(in);
-    
-    RealVector V = rvsR.operate( A );
+    RealVector y = rvsTrans.operate(new ArrayRealVector( in ));
     for ( int i=0; i<num_var; i++ ) {
-      out[i] = V.getEntry(i) + mu.getEntry(i);
+      out[i] = y.getEntry(i) + mu.getEntry(i);
+    }
+  }
+  
+
+  // =====================================================================================
+  /** @brief Recover Transform.
+   *  @param out output vector.
+   *  @param in  input vector.
+   *
+   *  Recover the rotation and shift out to the mean.
+   */
+  // -------------------------------------------------------------------------------------
+  public void recover( double[][] out, double[][] in ) {
+    // -----------------------------------------------------------------------------------
+    int n = out.length;
+    for ( int i=0; i<n; i++ ) {
+      recover( out[i], in[i] );
     }
   }
   
@@ -252,14 +295,11 @@ public class PCA {
   public void report( PrintStream ps, String fmt ) {
     // -----------------------------------------------------------------------------------
     ps.format("Number of variables = %d\n", num_var );
-    ps.format("Mean      = %s\n", array.toString( mu.toArray(), fmt ) );
-    double[][] C = covariance.getData();
-    ps.format("\nCovariance =\n%s\n", array.toString( C, fmt ) );
-    ps.format("\nEigen Values =\n%s\n", array.toString( variance, fmt ) );
-    double[][] V1 = fwdR.getData();
-    ps.format("\nEigen Vectors =\n%s\n", array.toString( V1, fmt ) );
-    double[][] V2 = rvsR.getData();
-    ps.format("\nReverse Vectors =\n%s\n", array.toString( V2, fmt ) );
+    ps.format("Mean = %s\n", array.toString( getMean(), fmt ) );
+    ps.format("\nCovariance =\n%s\n", array.toString( getCovariance(), fmt ) );
+    ps.format("\nPrinciple Components =\n%s\n", array.toString( getPrinciple(), fmt ) );
+    ps.format("\nForward Transform =\n%s\n", array.toString( getForwardTransform(), fmt ) );
+    ps.format("\nReverse Transform =\n%s\n", array.toString( getReverseTransform(), fmt ) );
   }
 
   
