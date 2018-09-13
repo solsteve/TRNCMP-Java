@@ -240,6 +240,7 @@ public class IntegerEncoding extends Encoding {
     double sigma = 2.0e0 * scale / N_SIGMA_SCALE;
 
     for ( int i=0; i<data_len; i++ ) {
+      //System.out.println( "min:"+min_int+" max:"+max_int+" mu:"+data[i]+" sig:"+sigma );
       data[i] = gaussian( ent, min_int, max_int, data[i], sigma );
     }
   }

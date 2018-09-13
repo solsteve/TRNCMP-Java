@@ -2052,6 +2052,70 @@ public class Math2 implements MathConstants {
     return cov;
   }
 
+
+
+
+  // ===================================================================================
+  /** @brief B-Spline.
+   *  @param A return coefficients.
+   *  @param X array of independent points.
+   *  @param Y array of dependent points.
+   *
+   *  Fit a quadratic to the data points.
+   *  If there are three data points then compute the fully determined problem directly.
+   */
+  // -----------------------------------------------------------------------------------
+  public static void BSpline( double[] A, double[] X, double[] Y ) {
+    // ---------------------------------------------------------------------------------
+    int n = X.length;
+
+    // ----- under determined ----------------------------------------------------------
+    if ( n < 3 ) {
+      System.err.println( "Math2.QSpline: data is underdetermined for quadratic" );
+      return;
+    }
+
+    // ----- over determined -----------------------------------------------------------
+    if ( n > 3 ) {
+      System.err.println( "Math2.QSpline: overdetermined is not yet supported" );
+      return;
+    }
+
+    double x1  = X[0];
+    double x2  = X[1];
+    double x3  = X[2];
+
+    double x1s = x1*x1;
+    double x2s = x2*x2;
+    double x3s = x3*x3;
+
+    double y1  = Y[0];
+    double y2  = Y[1];
+    double y3  = Y[2];
+    
+    double D =
+        (x2 - x3)*x1s +
+        (x3 - x1)*x2s +
+        (x1 - x2)*x3s;
+
+    if ( Math2.isZero( D ) ) {
+      System.err.println( "Math2.QSpline: data is singular" );
+      return;
+    }
+
+    A[0] = ( (x2 - x3)*y1 +
+             (x3 - x1)*y2 +
+             (x1 - x2)*y3 ) / D;
+
+    A[1] = ( (x3s - x2s)*y1 +
+             (x1s - x3s)*y2 +
+             (x2s - x1s)*y3 ) / D;
+
+    A[2] = ( (x2s*x3 - x2*x3s)*y1 +
+             (x1*x3s - x1s*x3)*y2 +
+             (x1s*x2 - x1*x2s)*y3 ) / D;
+  }
+
 }
 
 // =======================================================================================

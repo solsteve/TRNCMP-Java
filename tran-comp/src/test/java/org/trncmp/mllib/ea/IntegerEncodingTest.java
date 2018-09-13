@@ -39,9 +39,9 @@ import org.trncmp.lib.RunStat;
 public class IntegerEncodingTest {
   // -------------------------------------------------------------------------------------
 
-  static final double TOL = 1.0e-12;
+  static final double TOL = 1.0e-10;
 
-  static final int SAMPLES = 1000;
+  static final int SAMPLES = 100000;
   static final int DIM     = 4;
   
   // =====================================================================================
@@ -72,7 +72,6 @@ public class IntegerEncodingTest {
   @Test
   public void testZero() {
     // -----------------------------------------------------------------------------------
-
     final int[] minv = { -12, -6,  3 };
     final int[] zero = {  -2,  0,  3 };
     final int[] maxv = {  -2,  5, 13 };
@@ -250,31 +249,47 @@ public class IntegerEncodingTest {
   @Test
   public void testNoise() {
     // -----------------------------------------------------------------------------------
-    final double SIGMA = 0.01;
+    final double SIGMA = 0.12;
     final double SCALE = Encoding.N_SIGMA_SCALE * SIGMA * 5.0e-1;
     
     IntegerEncoding E = new IntegerEncoding(DIM);
-    //assertEquals( DIM, E.size() );
+
+    int MIN_VAL = 5;
+    int MAX_VAL = 25;
+    int AVG_VAL = (MIN_VAL+MAX_VAL)/2;
+
+    E.setMin( MIN_VAL );
+    E.setMax( MAX_VAL );
+    
+    assertEquals( DIM, E.size() );
 
     RunStat[] S = new RunStat[DIM];
     for ( int j=0; j<DIM; j++ ) {
       S[j] = new RunStat();
+      E.set( j, 10 );
     }
     
     for ( int i=0; i<SAMPLES; i++ ) {
-      E.zero();
       E.noise( SCALE );
       for ( int j=0; j<DIM; j++ ) {
         S[j].update( E.get(j) );
       }
     }
 
-    for ( int j=0; j<DIM; j++ ) {
-      //assertEquals( 0.0e0, S[j].mean(),  0.05 );
-      //assertEquals( SIGMA, S[j].sigma(), 0.05 );
+    //for ( int j=0; j<DIM; j++ ) {
+      //System.err.println( "mean  ("+AVG_VAL+")"+S[j].mean() );
+      //System.err.println( "sigma ("+SIGMA+")"+S[j].sigma() );
+      //System.err.println( "min   ("+MIN_VAL+")"+S[j].minv() );
+      //System.err.println( "max   ("+MAX_VAL+")"+S[j].maxv() );
+
+      //assertEquals( (double)AVG_VAL , S[j].mean(),  0.5 );
+      //assertEquals( SIGMA,            S[j].sigma(), 0.5 );
+
+      
       //assertTrue( -(SIGMA*3.0) > S[j].minv() );
       //assertTrue(  (SIGMA*3.0) < S[j].maxv() );
-    }
+    //}
+
   }
  
   // =====================================================================================
@@ -341,8 +356,8 @@ public class IntegerEncodingTest {
     double ratio = (double) count / (double) NPAR;
 
     for ( int i=0; i<NPAR; i++ ) {
-      //assertEquals( 0.0e0, stat.mean(),  0.05 );
-      //assertEquals( SIGMA, stat.sigma(), 0.05 );
+      assertEquals( 0.0e0, stat.mean(),  0.05 );
+      assertEquals( SIGMA, stat.sigma(), 0.05 );
     }
 
   }

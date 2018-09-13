@@ -43,8 +43,8 @@ public class Dice {
 
   private static final Logger logger = LogManager.getLogger();
 
-  private static int     dice_singleton_entropy_type = Entropy.NO_ENGINE;
-  private static Dice    dice_singleton_instance     = null;
+  private static int  dice_singleton_entropy_type = Entropy.NO_ENGINE;
+  private static Dice dice_singleton_instance     = null;
 
   private Entropy ent_engine = null;
   private boolean have_spare = false; //< state flag      for Box-Muller.

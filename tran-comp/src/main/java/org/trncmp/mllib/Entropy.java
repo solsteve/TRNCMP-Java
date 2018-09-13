@@ -41,6 +41,7 @@ import java.util.Random;
 
 import org.trncmp.lib.FileTools;
 import org.trncmp.lib.SeedMatter;
+import org.trncmp.lib.Math2;
 
 // =======================================================================================
 public class Entropy {
@@ -52,6 +53,8 @@ public class Entropy {
   /** Use the built-in random generator for now */
   private Random builtin = null;
   
+  private boolean have_spare = false; //< state flag      for Box-Muller.
+  private double  rand1, rand2;       //< state variables for Box-Muller.
 
   // =====================================================================================
   /** @breif Get Instance
@@ -195,6 +198,35 @@ public class Entropy {
     return (wgt < uniform()) ? false : true;
   }
 
+
+  // =====================================================================================
+  /** @brief Normal distribution.
+   *  @return a number with a normal distribution..
+   *
+   *  Use Box-Muller algorithm to generate numbers with a normal distribution.
+   *  The mean is 0.0, the standard deviation is 1.0 and limits +/- 6.15 * StdDev,
+   *  based on experimental results of rolling 1 trillion values.
+   */
+  // -------------------------------------------------------------------------------------
+  protected double box_muller() {
+    // -----------------------------------------------------------------------------------
+    if ( have_spare ) {
+      have_spare = false;
+      return Math.sqrt(rand1) * Math.sin(rand2);
+    }
+  
+    have_spare = true;
+  
+    rand1 = uniform();
+  
+    if ( rand1 < 1e-100 ) { rand1 = 1e-100; }
+  
+    rand1 = -Math2.N_TWO * Math.log(rand1);
+    rand2 =  Math2.N_2PI * uniform();
+  
+    return Math.sqrt(rand1) * Math.cos(rand2);
+  }
+  
   
   // =====================================================================================
   /** @brief Gaussian distribution.
@@ -210,16 +242,14 @@ public class Entropy {
   public double gauss( double low,  double high,
                        double mean, double std ) {
     // -----------------------------------------------------------------------------------
-    double x, y, yt, d, r, m;
 
-    r = (high-low);
+    if ( mean < low  ) { return low;  }
+    if ( mean > high ) { return high; }
 
-    do {
-      x  = r*uniform() + low;
-      y  = uniform();
-      d  = (x - mean)/std;
-      yt = Math.exp(-d*d/2.0e0);
-    } while (y > yt);
+    double x = mean + std*box_muller();
+
+    if ( x < low  ) { return low;  }
+    if ( x > high ) { return high; }
 
     return x;
   }
