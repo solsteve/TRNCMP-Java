@@ -80,12 +80,6 @@ public class Entropy {
   }
 
 
-
-
-
-
-
-
   // =====================================================================================
   /** @brief Seed Size.
    *  @return the native seed size for the chosen entropy engine.
@@ -131,7 +125,7 @@ public class Entropy {
   // -------------------------------------------------------------------------------------
   public void seed_set( byte[] sdat ) {
     // -----------------------------------------------------------------------------------
-      seed_set( new SeedMatter( sdat ) );
+    seed_set( new SeedMatter( sdat ) );
   }
 
   
