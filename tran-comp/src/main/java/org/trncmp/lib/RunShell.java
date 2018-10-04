@@ -39,36 +39,58 @@ import java.lang.ProcessBuilder.Redirect;
     
 // =======================================================================================
 public class RunShell {
-    // -----------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------
 
-    // ===================================================================================
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public static void script( String command, String args, boolean wait_for_shell ) {
     // -----------------------------------------------------------------------------------
-    public static void script( String command, boolean wait_for_shell ) {
-	// -------------------------------------------------------------------------------
-	try {
-	    ProcessBuilder PB = new ProcessBuilder("/bin/bash",
-						   "-c",
-						   command);
-	    File err_log = new File("/tmp/jexec.stderr");
-	    File std_log = new File("/tmp/jexec.stdout");
-	    PB.redirectError(Redirect.appendTo(err_log));
-	    PB.redirectOutput(Redirect.appendTo(std_log));
-	    Process p = PB.start();
-	    if ( wait_for_shell ) { p.waitFor(); }
-	} catch( java.io.IOException e1 ) {
-	    System.err.println( e1.toString() );
-	} catch( java.lang.InterruptedException e2 ) {
-	    System.err.println( e2.toString() );
-	}
-   }
+    String cmd_args = null;
+
+    if ( null == args ) {
+      cmd_args = new String( command );
+    } else {
+      cmd_args = String.format( "%s %s", command, args );
+    }
+
+    try {
+      ProcessBuilder PB = new ProcessBuilder( "/bin/bash", "-c", cmd_args );
+      File err_log = new File( "/tmp/jexec.stderr" );
+      File std_log = new File( "/tmp/jexec.stdout" );
+      PB.redirectError(  Redirect.appendTo(err_log) );
+      PB.redirectOutput( Redirect.appendTo(std_log) );
+      Process p = PB.start();
+      if ( wait_for_shell ) {
+        p.waitFor();
+      }
+    } catch( java.io.IOException e1 ) {
+      System.err.println( e1.toString() );
+    } catch( java.lang.InterruptedException e2 ) {
+      System.err.println( e2.toString() );
+    }
+  }
 
     
-    // ===================================================================================
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public static void script( String command, boolean wait_for_shell ) {
     // -----------------------------------------------------------------------------------
-    public static void script( String command ) {
-	// -------------------------------------------------------------------------------
-	script( command, false );
-    }
+    script( command, null, wait_for_shell );
+  }
+    
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public static void script( String command, String args ) {
+    // -----------------------------------------------------------------------------------
+    script( command, args, false );
+  }
+    
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public static void script( String command ) {
+    // -----------------------------------------------------------------------------------
+    script( command, null, false );
+  }
     
 }
 
