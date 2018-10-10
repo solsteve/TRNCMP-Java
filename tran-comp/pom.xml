@@ -41,7 +41,7 @@
   </developers>
 
   <organization>
-      <name>Tranquillitatis Computing</name>
+    <name>Tranquillitatis Computing</name>
     <url>http://research.trncmp.org</url>
   </organization>
 
@@ -119,18 +119,24 @@
     </dependency>
     <!-- ============================================================ -->
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>3.6.1</version>
+    </dependency>
+    <!-- ============================================================ -->
+    <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-mllib_2.11</artifactId>
       <version>2.2.1</version>
     </dependency>
     <!-- ============================================================ -->
-	<!-- LOGGING API -->
+    <!-- LOGGING API -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
     </dependency>
     <!-- ============================================================ -->
-	<!-- LOGGING BACKEND -->
+    <!-- LOGGING BACKEND -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
