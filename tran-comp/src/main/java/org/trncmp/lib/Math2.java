@@ -254,7 +254,7 @@ public class Math2 implements MathConstants {
   /** @brief Maximum Index
    *  @param x array of integers.
    *  @return index of the maximum array element.
-   *
+   *  <p>
    * Find the array element that contains the maximum value.
    */
   // -----------------------------------------------------------------------------------
@@ -273,7 +273,7 @@ public class Math2 implements MathConstants {
   /** @brief Minimum Index
    *  @param x array of integers.
    *  @return index of the minimum array element.
-   *
+   *  <p>
    * Find the array element that contains the minimum value.
    */
   // -----------------------------------------------------------------------------------
@@ -293,7 +293,7 @@ public class Math2 implements MathConstants {
   /** @brief Maximum Index
    *  @param x array of reals.
    *  @return index of the maximum array element.
-   *
+   *  <p>
    * Find the array element that contains the maximum value.
    */
   // -----------------------------------------------------------------------------------
@@ -312,7 +312,7 @@ public class Math2 implements MathConstants {
   /** @brief Minimum Index
    *  @param x array of reals.
    *  @return index of the minimum array element.
-   *
+   *  <p>
    * Find the array element that contains the minimum value.
    */
   // -----------------------------------------------------------------------------------
@@ -366,7 +366,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 1D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -386,7 +386,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -401,7 +401,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -416,7 +416,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -431,7 +431,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -446,7 +446,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -464,9 +464,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -484,9 +484,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -504,9 +504,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -524,9 +524,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -544,9 +544,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -568,7 +568,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 1D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -586,7 +586,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 1D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -604,7 +604,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 1D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -622,7 +622,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 1D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -640,7 +640,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 1D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -664,7 +664,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 1D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -687,7 +687,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 1D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -710,7 +710,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 1D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -733,7 +733,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 1D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -756,7 +756,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 1D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -781,7 +781,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 1D array of wieghts.
    *  @param X pointer to 1D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -802,7 +802,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 1D array of wieghts.
    *  @param X pointer to 1D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -823,7 +823,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 1D array of wieghts.
    *  @param X pointer to 1D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -844,7 +844,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 1D array of wieghts.
    *  @param X pointer to 1D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -865,7 +865,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 1D array of wieghts.
    *  @param X pointer to 1D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -900,7 +900,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -919,7 +919,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -938,7 +938,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -957,7 +957,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -976,7 +976,7 @@ public class Math2 implements MathConstants {
   // ===================================================================================
   /** @brief Zero.
    *  @param array pointer to an array. 
-   *
+   *  <p>
    *  Set all the elements of the array to zero.
    */
   // -----------------------------------------------------------------------------------
@@ -1002,9 +1002,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -1025,9 +1025,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -1048,9 +1048,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -1071,9 +1071,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -1094,9 +1094,9 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param dst pointer to the destination array.
    *  @param src pointer to the source array.
-   *
+   *  <p>
    *  Copy each element of the source array into the destination array.
-   *
+   *  <p>
    *  @note it is the programer's responsibility to ensure that the receiving array will
    *        not over flow.
    */
@@ -1123,7 +1123,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 2D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -1145,7 +1145,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 2D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -1167,7 +1167,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 2D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -1189,7 +1189,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 2D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -1211,7 +1211,7 @@ public class Math2 implements MathConstants {
   /** @brief Sum of the squares.
    *  @param array pointer to an 2D array.
    *  @return sum of the squares: s = sum(i=1,n) array(i)
-   *
+   *  <p>
    *  Sum the square of each element of the array.
    */
   // -----------------------------------------------------------------------------------
@@ -1241,7 +1241,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 2D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -1268,7 +1268,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 2D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -1295,7 +1295,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 2D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -1322,7 +1322,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 2D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -1349,7 +1349,7 @@ public class Math2 implements MathConstants {
    *  @param R1 pointer to the second 2D array.
    *  @param n number of elements.
    *  @return sum of the squares: s = sum(i=1,n) [ ( R1(i)-R2(i) )**2 ]
-   *
+   *  <p>
    *  Sum the square of the difference of each element of the arrays.
    */
   // -----------------------------------------------------------------------------------
@@ -1381,7 +1381,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 2D array of wieghts.
    *  @param X pointer to 2D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -1404,7 +1404,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 2D array of wieghts.
    *  @param X pointer to 2D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -1427,7 +1427,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 2D array of wieghts.
    *  @param X pointer to 2D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -1450,7 +1450,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 2D array of wieghts.
    *  @param X pointer to 2D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -1473,7 +1473,7 @@ public class Math2 implements MathConstants {
    *  @param W pointer to 2D array of wieghts.
    *  @param X pointer to 2D array of values.
    *  @return sum of the products: s = sum(i=1,n) W(i)*X(i)
-   *
+   *  <p>
    *  Perform a weighted sum.
    */
   // -----------------------------------------------------------------------------------
@@ -1500,7 +1500,7 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param src pointer to the source array.
    *  @return pointer to the destination array.
-   *
+   *  <p>
    *  Clone the srce array and copy each element of the source array into
    *  the destination array.
    */
@@ -1521,7 +1521,7 @@ public class Math2 implements MathConstants {
   /** @brief Copy.
    *  @param src pointer to the source array.
    *  @return pointer to the destination array.
-   *
+   *  <p>
    *  Clone the srce array and copy each element of the source array into
    *  the destination array.
    */
@@ -1693,7 +1693,7 @@ public class Math2 implements MathConstants {
    *  @param A receiving 2x2 matrix.
    *  @param M 2x2 matrix
    *  @return the determinant of the source matrix.
-   *
+   *  <p>
    *  Compute the inverse of matrix M and store in matrix A.
    */
   // -----------------------------------------------------------------------------------
@@ -1718,7 +1718,7 @@ public class Math2 implements MathConstants {
    *  @param A receiving 2x2 matrix.
    *  @param M 2x2 matrix
    *  @return the determinant of the source matrix.
-   *
+   *  <p>
    *  Compute the inverse of matrix M and store in matrix A.
    */
   // -----------------------------------------------------------------------------------
@@ -1749,7 +1749,7 @@ public class Math2 implements MathConstants {
    *  @param A receiving 2x2 matrix.
    *  @param M 2x2 matrix
    *  @return the determinant of the source matrix.
-   *
+   *  <p>
    *  Compute the inverse of matrix M and store in matrix A.
    */
   // -----------------------------------------------------------------------------------
@@ -1941,12 +1941,160 @@ public class Math2 implements MathConstants {
   }
 
 
+
+  
+  // ===================================================================================
+  /** @brief Minimum.
+   *  @param data array of data.
+   *  @param return then minimum of each Column.
+   *  <p>
+   *  The minimum is computed for each column down the rows. The output has the
+   *  dimension of the number of columns in data.
+   */
+  // -----------------------------------------------------------------------------------
+  protected static double[] MinCol( double[][] data ) {
+    // ---------------------------------------------------------------------------------
+    int nr = data.length;
+    int nc = data[0].length;
+    double[] V = new double[nc];
+
+    for ( int c=0; c<nc; c++ ) {
+      double mn = data[0][c];
+      for ( int r=0; r<nr; r++ ) {
+        if ( mn > data[r][c] ) mn = data[r][c];
+      }
+      V[c] = mn;
+    }
+
+    return V;
+  }
+
+
+  // ===================================================================================
+  /** @brief Minimum.
+   *  @param data array of data.
+   *  @param return the minimum of each Row.
+   *  <p>
+   *  The minimum is computed for each row across the columns. The output has the
+   *  dimension of the number of rows in data.
+   */
+  // -----------------------------------------------------------------------------------
+  protected static double[] MinRow( double[][] data ) {
+    // ---------------------------------------------------------------------------------
+    int nr = data.length;
+    int nc = data[0].length;
+    double[] V = new double[nr];
+
+    for ( int r=0; r<nr; r++ ) {
+      double mn = data[r][0];
+      for ( int c=0; c<nc; c++ ) {
+        if ( mn > data[r][c] ) mn = data[r][c];
+      }
+      V[r] = mn;
+    }
+
+    return V;
+  }
+
+
+  // ===================================================================================
+  /** @brief Minimum.
+   *  @param data array of data.
+   *  @param dim dimension to find the minimum.
+   *  @param return the minimum value of the columns or rows.
+   *  <p>
+   *  If dim=0 then the minimum is computed for each column down the rows.
+   */
+  // -----------------------------------------------------------------------------------
+  protected static double[] Min( double[][] data, int dim ) {
+    // ---------------------------------------------------------------------------------
+    if ( 0==dim ) {
+      return MinCol(data);
+    }
+    return MinRow(data);
+  }
+
+
+
+
+  // ===================================================================================
+  /** @brief Maximum.
+   *  @param data array of data.
+   *  @param return then maximum of each Column.
+   *  <p>
+   *  The maximum is computed for each column down the rows. The output has the
+   *  dimension of the number of columns in data.
+   */
+  // -----------------------------------------------------------------------------------
+  protected static double[] MaxCol( double[][] data ) {
+    // ---------------------------------------------------------------------------------
+    int nr = data.length;
+    int nc = data[0].length;
+    double[] V = new double[nc];
+
+    for ( int c=0; c<nc; c++ ) {
+      double mx = data[0][c];
+      for ( int r=0; r<nr; r++ ) {
+        if ( mx < data[r][c] ) mx = data[r][c];
+      }
+      V[c] = mx;
+    }
+
+    return V;
+  }
+
+
+  // ===================================================================================
+  /** @brief Maximum.
+   *  @param data array of data.
+   *  @param return the maximum of each Row.
+   *  <p>
+   *  The maximum is computed for each row across the columns. The output has the
+   *  dimension of the number of rows in data.
+   */
+  // -----------------------------------------------------------------------------------
+  protected static double[] MaxRow( double[][] data ) {
+    // ---------------------------------------------------------------------------------
+    int nr = data.length;
+    int nc = data[0].length;
+    double[] V = new double[nr];
+
+    for ( int r=0; r<nr; r++ ) {
+      double mx = data[r][0];
+      for ( int c=0; c<nc; c++ ) {
+        if ( mx < data[r][c] ) mx = data[r][c];
+      }
+      V[r] = mx;
+    }
+
+    return V;
+  }
+
+
+  // ===================================================================================
+  /** @brief Maximum.
+   *  @param data array of data.
+   *  @param dim dimension to find the maximum.
+   *  @param return the maximum value of the columns or rows.
+   *  <p>
+   *  If dim=0 then the maximum is computed for each column down the rows.
+   */
+  // -----------------------------------------------------------------------------------
+  protected static double[] Max( double[][] data, int dim ) {
+    // ---------------------------------------------------------------------------------
+    if ( 0==dim ) {
+      return MaxCol(data);
+    }
+    return MaxRow(data);
+  }
+
+
   // ===================================================================================
   /** @brief Mean.
    *  @param data array of data.
    *  @param dim dimension to find the mean.
    *  @param return covariance.
-   *
+   *  <p>
    *  If dim=0 then the mean is computed down the rows.
    */
   // -----------------------------------------------------------------------------------
@@ -1996,7 +2144,7 @@ public class Math2 implements MathConstants {
   /** @brief Covariance.
    *  @param data array of data.
    *  @param return covariance.
-   *
+   *  <p>
    *  It is assumed that the number of samples is greater than the number of variables.
    */
   // -----------------------------------------------------------------------------------
@@ -2077,7 +2225,7 @@ public class Math2 implements MathConstants {
    *  @param A return coefficients.
    *  @param X array of independent points.
    *  @param Y array of dependent points.
-   *
+   *  <p>
    *  Fit a quadratic to the data points.
    *  If there are three data points then compute the fully determined problem directly.
    */

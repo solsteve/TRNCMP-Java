@@ -47,6 +47,9 @@ jar:
 assembly:
 	mvn $(EXTRAS) assembly:assembly
 
+docs:
+	mvn $(EXTRAS) javadoc:javadoc
+
 clean:
 	mvn clean
 	rm -f *.tmp
