@@ -1,6 +1,8 @@
 // ====================================================================== BEGIN FILE =====
-// **                             C I R C U L A R Q U E U E                             **
+// **                          E U C L I D E A N C L U S T E R                          **
 // =======================================================================================
+// **                                                                                   **
+// **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
 // **                      stephen.soliday@trncmp.org                                   **
@@ -22,166 +24,171 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @brief   Circular Queue.
- * @file    CircularQueue.java
+ * @file EuclideanCluster.java
+ * <p>
+ * Provides interface and methods for a Cluster based on Euclidean statistics.
  *
- * @details Provides the interface and procedures for simple circular queue.
+ * @date 2018-11-13
  *
- * @date    2018-06-14
  */
 // =======================================================================================
 
-package org.trncmp.lib;
+package org.trncmp.mllib.clustering;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.List;
 
-// =======================================================================================
-public class CircularQueue<E> {
-  // -------------------------------------------------------------------------------------
-  private int                      max_elements = 0;
-  private ConcurrentLinkedDeque<E> queue        = null;
-
-  // =====================================================================================
-  /** @brief Constructor.
-   *  @param n maximum capacity of the buffer.
-   */
-  // -------------------------------------------------------------------------------------
-  public CircularQueue( int n ) {
-    // -----------------------------------------------------------------------------------
-    max_elements = n;
-    queue = new ConcurrentLinkedDeque<E>();
-  }
-
-  // =====================================================================================
-  /** @brief Clear.
-   *
-   *  Removes all of the elements from this circular queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public void clear() {
-    // -----------------------------------------------------------------------------------
-    queue.clear();
-  }
-
-  // =====================================================================================
-  /** @brief Size.
-   *  @return the number of elements in this circular queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public int size() {
-    // -----------------------------------------------------------------------------------
-    return queue.size();
-  }
-
-  // =====================================================================================
-  /** @brief Capacity.
-   *  @return the maximum capacity of this circular queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public int capacity() {
-    // -----------------------------------------------------------------------------------
-    return max_elements;
-  }
-
-  // =====================================================================================
-  /** @brief Is Full.
-   *  @return true if thi circular queue is full.
-   */
-  // -------------------------------------------------------------------------------------
-  public boolean isFull() {
-    // -----------------------------------------------------------------------------------
-    return ( size() == max_elements );
-  }
-
-  // =====================================================================================
-  /** @brief Is Empty.
-   *  @return true if the buffer is empty.
-   */
-  // -------------------------------------------------------------------------------------
-  public boolean isEmpty() {
-    // -----------------------------------------------------------------------------------
-    return queue.isEmpty();
-  }
-
-  // =====================================================================================
-  /** @brief Add.
-   *  @param e element to be added to the tail of the queue.
-   *
-   *  Add a new element to the circular queue. If the queue is full the oldest element
-   *  will be overwritten. This element is the youngest element in the queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public void add( E e ) {
-    // -----------------------------------------------------------------------------------
-    if ( isFull() ) {
-      queue.poll();
-    }
-    queue.add( e );
-  }
-
-  // =====================================================================================
-  /** @brief Remove.
-   *  @return the oldest element of this circular queue, or null if this queue is empty.
-   *
-   *  Retrieves and removes the oldest element in the queue,
-   *  or returns null if this deque is empty. 
-   */
-  // -------------------------------------------------------------------------------------
-  public E remove() {
-    // -----------------------------------------------------------------------------------
-    return queue.remove();
-  }
-
-  // =====================================================================================
-  /** @brief Peek Old.
-   *  @return the oldest element in this queue, or null if this queue is empty
-   *
-   *  Retrieves, but does not remove, the oldest element of this circular queue,
-   *  or returns null if this deque is empty.
-   */
-  // -------------------------------------------------------------------------------------
-  public E peekOld() {
-    // -----------------------------------------------------------------------------------
-    return queue.peekFirst();
-  }
-
-  // =====================================================================================
-  /** @brief Peek New.
-   *  @return the newest element in this queue, or null if this queue is empty
-   *
-   *  Retrieves, but does not remove, the newest element of this circular queue,
-   *  or returns null if this deque is empty. 
-   */
-  // -------------------------------------------------------------------------------------
-  public E peekNew() {
-    // -----------------------------------------------------------------------------------
-    return queue.peekLast();
-  }
-
-
-  // =====================================================================================
-  /** @brief To Array.
-   *  @return an array containing all of the elements in this queue.
-   *
-   *  Returns an array containing all of the elements in this circular queue, in proper
-   *  sequence (from oldest to newest element).  
-   */
-  // -------------------------------------------------------------------------------------
-  public E[] toArray( E[] array ) {
-    // -----------------------------------------------------------------------------------
-    int count = 0;
-    for ( E obj : queue ) {
-      array[count] = obj;
-      count += 1;
-    }
-
-    return array;
-  }
-
-
-} // end class CircularQueue
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 // =======================================================================================
-// **                             C I R C U L A R Q U E U E                             **
-// =========================================================================== END FILE ==
+public class EuclideanCluster extends Cluster {
+  // -------------------------------------------------------------------------------------
+
+  /** Logging */
+  private static final Logger logger = LogManager.getLogger();
+
+  /** Standard deviation of the mean */
+  protected double[] stddev_val = null;
+
+  
+  // =====================================================================================
+  /** Constructor
+   *  @param n number of dimensions.
+   */
+  // -------------------------------------------------------------------------------------
+  public EuclideanCluster( int n, int id_num ) {
+    // -----------------------------------------------------------------------------------
+    resize(n); // set the parent class member data
+    stddev_val = new double[n];
+    id         = id_num;
+  }
+    
+
+  // =====================================================================================
+  /** Constructor
+   *  @param P point representing the Cluter's center.
+   */
+  // -------------------------------------------------------------------------------------
+  public EuclideanCluster( ClusterPoint P, int id_num ) {
+    // -----------------------------------------------------------------------------------
+    int n = P.coord_dims();
+    resize(n); // set the parent class member data
+    stddev_val = new double[n];
+    id         = id_num;
+  }
+    
+
+  // =====================================================================================
+  /** Constructor
+   *  @param init_pop members in this cluster.
+   */
+  // -------------------------------------------------------------------------------------
+  public EuclideanCluster( List<ClusterPoint> init_pop, int id_num ) {
+    // -----------------------------------------------------------------------------------
+    if ( 0 < init_pop.size() ) {
+      int n = init_pop.get(0).coord_dims();
+      resize(n); // set the parent class member data
+    
+      stddev_val = new double[n];
+      id         = id_num;
+
+      add( init_pop );
+      recenter();
+    } else {
+      logger.error( "Data point list is empty." );
+      System.exit(1);
+    }
+  }
+
+
+
+
+
+
+  // =====================================================================================
+  /** Get Standard Deviations.
+   *  @return pointer to the vector containing the component standard deviations.
+   */
+  // -------------------------------------------------------------------------------------
+  public double[] getStdevs() {
+    // -----------------------------------------------------------------------------------
+    return stddev_val;
+  }
+
+  
+  // =====================================================================================
+  /** Get Standard Deviation.
+   *  @param i vector index.
+   *  @return the ith vector value.
+   */
+  // -------------------------------------------------------------------------------------
+  public double getStdev( int i ) {
+    // -----------------------------------------------------------------------------------
+    return stddev_val[i];
+  }
+
+  
+  // =====================================================================================
+  /** Re-center.
+   *  <p>
+   *  Compute cluster statistics.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override
+  public int recenter() {
+    // -----------------------------------------------------------------------------------
+    for ( int i=0; i<num_var; i++ ) {
+      stddev_val[i] = 0.0e0;
+    }
+
+    int n = basic_stats();
+
+    if ( 0 < n ) {
+      for ( ClusterPoint sample : members ) {
+        double[] x = sample.get_coord();
+        for ( int i=0; i<num_var; i++ ) {
+          double d = mean_val[i] - x[i];
+          stddev_val[i] += (d*d);
+        }
+      }
+      
+      for ( int i=0; i<num_var; i++ ) {
+        stddev_val[i] = Math.sqrt( stddev_val[i] / (double)(n - 1) );
+      }
+    }
+
+    return n;
+  }
+
+
+  // =====================================================================================
+  /** Euclidean Distance.
+   *  @param P sample ClusterPoint.
+   *  @return scalar square of the Euclidian distance metric.
+   *  <p>
+   *  Compute the square of the Euclidean distance between a sample point and these
+   *  statistics.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override
+  public double distanceSquared( ClusterPoint P ) {
+    // -----------------------------------------------------------------------------------
+    double[] x   = P.get_coord();
+    double   sum = 0.0e0;
+
+    for ( int i=0; i<num_var; i++ ) {
+      double d = x[i] - mean_val[i];
+      sum += (d*d);
+    }
+
+    return sum;
+  }
+  
+ 
+} // end class EuclideanCluster
+
+
+// =======================================================================================
+// **                          E U C L I D E A N C L U S T E R                          **
+// ======================================================================== END FILE =====

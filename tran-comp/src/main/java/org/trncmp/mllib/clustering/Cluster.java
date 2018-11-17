@@ -1,6 +1,8 @@
 // ====================================================================== BEGIN FILE =====
-// **                             C I R C U L A R Q U E U E                             **
+// **                                   C L U S T E R                                   **
 // =======================================================================================
+// **                                                                                   **
+// **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
 // **                      stephen.soliday@trncmp.org                                   **
@@ -22,166 +24,268 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @brief   Circular Queue.
- * @file    CircularQueue.java
+ * @file Cluster.java
+ * <p>
+ * Provides interface and methods for a parent Cluster class.
  *
- * @details Provides the interface and procedures for simple circular queue.
+ * @date 2018-11-13
  *
- * @date    2018-06-14
  */
 // =======================================================================================
 
-package org.trncmp.lib;
+package org.trncmp.mllib.clustering;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Iterator;
+
+import org.trncmp.lib.Table;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
-public class CircularQueue<E> {
+public abstract class Cluster {
   // -------------------------------------------------------------------------------------
-  private int                      max_elements = 0;
-  private ConcurrentLinkedDeque<E> queue        = null;
 
+  /** Logging */
+  private static final Logger logger = LogManager.getLogger();
+
+  /** Identification Number */
+  protected int id;
+  
+  /** Members of this cluster */
+  protected List<ClusterPoint> members = null;
+
+  /** Number of variables */
+  protected int num_var = 0;
+
+  /** Minimum values. */
+  protected double[] min_val  = null;
+
+  /** Maximum values */
+  protected double[] max_val  = null;
+
+  /** Mean values */
+  protected double[] mean_val = null;
+
+  
   // =====================================================================================
-  /** @brief Constructor.
-   *  @param n maximum capacity of the buffer.
+  /** Initialize.
+   *  @param n number of dimensions.
    */
   // -------------------------------------------------------------------------------------
-  public CircularQueue( int n ) {
+  protected void resize( int n ) {
     // -----------------------------------------------------------------------------------
-    max_elements = n;
-    queue = new ConcurrentLinkedDeque<E>();
+    num_var  = n;
+    min_val  = new double[num_var];
+    max_val  = new double[num_var];
+    mean_val = new double[num_var];
   }
 
+  
   // =====================================================================================
-  /** @brief Clear.
-   *
-   *  Removes all of the elements from this circular queue.
+  /** Constructor
+   *  @param n number of dimensions.
+   */
+  // -------------------------------------------------------------------------------------
+  public Cluster() {
+    // -----------------------------------------------------------------------------------
+    members = new LinkedList<ClusterPoint>();
+  }
+
+  
+  // =====================================================================================
+  /** Clear.
+   *  <p>
+   *  Remove all members from this cluster.
    */
   // -------------------------------------------------------------------------------------
   public void clear() {
     // -----------------------------------------------------------------------------------
-    queue.clear();
+    members.clear();
   }
 
+  
   // =====================================================================================
-  /** @brief Size.
-   *  @return the number of elements in this circular queue.
+  /** Add.
+   *  @param P reference to a ClusterPoint.
+   *  <p>
+   *  Add a new ClusterPoint to this class's members list.
    */
   // -------------------------------------------------------------------------------------
-  public int size() {
+  public void add( ClusterPoint P ) {
     // -----------------------------------------------------------------------------------
-    return queue.size();
+    P.assign_to_cluster( id );
+    members.add( P );
   }
 
+  
   // =====================================================================================
-  /** @brief Capacity.
-   *  @return the maximum capacity of this circular queue.
+  /** Add.
+   *  @param P reference to a list of ClusterPoints.
+   *  <p>
+   *  Add a list of ClusterPoints to this class's members list.
    */
   // -------------------------------------------------------------------------------------
-  public int capacity() {
+  public void add( List<ClusterPoint> C ) {
     // -----------------------------------------------------------------------------------
-    return max_elements;
-  }
-
-  // =====================================================================================
-  /** @brief Is Full.
-   *  @return true if thi circular queue is full.
-   */
-  // -------------------------------------------------------------------------------------
-  public boolean isFull() {
-    // -----------------------------------------------------------------------------------
-    return ( size() == max_elements );
-  }
-
-  // =====================================================================================
-  /** @brief Is Empty.
-   *  @return true if the buffer is empty.
-   */
-  // -------------------------------------------------------------------------------------
-  public boolean isEmpty() {
-    // -----------------------------------------------------------------------------------
-    return queue.isEmpty();
-  }
-
-  // =====================================================================================
-  /** @brief Add.
-   *  @param e element to be added to the tail of the queue.
-   *
-   *  Add a new element to the circular queue. If the queue is full the oldest element
-   *  will be overwritten. This element is the youngest element in the queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public void add( E e ) {
-    // -----------------------------------------------------------------------------------
-    if ( isFull() ) {
-      queue.poll();
+    for ( ClusterPoint P : C ) {
+      add( P );
     }
-    queue.add( e );
-  }
-
-  // =====================================================================================
-  /** @brief Remove.
-   *  @return the oldest element of this circular queue, or null if this queue is empty.
-   *
-   *  Retrieves and removes the oldest element in the queue,
-   *  or returns null if this deque is empty. 
-   */
-  // -------------------------------------------------------------------------------------
-  public E remove() {
-    // -----------------------------------------------------------------------------------
-    return queue.remove();
-  }
-
-  // =====================================================================================
-  /** @brief Peek Old.
-   *  @return the oldest element in this queue, or null if this queue is empty
-   *
-   *  Retrieves, but does not remove, the oldest element of this circular queue,
-   *  or returns null if this deque is empty.
-   */
-  // -------------------------------------------------------------------------------------
-  public E peekOld() {
-    // -----------------------------------------------------------------------------------
-    return queue.peekFirst();
-  }
-
-  // =====================================================================================
-  /** @brief Peek New.
-   *  @return the newest element in this queue, or null if this queue is empty
-   *
-   *  Retrieves, but does not remove, the newest element of this circular queue,
-   *  or returns null if this deque is empty. 
-   */
-  // -------------------------------------------------------------------------------------
-  public E peekNew() {
-    // -----------------------------------------------------------------------------------
-    return queue.peekLast();
   }
 
 
   // =====================================================================================
-  /** @brief To Array.
-   *  @return an array containing all of the elements in this queue.
-   *
-   *  Returns an array containing all of the elements in this circular queue, in proper
-   *  sequence (from oldest to newest element).  
+  /** Get ID.
+   *  @return identification number of this cluster.
    */
   // -------------------------------------------------------------------------------------
-  public E[] toArray( E[] array ) {
+  public int  getID() {
     // -----------------------------------------------------------------------------------
-    int count = 0;
-    for ( E obj : queue ) {
-      array[count] = obj;
-      count += 1;
+    return id;
+  }
+
+  
+  // =====================================================================================
+  /** Set ID.
+   *  @param i new identification number for this cluster.
+   */
+  // -------------------------------------------------------------------------------------
+  public void setID( int i ) {
+    // -----------------------------------------------------------------------------------
+    id = i;
+  }
+
+
+  // =====================================================================================
+  /** Get Minimums.
+   *  @return pointer to the vector containing the component minimums.
+   */
+  // -------------------------------------------------------------------------------------
+  public double[] getMins() {
+    // -----------------------------------------------------------------------------------
+    return min_val;
+  }
+
+  
+  // =====================================================================================
+  /** Get Minimum.
+   *  @param i vector index.
+   *  @return the ith vector value.
+   */
+  // -------------------------------------------------------------------------------------
+  public double getMin( int i ) {
+    // -----------------------------------------------------------------------------------
+    return min_val[i];
+  }
+
+    
+  // =====================================================================================
+  /** Get Maximums.
+   *  @return pointer to the vector containing the component maximums.
+   */
+  // -------------------------------------------------------------------------------------
+  public double[] getMaxs() {
+    // -----------------------------------------------------------------------------------
+    return max_val;
+  }
+
+  
+  // =====================================================================================
+  /** Get Maximum.
+   *  @param i vector index.
+   *  @return the ith vector value.
+   */
+  // -------------------------------------------------------------------------------------
+  public double getMax( int i ) {
+    // -----------------------------------------------------------------------------------
+    return max_val[i];
+  }
+
+    
+  // =====================================================================================
+  /** Get Means.
+   *  @return pointer to the vector containing the component .
+   */
+  // -------------------------------------------------------------------------------------
+  public double[] getMeans() {
+    // -----------------------------------------------------------------------------------
+    return mean_val;
+  }
+
+  
+  // =====================================================================================
+  /** Get Mean.
+   *  @param i vector index.
+   *  @return the ith vector value.
+   */
+  // -------------------------------------------------------------------------------------
+  public double getMean( int i ) {
+    // -----------------------------------------------------------------------------------
+    return mean_val[i];
+  }
+
+
+  // =====================================================================================
+  /** Get Count.
+   *  @return number of samples compiled.
+   */
+  // -------------------------------------------------------------------------------------
+  public double count() {
+    // -----------------------------------------------------------------------------------
+    return members.size();
+  }
+
+
+  // =====================================================================================
+  /** Basic Statisitics.
+   *  @param samples.
+   *  <p>
+   *  Set the basic statistics for this cluster based on the ClusterPoints in the members list.
+   */
+  // -------------------------------------------------------------------------------------
+  protected int basic_stats() {
+    // -----------------------------------------------------------------------------------
+    for ( int i=0; i<num_var; i++ ) {
+      min_val[i]  =  1.0e299;
+      max_val[i]  = -1.0e299;
+      mean_val[i] = 0.0e0;
+    }
+    
+    int number_of_samples = 0;
+    for ( ClusterPoint sample : members ) {
+      double[] x = sample.get_coord();
+      for ( int i=0; i<num_var; i++ ) {
+        if ( x[i] < min_val[i] ) { min_val[i] = x[i]; }
+        if ( x[i] > max_val[i] ) { max_val[i] = x[i]; }
+        mean_val[i] += x[i];
+      }
+      number_of_samples += 1;
     }
 
-    return array;
+    if ( 0 < number_of_samples ) {
+      for ( int i=0; i<num_var; i++ ) {
+        mean_val[i] /= (double)number_of_samples;
+      }
+    }
+
+    return number_of_samples;
   }
 
 
-} // end class CircularQueue
+  abstract public int    recenter        ();
+  abstract public double distanceSquared ( ClusterPoint P );
 
 
+
+
+
+
+
+
+} // end class Cluster
+     
 // =======================================================================================
-// **                             C I R C U L A R Q U E U E                             **
-// =========================================================================== END FILE ==
+// **                                   C L U S T E R                                   **
+// ======================================================================== END FILE =====

@@ -60,7 +60,7 @@ fullclean: clean
 	rm -f *.pnm *.mod *.ps *.tle
 
 distclean: fullclean
-	rm -f test.*.err test.*.out
+	rm -f test.*.err test.*.out temp*.* test*.*
 	rm -f logs/*.log
 	rm -rf trncmp trncmp.tar
 

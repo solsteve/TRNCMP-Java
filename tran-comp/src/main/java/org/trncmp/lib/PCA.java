@@ -176,7 +176,13 @@ public class PCA {
     rvsTrans = USV.getV();
 
     double[] sv = USV.getSingularValues();
-    for ( int j=0; j<num_var; j++ ) {
+    int k = sv.length;
+
+    if ( k < num_var ) {
+      System.err.println( "PCA: Number of singular values = "+k+" expected "+num_var );
+    }
+    
+    for ( int j=0; j<k; j++ ) {
       double x = sv[j];
       sv[j] = x*x/(double)(num_sample-1);
     }
@@ -227,7 +233,9 @@ public class PCA {
     }
     RealVector x = fwdTrans.operate(y);
 
-    for ( int i=0; i<num_var; i++ ) {
+    int k = out.length;
+    if ( x.getDimension​() < k ) { k = x.getDimension​(); }
+    for ( int i=0; i<k; i++ ) {
       out[i] = x.getEntry(i);
     }
   }

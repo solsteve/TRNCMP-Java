@@ -1,6 +1,8 @@
 // ====================================================================== BEGIN FILE =====
-// **                             C I R C U L A R Q U E U E                             **
+// **                           G A U S S I A N C L U S T E R                           **
 // =======================================================================================
+// **                                                                                   **
+// **  This file is part of the TRNCMP Research Library. (formerly SolLib)              **
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
 // **                      stephen.soliday@trncmp.org                                   **
@@ -22,166 +24,194 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @brief   Circular Queue.
- * @file    CircularQueue.java
+ * @file GaussianCluster.java
+ * <p>
+ * Provides interface and methods for a Cluster based on Gaussian statistics.
  *
- * @details Provides the interface and procedures for simple circular queue.
+ * @date 2018-11-13
  *
- * @date    2018-06-14
  */
 // =======================================================================================
 
-package org.trncmp.lib;
+package org.trncmp.mllib.clustering;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.List;
+import org.trncmp.lib.linear.Matrix;
 
-// =======================================================================================
-public class CircularQueue<E> {
-  // -------------------------------------------------------------------------------------
-  private int                      max_elements = 0;
-  private ConcurrentLinkedDeque<E> queue        = null;
-
-  // =====================================================================================
-  /** @brief Constructor.
-   *  @param n maximum capacity of the buffer.
-   */
-  // -------------------------------------------------------------------------------------
-  public CircularQueue( int n ) {
-    // -----------------------------------------------------------------------------------
-    max_elements = n;
-    queue = new ConcurrentLinkedDeque<E>();
-  }
-
-  // =====================================================================================
-  /** @brief Clear.
-   *
-   *  Removes all of the elements from this circular queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public void clear() {
-    // -----------------------------------------------------------------------------------
-    queue.clear();
-  }
-
-  // =====================================================================================
-  /** @brief Size.
-   *  @return the number of elements in this circular queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public int size() {
-    // -----------------------------------------------------------------------------------
-    return queue.size();
-  }
-
-  // =====================================================================================
-  /** @brief Capacity.
-   *  @return the maximum capacity of this circular queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public int capacity() {
-    // -----------------------------------------------------------------------------------
-    return max_elements;
-  }
-
-  // =====================================================================================
-  /** @brief Is Full.
-   *  @return true if thi circular queue is full.
-   */
-  // -------------------------------------------------------------------------------------
-  public boolean isFull() {
-    // -----------------------------------------------------------------------------------
-    return ( size() == max_elements );
-  }
-
-  // =====================================================================================
-  /** @brief Is Empty.
-   *  @return true if the buffer is empty.
-   */
-  // -------------------------------------------------------------------------------------
-  public boolean isEmpty() {
-    // -----------------------------------------------------------------------------------
-    return queue.isEmpty();
-  }
-
-  // =====================================================================================
-  /** @brief Add.
-   *  @param e element to be added to the tail of the queue.
-   *
-   *  Add a new element to the circular queue. If the queue is full the oldest element
-   *  will be overwritten. This element is the youngest element in the queue.
-   */
-  // -------------------------------------------------------------------------------------
-  public void add( E e ) {
-    // -----------------------------------------------------------------------------------
-    if ( isFull() ) {
-      queue.poll();
-    }
-    queue.add( e );
-  }
-
-  // =====================================================================================
-  /** @brief Remove.
-   *  @return the oldest element of this circular queue, or null if this queue is empty.
-   *
-   *  Retrieves and removes the oldest element in the queue,
-   *  or returns null if this deque is empty. 
-   */
-  // -------------------------------------------------------------------------------------
-  public E remove() {
-    // -----------------------------------------------------------------------------------
-    return queue.remove();
-  }
-
-  // =====================================================================================
-  /** @brief Peek Old.
-   *  @return the oldest element in this queue, or null if this queue is empty
-   *
-   *  Retrieves, but does not remove, the oldest element of this circular queue,
-   *  or returns null if this deque is empty.
-   */
-  // -------------------------------------------------------------------------------------
-  public E peekOld() {
-    // -----------------------------------------------------------------------------------
-    return queue.peekFirst();
-  }
-
-  // =====================================================================================
-  /** @brief Peek New.
-   *  @return the newest element in this queue, or null if this queue is empty
-   *
-   *  Retrieves, but does not remove, the newest element of this circular queue,
-   *  or returns null if this deque is empty. 
-   */
-  // -------------------------------------------------------------------------------------
-  public E peekNew() {
-    // -----------------------------------------------------------------------------------
-    return queue.peekLast();
-  }
-
-
-  // =====================================================================================
-  /** @brief To Array.
-   *  @return an array containing all of the elements in this queue.
-   *
-   *  Returns an array containing all of the elements in this circular queue, in proper
-   *  sequence (from oldest to newest element).  
-   */
-  // -------------------------------------------------------------------------------------
-  public E[] toArray( E[] array ) {
-    // -----------------------------------------------------------------------------------
-    int count = 0;
-    for ( E obj : queue ) {
-      array[count] = obj;
-      count += 1;
-    }
-
-    return array;
-  }
-
-
-} // end class CircularQueue
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 // =======================================================================================
-// **                             C I R C U L A R Q U E U E                             **
-// =========================================================================== END FILE ==
+public class GaussianCluster extends Cluster {
+  // -------------------------------------------------------------------------------------
+
+  /** Logging */
+  private static final Logger logger = LogManager.getLogger();
+
+  /** Covariance of the ClusterPoints in the members list. */
+  protected Matrix covariance = null;
+
+  /** Inverse of the Covariance matrix. This is the precision matrix. */
+  protected Matrix inv_cov    = null;
+
+  
+  // =====================================================================================
+  /** Constructor
+   *  @param n number of dimensions.
+   */
+  // -------------------------------------------------------------------------------------
+  public GaussianCluster( int n, int id_num ) {
+    // -----------------------------------------------------------------------------------
+    resize(n); // set the parent class member data
+    covariance = new Matrix(n,n);
+    inv_cov    = new Matrix(n,n);
+    id         = id_num;
+  }
+
+
+  // =====================================================================================
+  /** Constructor
+   *  @param P   point representing the Cluter's center..
+   *  @param cov covariance of the cluster.
+   */
+  // -------------------------------------------------------------------------------------
+  public GaussianCluster( ClusterPoint P, Matrix cov, int id_num ) {
+    // -----------------------------------------------------------------------------------
+    int n = P.coord_dims();
+    resize(n); // set the parent class member data
+    covariance = cov;
+    inv_cov    = new Matrix(n,n);
+    inv_cov.invert(cov);
+    id         = id_num;
+  }
+    
+
+  // =====================================================================================
+  /** Constructor
+   *  @param init_pop members in this cluster.
+   */
+  // -------------------------------------------------------------------------------------
+  public GaussianCluster( List<ClusterPoint> init_pop, int id_num ) {
+    // -----------------------------------------------------------------------------------
+    if ( 0 < init_pop.size() ) {
+      int n = init_pop.get(0).coord_dims();
+      resize(n); // set the parent class member data
+    
+      covariance = new Matrix(n,n);
+      inv_cov    = new Matrix(n,n);
+      id         = id_num;
+
+      add( init_pop );
+      recenter();
+    } else {
+      logger.error( "Data point list is empty." );
+      System.exit(1);
+    }
+  }
+
+
+
+
+
+
+  // =====================================================================================
+  /** Get Covariance.
+   *  @param r row index.
+   *  @param c column index.
+   *  @return covariance between the row and col variables.
+   */
+  // -------------------------------------------------------------------------------------
+  public double getCov( int r, int c ) {
+    // -----------------------------------------------------------------------------------
+    return covariance.A[r][c];
+  }
+
+  
+  // =====================================================================================
+  /** Get inverse Covariance.
+   *  @param r row index.
+   *  @param c column index.
+   *  @return inverse covariance between the row and col variables.
+   */
+  // -------------------------------------------------------------------------------------
+  public double getInvCov( int r, int c ) {
+    // -----------------------------------------------------------------------------------
+    return inv_cov.A[r][c];
+  }
+
+  
+  // =====================================================================================
+  /** Re-center.
+   *  <p>
+   *  Compute cluster statistics.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override
+  public int recenter() {
+    // -----------------------------------------------------------------------------------
+    for ( int r=0; r<num_var; r++ ) {
+      for ( int c=0; c<num_var; c++ ) {
+        covariance.A[r][c] = 0.0e0;
+        inv_cov.A[r][c]    = 1.0e0;
+      }
+    }
+
+    int n = basic_stats();
+
+    if ( 0 < n ) {
+      for ( int r=0; r<num_var; r++ ) {
+        double rmean = mean_val[r];
+        for ( int c=r; c<num_var; c++ ) {
+          double cmean = mean_val[c];
+          double c_sum = 0.0e0;
+          for ( ClusterPoint sample : members ) {
+            double rx = sample.get_coord(r) - rmean;
+            double cx = sample.get_coord(c) - cmean;
+            c_sum += ( rx * cx );
+          }
+          c_sum /= (double)(n - 1);
+          covariance.A[r][c] = c_sum;
+          covariance.A[c][r] = c_sum;
+        }
+      }
+
+      inv_cov.invert( covariance );
+    }
+
+    return n;
+  }
+
+  
+  // =====================================================================================
+  /** Mahalonobis Distance.
+   *  @param P sample ClusterPoint.
+   *  @return scalar square of the Mahalonobis distance metric.
+   *  <p>
+   *  Compute the square of the Mahalonobis distance between a sample point and these
+   *  statistics.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override
+  public double distanceSquared( ClusterPoint P ) {
+    // -----------------------------------------------------------------------------------
+    double[] x = P.get_coord();
+    double   a = 0.0e0;
+
+    for ( int i=0; i<num_var; i++ ) {
+      double t = 0.0e0;
+      for ( int j=0; j<num_var; j++ ) {
+        t += ( inv_cov.A[i][j] * ( x[j] - mean_val[j] ) );
+      }
+      a += ( t * ( x[i] - mean_val[i] ) );
+    }
+    return a;
+  }
+
+ 
+} // end class GaussianCluster
+
+
+// =======================================================================================
+// **                           G A U S S I A N C L U S T E R                           **
+// ======================================================================== END FILE =====

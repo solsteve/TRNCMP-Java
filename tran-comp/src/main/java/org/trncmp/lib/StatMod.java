@@ -164,30 +164,37 @@ public class StatMod {
     public single( double[] x ) {
       // ---------------------------------------------------------------------------------
       int    n  = x.length;
-      double nf = (double) n;
+      if ( 1 < n ) {
+        double nf = (double) n;
 
-      min_value  = x[0];
-      max_value  = x[0];
-      mean_value = x[0];
+        min_value  = x[0];
+        max_value  = x[0];
+        mean_value = x[0];
 
-      for ( int i=1; i<n; i++ ) {
-        double t = x[i];
-        mean_value += t;
-        if ( min_value > t ) { min_value = t; }
-        if ( max_value < t ) { max_value = t; }
+        for ( int i=1; i<n; i++ ) {
+          double t = x[i];
+          mean_value += t;
+          if ( min_value > t ) { min_value = t; }
+          if ( max_value < t ) { max_value = t; }
+        }
+
+        mean_value /= nf;
+
+        double d  = x[0] - mean_value;
+        double sd = d*d;
+
+        for ( int i=1; i<n; i++ ) {
+          d   = x[i] - mean_value;
+          sd += (d*d);
+        }
+
+        std_dev = Math.sqrt( sd / (nf - 1.0) );
+      } else {
+        mean_value = x[0];
+        std_dev    = Math2.N_EPSILON;
+        min_value  = x[0]-4.0*Math2.N_EPSILON;
+        max_value  = x[0]+4.0*Math2.N_EPSILON;
       }
-
-      mean_value /= nf;
-
-      double d  = x[0] - mean_value;
-      double sd = d*d;
-
-      for ( int i=1; i<n; i++ ) {
-        d   = x[i] - mean_value;
-        sd += (d*d);
-      }
-
-      std_dev = Math.sqrt( sd / (nf - 1.0) );
     }
 
     

@@ -55,8 +55,8 @@ public class jtest_table {
 	    }
 	}
 
-	Table.write_ascii( T1, "/tmp/test.dat" );
-	Table.read_ascii( T2,  "/tmp/test.dat" );
+	Table.write_ascii( T1, "/tmp/test1.dat" );
+	Table.read_ascii( T2,  "/tmp/test1.dat" );
 
 	System.out.println( "MSE = " + T1.sumsq( T2 ) );
     }
@@ -83,8 +83,8 @@ public class jtest_table {
 	    }
 	}
 
-	Table.write_ascii( aT1, bT1, "/tmp/test.dat" );
-	Table.read_ascii(  aT2, bT2, "/tmp/test.dat" );
+	Table.write_ascii( aT1, bT1, "/tmp/test2.dat" );
+	Table.read_ascii(  aT2, bT2, "/tmp/test2.dat" );
 
 	System.out.println( "MSE = " + aT1.sumsq( aT2 ) + " "  + bT1.sumsq( bT2 ) );
     }
@@ -99,7 +99,8 @@ public class jtest_table {
     // ===================================================================================
     public static void Test03( ) {
 	// -------------------------------------------------------------------------------
-	
+	    // -----------------------------------------------------------------------------------
+
 	Table T1 = new Table( 8, 4 );
 	Table T2 = new Table( 8, 3 );
 
@@ -112,8 +113,8 @@ public class jtest_table {
 	    }
 	}
 
-	Table.write_ascii( T1, "./test1.dat", "%7.2f" );
-	Table.write_ascii( T1, T2, "./test2.dat", "%7.2f" );
+	Table.write_ascii( T1,     "./test-1.dat", "%7.2f" );
+	Table.write_ascii( T1, T2, "./test-2.dat", "%7.2f" );
 
 	try {
 	    Runtime.getRuntime().exec( "cat ./test1.dat" ).waitFor();
