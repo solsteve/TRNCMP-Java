@@ -36,6 +36,8 @@ package org.trncmp.lib;
 import java.nio.ByteBuffer;
 import java.io.*;
 
+import java.util.Scanner;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -347,6 +349,18 @@ public class FileTools {
       logger.error( "Cannot open [" + fspc + "] for writting" );
     }
     return null;
+  }
+
+
+  // ===================================================================================
+  /** @brief Open Scanner for Reading.
+   *  @param fspc path to file.
+   *  @return reference to a Scanner. null if failed.
+   */
+  // -----------------------------------------------------------------------------------
+  public static Scanner openScanner( String fspc ) {
+    // -------------------------------------------------------------------------------
+    return new Scanner( openRead( fspc ) );
   }
 
 

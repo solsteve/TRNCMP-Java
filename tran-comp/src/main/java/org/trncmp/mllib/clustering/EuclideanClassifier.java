@@ -37,7 +37,10 @@ package org.trncmp.mllib.clustering;
 
 import java.util.List;
 import java.io.PrintStream;
+import java.util.Scanner;
 
+import org.trncmp.lib.IntegerMap;
+import org.trncmp.lib.FileTools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,8 +56,16 @@ public class EuclideanClassifier extends Classifier {
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
+  public EuclideanClassifier( ) {
+    // -----------------------------------------------------------------------------------
+    super();
+  }
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
   public EuclideanClassifier( int n, int m ) {
     // -----------------------------------------------------------------------------------
+    super();
     for ( int i=0; i<n; i++ ) {
       Cluster C = new EuclideanCluster( m, i );
       cluster.set( i, C );
@@ -65,6 +76,7 @@ public class EuclideanClassifier extends Classifier {
   // -------------------------------------------------------------------------------------
   public EuclideanClassifier( List<List<ClusterPoint>> labled_data ) {
     // -----------------------------------------------------------------------------------
+    super();
     logger.debug( "Presented with "+labled_data.size()+" unique classes" );
 
     for ( List<ClusterPoint> group : labled_data ) {
@@ -87,10 +99,39 @@ public class EuclideanClassifier extends Classifier {
 
 
   // =====================================================================================
+  /** Read.
+   *  @param fspc Path to a Classifier Configuration file.
+   *  <p>
+   *  Static.
+   */
   // -------------------------------------------------------------------------------------
-  @Override
-  public void write( PrintStream ps ) {
+  static public EuclideanClassifier read( Scanner inp ) {
     // -----------------------------------------------------------------------------------
+    EuclideanClassifier cls = new EuclideanClassifier();
+    int n = inp.nextInt();
+    for ( int i=0; i<n; i++ ) {
+      EuclideanCluster EC = EuclideanCluster.read( inp );
+      cls.set( EC.getID(), EC );
+    }
+    
+    return cls;
+  }
+
+
+  // =====================================================================================
+  /** Read.
+   *  @param fspc Path to a Classifier Configuration file.
+   *  <p>
+   *  Static.
+   */
+  // -------------------------------------------------------------------------------------
+  static public EuclideanClassifier read( String fspc ) {
+    // -----------------------------------------------------------------------------------
+    Scanner scn = new Scanner( FileTools.openRead( fspc ) );
+    EuclideanClassifier cls = EuclideanClassifier.read( scn );
+    scn.close();
+    logger.debug( "Successfully read Euclidean classifier." );
+    return cls;
   }    
 
   

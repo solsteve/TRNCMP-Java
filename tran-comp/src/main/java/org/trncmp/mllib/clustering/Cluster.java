@@ -35,6 +35,7 @@
 
 package org.trncmp.mllib.clustering;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -278,6 +279,7 @@ public abstract class Cluster {
   abstract public double distanceSquared ( ClusterPoint P );
 
 
+  abstract public void    write          ( PrintStream ps );
 
 
 

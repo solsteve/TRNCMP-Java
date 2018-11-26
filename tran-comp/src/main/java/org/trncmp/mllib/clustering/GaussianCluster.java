@@ -35,6 +35,9 @@
 
 package org.trncmp.mllib.clustering;
 
+import java.io.BufferedReader;
+import java.io.PrintStream;
+import java.util.Scanner;
 import java.util.List;
 import org.trncmp.lib.linear.Matrix;
 
@@ -209,6 +212,70 @@ public class GaussianCluster extends Cluster {
   }
 
  
+  // =====================================================================================
+  /** Write.
+   *  @param ps reference to an open PrintStream.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override
+  public void write( PrintStream ps ) {
+    // -----------------------------------------------------------------------------------
+    ps.format( "%d %d\n", id, num_var );
+    for ( int i=0; i<num_var; i++ ) {
+      ps.format( "%17.10e %17.10e %17.10e\n",
+                 min_val[i], max_val[i], mean_val[i] );
+    }
+    
+    for ( int r=0; r<num_var; r++ ) {
+      ps.format( "%17.10e", covariance.A[r][r] );
+      if ( r < (num_var+1) ) {
+        for ( int c=r+1; c<num_var; c++ ) {
+          ps.format( " %17.10e", covariance.A[r][c] );
+        }
+      }
+      ps.format( "\n" );
+    }
+    
+  }    
+
+
+
+
+  // =====================================================================================
+  /** Read.
+   *  @param br reference to an open Scanner.
+   */
+  // -------------------------------------------------------------------------------------
+  static public GaussianCluster read( Scanner inp ) {
+    // -----------------------------------------------------------------------------------
+
+    int cid = inp.nextInt();
+    int nvr = inp.nextInt();
+
+    GaussianCluster EC = new GaussianCluster( nvr, cid );
+
+    for ( int i=0; i<nvr; i++ ) {
+     EC.min_val[i]    = inp.nextDouble();
+     EC.max_val[i]    = inp.nextDouble();
+     EC.mean_val[i]   = inp.nextDouble();
+    }
+
+    for ( int r=0; r<nvr; r++ ) {
+        for ( int c=r; c<nvr; c++ ) {
+          EC.covariance.A[r][c] = inp.nextDouble();
+          if ( r != c ) {
+            EC.covariance.A[c][r] = EC.covariance.A[r][c];
+          }
+        }
+    }
+
+    EC.inv_cov.invert( EC.covariance );
+
+    return EC;
+  }
+
+  
+
 } // end class GaussianCluster
 
 

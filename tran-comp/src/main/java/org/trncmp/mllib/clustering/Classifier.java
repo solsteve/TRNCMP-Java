@@ -40,6 +40,7 @@ import java.io.PrintStream;
 
 import org.trncmp.lib.IntegerMap;
 import org.trncmp.lib.Math2;
+import org.trncmp.lib.FileTools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -90,11 +91,54 @@ abstract public class Classifier {
     }
     
     return closest_cluster;
-  }    
+  }
+
+
+  // =====================================================================================
+  public Cluster get( Integer key ) {
+    // -----------------------------------------------------------------------------------
+    return cluster.get( key );
+  }
 
   
+  // =====================================================================================
+  public void set( Integer key, Cluster cls ) {
+    // -----------------------------------------------------------------------------------
+    cluster.set( key, cls );
+  }
+
+
+
+  
+  // =====================================================================================
+  /** Write.
+   *  @param ps reference to an open PrintStream.
+   */
+  // -------------------------------------------------------------------------------------
+  public void write( PrintStream ps ) {
+    // -----------------------------------------------------------------------------------
+    ps.format( "%d\n", cluster.size() );
+    IntegerMap.Iterator<Cluster> it = cluster.iterator();
+    while ( it.hasNext() ) {
+      it.next().write( ps );
+    }
+  }    
+
+
+  // =====================================================================================
+  /** Write.
+   *  @param fspc Path to a file to save the configuration.
+   */
+  // -------------------------------------------------------------------------------------
+  public void write( String fspc ) {
+    // -----------------------------------------------------------------------------------
+    PrintStream ps = FileTools.openWrite( fspc );
+    write( ps );
+    ps.close();
+  }    
+
+
   abstract public void learn    ( List<ClusterPoint> C );
-  abstract public void write    ( PrintStream ps );
 
 
 } // end class Classifier

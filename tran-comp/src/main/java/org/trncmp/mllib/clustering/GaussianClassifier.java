@@ -37,6 +37,10 @@ package org.trncmp.mllib.clustering;
 
 import java.util.List;
 import java.io.PrintStream;
+import java.util.Scanner;
+
+import org.trncmp.lib.IntegerMap;
+import org.trncmp.lib.FileTools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,8 +56,16 @@ public class GaussianClassifier extends Classifier {
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
+  public GaussianClassifier() {
+    // -----------------------------------------------------------------------------------
+    super();
+  }
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
   public GaussianClassifier( int n, int m ) {
     // -----------------------------------------------------------------------------------
+    super();
     for ( int i=0; i<n; i++ ) {
       Cluster C = new GaussianCluster( m, i );
       cluster.set( i, C );
@@ -64,6 +76,7 @@ public class GaussianClassifier extends Classifier {
   // -------------------------------------------------------------------------------------
   public GaussianClassifier( List<List<ClusterPoint>> labled_data ) {
     // -----------------------------------------------------------------------------------
+    super();
     logger.debug( "Presented with "+labled_data.size()+" unique classes" );
 
     for ( List<ClusterPoint> group : labled_data ) {
@@ -86,13 +99,42 @@ public class GaussianClassifier extends Classifier {
 
 
   // =====================================================================================
+  /** Read.
+   *  @param fspc Path to a Classifier Configuration file.
+   *  <p>
+   *  Static.
+   */
   // -------------------------------------------------------------------------------------
-  @Override
-  public void write( PrintStream ps ) {
+  static public GaussianClassifier read( Scanner inp ) {
     // -----------------------------------------------------------------------------------
+    GaussianClassifier cls = new GaussianClassifier();
+    int n = inp.nextInt();
+    for ( int i=0; i<n; i++ ) {
+      GaussianCluster EC = GaussianCluster.read( inp );
+      cls.set( EC.getID(), EC );
+    }
+    
+    return cls;
+  }
+
+
+  // =====================================================================================
+  /** Read.
+   *  @param fspc Path to a Classifier Configuration file.
+   *  <p>
+   *  Static.
+   */
+  // -------------------------------------------------------------------------------------
+  static public GaussianClassifier read( String fspc ) {
+    // -----------------------------------------------------------------------------------
+    Scanner scn = new Scanner( FileTools.openRead( fspc ) );
+    GaussianClassifier cls = GaussianClassifier.read( scn );
+    scn.close();
+    logger.debug( "Successfully read Gaussian classifier." );
+    return cls;
   }    
 
-  
+
 } // end class GaussianClassifier
 
 

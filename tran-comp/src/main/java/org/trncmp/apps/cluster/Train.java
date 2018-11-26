@@ -102,6 +102,25 @@ public class Train {
     return result;
   }
 
+  
+  // =====================================================================================
+  protected static int[][] TestE( String fspc, List<ClusterPoint>  labeled_data) {
+    // -----------------------------------------------------------------------------------
+    EuclideanClassifier EC = EuclideanClassifier.read( fspc );
+    EC.write( "retest-ecl.cfg" );
+    return Test( EC, labeled_data);
+  }
+
+
+  // =====================================================================================
+  protected static int[][] TestG( String fspc, List<ClusterPoint>  labeled_data) {
+    // -----------------------------------------------------------------------------------
+    GaussianClassifier GC = GaussianClassifier.read( fspc );
+    GC.write( "retest-gau.cfg" );
+    return Test( GC, labeled_data);
+  }
+
+
 
   // =====================================================================================
   protected static void processEuclidean( String inputFilename ) {
@@ -120,7 +139,9 @@ public class Train {
 
         Classifier cls = new EuclideanClassifier( clusters );
 
-        int[][] result = Test( cls, labeled_data );
+        cls.write( "test-ecl.cfg" );
+
+        int[][] result = TestE( "test-ecl.cfg", labeled_data );
 
         displayResult( System.out, result );
       } else {
@@ -148,7 +169,9 @@ public class Train {
 
         Classifier cls = new GaussianClassifier( clusters );
 
-        int[][] result = Test( cls, labeled_data );
+        cls.write( "test-gau.cfg" );
+
+        int[][] result = TestG( "test-gau.cfg", labeled_data );
 
         displayResult( System.out, result );
       } else {

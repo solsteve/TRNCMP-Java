@@ -35,6 +35,9 @@
 
 package org.trncmp.mllib.clustering;
 
+import java.io.BufferedReader;
+import java.io.PrintStream;
+import java.util.Scanner;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -184,8 +187,48 @@ public class EuclideanCluster extends Cluster {
 
     return sum;
   }
-  
- 
+
+
+  // =====================================================================================
+  /** Write.
+   *  @param ps reference to an open PrintStream.
+   */
+  // -------------------------------------------------------------------------------------
+  @Override
+  public void write( PrintStream ps ) {
+    // -----------------------------------------------------------------------------------
+    ps.format( "%d %d\n", id, num_var );
+    for ( int i=0; i<num_var; i++ ) {
+      ps.format( "%17.10f %17.10f %17.10f %17.10f\n",
+                 min_val[i], max_val[i], mean_val[i], stddev_val[i] );
+    }
+  }    
+
+
+  // =====================================================================================
+  /** Read.
+   *  @param inp reference to an open Scanner.
+   */
+  // -------------------------------------------------------------------------------------
+  static public EuclideanCluster read( Scanner inp ) {
+    // -----------------------------------------------------------------------------------
+
+    int cid = inp.nextInt();
+    int nvr = inp.nextInt();
+
+    EuclideanCluster EC = new EuclideanCluster( nvr, cid );
+
+    for ( int i=0; i<nvr; i++ ) {
+     EC.min_val[i]    = inp.nextDouble();
+     EC.max_val[i]    = inp.nextDouble();
+     EC.mean_val[i]   = inp.nextDouble();
+     EC.stddev_val[i] = inp.nextDouble();
+    }
+
+    return EC;
+  }    
+
+
 } // end class EuclideanCluster
 
 
