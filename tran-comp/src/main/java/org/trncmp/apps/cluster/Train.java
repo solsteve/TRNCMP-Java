@@ -22,13 +22,10 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @brief   
- * @file    
- *
- * @details Provides the interface and procedures 
- *
- * @author  Stephen W. Soliday
- * @date    2018-11-15
+ * Perform supervised training using labeled data.
+ * <p>
+ * @author Stephen W. Soliday
+ * @date   2018-11-15
  */
 // =======================================================================================
 
@@ -36,9 +33,10 @@ package org.trncmp.apps.cluster;
 
 import java.io.PrintStream;
 
+import org.trncmp.lib.AppOptions;
+import org.trncmp.lib.ConfigDB;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.trncmp.lib.IntegerMap;
 import org.trncmp.mllib.clustering.Cluster;
@@ -49,85 +47,22 @@ import org.trncmp.mllib.clustering.GaussianClassifier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.log4j.Level;
+
 
 // =======================================================================================
 public class Train {
   // -------------------------------------------------------------------------------------
   /** Logging */
-  private static final Logger logger = LogManager.getLogger();
-
-  // =====================================================================================
-  protected static void displayResult( PrintStream ps, int[][] R ) {
-    // -----------------------------------------------------------------------------------
-    int nr = R.length;
-    int nc = R[0].length;
-
-    ps.format( "\n       Truth\n      " );
-    for ( int c=0; c<nc; c++ ) {
-      ps.format( "   %3d", c );   
-    }
-    ps.format( "\n Class +-----+-----+-----+\n" );
-
-    for ( int r=0; r<nr; r++ ) {
-      ps.format( "  %3d  |", r );
-      for ( int c=0; c<nc; c++ ) {
-        ps.format( " %3d |", R[r][c] );   
-      }
-      ps.format( "\n       +-----+-----+-----+\n" );    
-    }
-    
-  }
+  private static final Logger logger = LogManager.getRootLogger();
 
 
   // =====================================================================================
-  protected static int[][] Test( Classifier cls, List<ClusterPoint>  labeled_data) {
-    // -----------------------------------------------------------------------------------
-    IntegerMap<Integer> map = ClusterPoint.constructClassMap( labeled_data );
-
-    int n = cls.size();
-    int[][] result = new int[n][n];
-    for ( int r=0; r<n; r++ ) {
-      for ( int c=0; c<n; c++ ) {
-        result[r][c] = 0;
-      }
-    }
-    
-    for ( ClusterPoint point : labeled_data ) {
-      int label = map.get( point.member_of_cluster() );
-      int test  = map.get( cls.classify( point ) );          
-      result[test][label] += 1;
-    }
-
-    return result;
-  }
-
-  
-  // =====================================================================================
-  protected static int[][] TestE( String fspc, List<ClusterPoint>  labeled_data) {
-    // -----------------------------------------------------------------------------------
-    EuclideanClassifier EC = EuclideanClassifier.read( fspc );
-    EC.write( "retest-ecl.cfg" );
-    return Test( EC, labeled_data);
-  }
-
-
-  // =====================================================================================
-  protected static int[][] TestG( String fspc, List<ClusterPoint>  labeled_data) {
-    // -----------------------------------------------------------------------------------
-    GaussianClassifier GC = GaussianClassifier.read( fspc );
-    GC.write( "retest-gau.cfg" );
-    return Test( GC, labeled_data);
-  }
-
-
-
-  // =====================================================================================
-  protected static void processEuclidean( String inputFilename ) {
+  protected static void processEuclidean( String inputFilename, String modelFilename ) {
     // -----------------------------------------------------------------------------------
     System.err.println( "" );    
     System.err.println( "Processing "+inputFilename+" as a Euclidian cluster." );
     System.err.println( "" );
+
     List<ClusterPoint> labeled_data = ClusterPoint.readLabeledPointsFromFile( inputFilename );
     if ( null != labeled_data ) {
 
@@ -136,24 +71,19 @@ public class Train {
       List<List<ClusterPoint>> clusters = ClusterPoint.collate( labeled_data );
       
       if ( null != clusters ) {
-
-        Classifier cls = new EuclideanClassifier( clusters );
-
-        cls.write( "test-ecl.cfg" );
-
-        int[][] result = TestE( "test-ecl.cfg", labeled_data );
-
-        displayResult( System.out, result );
+        EuclideanClassifier cls = new EuclideanClassifier.Builder().samples( clusters ).build(); 
+        cls.write( modelFilename );
       } else {
         logger.error( "No clusters were collated" );
       }
     } else {
-        logger.error( "Failed to read labeled data" );
+      logger.error( "Failed to read labeled data" );
     }
   }
-    
+
+  
   // =====================================================================================
-  protected static void processGaussian( String inputFilename ) {
+  protected static void processGaussian( String inputFilename, String modelFilename ) {
     // -----------------------------------------------------------------------------------
     System.err.println( "" );    
     System.err.println( "Processing "+inputFilename+" as a Gaussian cluster" );
@@ -166,34 +96,34 @@ public class Train {
       List<List<ClusterPoint>> clusters = ClusterPoint.collate( labeled_data );
       
       if ( null != clusters ) {
-
-        Classifier cls = new GaussianClassifier( clusters );
-
-        cls.write( "test-gau.cfg" );
-
-        int[][] result = TestG( "test-gau.cfg", labeled_data );
-
-        displayResult( System.out, result );
+        GaussianClassifier cls = new GaussianClassifier.Builder().samples( clusters ).build(); 
+        cls.write( modelFilename );
       } else {
         logger.error( "No clusters were collated" );
       }
     } else {
-        logger.error( "Failed to read labeled data" );
+      logger.error( "Failed to read labeled data" );
     }
   }
+
     
   // =====================================================================================
-  protected static void usage() {
+  static class myusage implements AppOptions.Usage {
     // -----------------------------------------------------------------------------------
-    System.err.println( "" );    
-    System.err.println( "Clustering Classifier * Supervised Learning * 2018" );    
-    System.err.println( "" );    
-    System.err.println( "USAGE: JRun cluster.Train type input.dat" );
-    System.err.println( "   type      - E[uclidean] or G[aussian]" );
-    System.err.println( "   input.dat - path to a file containing labeled data" );
-    System.err.println( "" );    
-    System.err.println( "Example: JRun cluster.Train E data/Iris/iris.labeled" );    
-    System.err.println( "" );    
+    public void display( String pn ) {
+      // ---------------------------------------------------------------------------------
+      System.err.println( "" );    
+      System.err.println( "Clustering Classifier * Supervised Learning * 2018" );    
+      System.err.println( "" );    
+      System.err.println( "USAGE: JRun "+pn+" [options]" );
+      System.err.println( "   mod - path to save a cluster config file" );
+      System.err.println( "   dat - path to a labeled data file" );
+      System.err.println( "   tp  - E[uclidean] or G[aussian]" );
+      System.err.println( "" );    
+      System.err.println( "Example: JRun "+pn+"mod=test-ecl.cfg "+
+                          "dat=data/Iris/iris.labeled tp=E" );
+      System.err.println( "" );    
+    }
   }
 
   
@@ -201,31 +131,57 @@ public class Train {
   public static void main( String[] args ) {
     // -----------------------------------------------------------------------------------
 
-    if ( 2 != args.length ) {
-      usage();
-      System.exit(1);
-    }
+    AppOptions.cli_map[] CLI = {
+      //               name   sect   cfgkey   req.  def   description
+      AppOptions.INIT( "mod", "APP", "model", true, null, "path to a model file" ),
+      AppOptions.INIT( "dat", "APP", "data",  true, null, "path to an data file" ),
+      AppOptions.INIT( "tp",  "APP", "type",  true, null, "type [E] or [G]" ),
+    };
 
-    char type = args[0].charAt(0);
+    AppOptions.init( CLI, new myusage() );
+    AppOptions.setAppName( "cluster.Train" );
+    AppOptions.setConfigBase( "app" );
+    AppOptions.setOptConfigFilename( "cfg" );
+    AppOptions.setHelp( "help" );
+    AppOptions.setCommandLine( args );
+
+    ConfigDB cfg = AppOptions.getConfigDB();
+
+    if ( null != cfg ) {
+
+      try {
     
-    switch( type ) {
-      case 'E':
-      case 'e':
-        processEuclidean( args[1] );
-        break;
-      case 'G':
-      case 'g':
-        processGaussian( args[1] );
-        break;
-      default:
-        System.err.println( "" );
-        System.err.println( "wrong type provided [" +
-                            type + "], Please use E or G" );
-        usage();
-        System.exit(2);
+        char   type        = cfg.get( "APP", "type").charAt(0);
+        String modFilename = cfg.get( "APP", "model");
+        String datFilename = cfg.get( "APP", "data");
+
+        switch( type ) {
+          case 'E':
+          case 'e':
+            processEuclidean( datFilename, modFilename );
+            break;
+          case 'G':
+          case 'g':
+            processGaussian( datFilename, modFilename );
+            break;
+          default:
+            System.err.println( "" );
+            System.err.println( "wrong type provided [" +
+                                type + "], Please use E or G" );
+            AppOptions.usage();
+            System.exit(2);
+        }
+
+        System.exit(0);
+
+      } catch( ConfigDB.NoSuchKey e1 ) {
+        logger.error( e1.toString() );
+      } catch( ConfigDB.NoSection e2 ) {
+        logger.error( e2.toString() );
+      }
     }
 
-    System.exit(0);
+    System.exit(1);
   }
 
   

@@ -24,10 +24,8 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file ClusterPoint.java
- * <p>
  * Provides interface for a sample point used in clustering.
- *
+ * <p>
  * @date 2018-11-13
  *
  */
@@ -41,6 +39,7 @@ import java.util.LinkedList;
 import org.trncmp.lib.IntegerMap;
 import org.trncmp.lib.Table;
 import org.trncmp.lib.linear.Matrix;
+import org.trncmp.lib.Dice;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,8 +49,11 @@ import org.apache.logging.log4j.Logger;
 public class ClusterPoint {
   // -------------------------------------------------------------------------------------
 
+  public static final int UNIFORM_SEED  = 0;
+  public static final int KMEANSPP_SEED = 1;
+  
   /** Logging */
-  private static final Logger logger = LogManager.getLogger();
+  private static final Logger logger = LogManager.getRootLogger();
 
   /** point coordinates in N-dimensional space. */
   protected double[] cluster_coord = null;
@@ -63,74 +65,92 @@ public class ClusterPoint {
 
 
   // =====================================================================================
-  /** Initialize.
-   *  @param src source for the data.
-   *  @param clu cluster index to assign this point to.
-   *  <p>
-   *  Initialize this point using src for the data and clu for the cluster asignment.
-   */
-  // -------------------------------------------------------------------------------------
-  protected void init_cluster_point( double[] src, int clu ) {
+  public static class Builder {
     // -----------------------------------------------------------------------------------
-    cluster_coord = src;
-    cluster_index = clu;
-  }
-  
 
+    /** coordinates */
+    private double[] cluster_coord = null;
+
+    /** identification number of the cluster tis point is a member of */
+    private int      id_number     = -1;
+
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public Builder dims( int d ) {
+      // ---------------------------------------------------------------------------------
+      cluster_coord = new double[d];
+      for ( int i=0; i<d; i++ ) {
+        cluster_coord[i] = 0.0e0;
+      }
+      return this;
+    }
+    
+    // ===================================================================================
+    public Builder coords( double[] src ) {
+      // ---------------------------------------------------------------------------------
+      int d = src.length;
+      cluster_coord = new double[d];
+      for ( int i=0; i<d; i++ ) {
+        cluster_coord[i] = src[i];
+      }
+      return this;
+    }
+    
+    // ===================================================================================
+    public Builder coords( double[] src, int offset, int d ) {
+      // ---------------------------------------------------------------------------------
+      cluster_coord = new double[d];
+      for ( int i=0; i<d; i++ ) {
+        cluster_coord[i] = src[i+offset];
+      }
+      return this;
+    }
+    
+    // ===================================================================================
+    public Builder id( int i ) {
+      // ---------------------------------------------------------------------------------
+      id_number = i;
+      return this;
+    }
+    
+    // ===================================================================================
+    public Builder copy( ClusterPoint src ) {
+      // ---------------------------------------------------------------------------------
+      int d = src.coord_dims();
+      cluster_coord = new double[d];
+      for ( int i=0; i<d; i++ ) {
+        cluster_coord[i] = src.get_coord(i);
+      }
+      id_number = src.member_of_cluster();
+      return this;     
+    }
+
+    // ===================================================================================
+    public ClusterPoint build() {
+      // ---------------------------------------------------------------------------------
+      return new ClusterPoint(this);
+    }
+    
+    
+  } // end class ClusterPoint.Builder
+
+
+
+  
   // =====================================================================================
   /** Constructor.
    *  <p>
    *  Void constructor.
    */
   // -------------------------------------------------------------------------------------
-  public ClusterPoint() {
+  protected ClusterPoint( Builder builder ) {
     // -----------------------------------------------------------------------------------
-    cluster_coord          = null;
-    cluster_index = -1;
-  }
-
-  
-  // =====================================================================================
-  /** Constructor.
-   *  @param n number of dimensions.
-   *  <p>
-   *  Create an empty point with space for n dimesions.
-   */
-  // -------------------------------------------------------------------------------------
-  public ClusterPoint( int n ) {
-    // -----------------------------------------------------------------------------------
-    init_cluster_point( new double[n], -1 );
-  }
-
-  
-  // =====================================================================================
-  /** Constructor.
-   *  @param src source for the data.
-   *  <p>
-   *  Create an unassigned point using src as the source for the data.
-   */
-  // -------------------------------------------------------------------------------------
-  public ClusterPoint( double[] src ) {
-    // -----------------------------------------------------------------------------------
-    init_cluster_point( src, -1 );
-  }
-
-  
-  // =====================================================================================
-  /** Constructor.
-   *  @param src source for the data.
-   *  @param clu cluster index to assign this point to.
-   *  <p>
-   *  Create an assigned point using src as the source for the data,
-   *  and clu for the assignment.
-   */
-  // -------------------------------------------------------------------------------------
-  public ClusterPoint( double[] src, int clu ) {
-    // -----------------------------------------------------------------------------------
-    init_cluster_point( src, clu );
+    cluster_coord = builder.cluster_coord;
+    cluster_index = builder.id_number;
   }
 
 
+ 
   // =====================================================================================
   /** Clone.
    *  @return deep copy. 
@@ -138,9 +158,9 @@ public class ClusterPoint {
   // -------------------------------------------------------------------------------------
   public ClusterPoint clone() {
     // -----------------------------------------------------------------------------------
-    ClusterPoint np = new ClusterPoint( this.cluster_coord );
-    np.assign_to_cluster( this.member_of_cluster() );
-    return np;
+    return new ClusterPoint.Builder()
+        .copy( this )
+        .build();
   }
 
 
@@ -185,28 +205,6 @@ public class ClusterPoint {
   public int coord_dims() {
     // -----------------------------------------------------------------------------------
     return cluster_coord.length;
-  }
-
-  
-  // =====================================================================================
-  /** Set.
-   *  @param src source data
-   *  <p>
-   *  Copy the source data.
-   *  @note this will leave remove any previous assignment.
-   */
-  // -------------------------------------------------------------------------------------
-  public void fromDoubleArray( double[] src ) {
-    // -----------------------------------------------------------------------------------
-    int n = src.length;
-    if ( n == cluster_coord.length ) {
-      for ( int i=0; i<n; i++ ) {
-        cluster_coord[i] = src[i];
-      }
-      remove_cluster_assignment();
-    } else {
-      init_cluster_point( src, -1 );
-    }
   }
 
   
@@ -313,7 +311,6 @@ public class ClusterPoint {
     cluster_index = -1;
   }
 
-
   // =====================================================================================
   /** Read Points.
    *  @param fspc path to a file containing data.
@@ -341,13 +338,11 @@ public class ClusterPoint {
     List<ClusterPoint> pop = new LinkedList<ClusterPoint>();
 
     int nr = data.rows();
-    int nc = data.cols();
 
     for ( int r=0; r<nr; r++ ) {
-      ClusterPoint pt = new ClusterPoint( nc );
-      pt.load_coord( data.row(r), 0 );
-      pt.remove_cluster_assignment();
-      pop.add( pt );
+      pop.add( new ClusterPoint.Builder()
+               .coords( data.row(r) )
+               .build() );
     }
    
     return pop;
@@ -389,10 +384,10 @@ public class ClusterPoint {
     int nc = data.cols();
 
     for ( int r=0; r<nr; r++ ) {
-      ClusterPoint pt = new ClusterPoint( nc );
-      pt.load_coord( data.row(r), 0 );
-      pt.assign_to_cluster( (int) label.get(r,0) );
-      pop.add( pt );
+      pop.add( new ClusterPoint.Builder()
+               .coords( data.row(r) )
+               .id( (int) label.get(r,0) )
+               .build() );
     }
 
     return pop;
@@ -402,6 +397,7 @@ public class ClusterPoint {
 
   
   // =====================================================================================
+  // Map labels (a,s,d,f...) -> (0,1,2,3...)
   // -------------------------------------------------------------------------------------
   static public IntegerMap<Integer> constructClassMap( List<ClusterPoint> points ) {
     // -----------------------------------------------------------------------------------
@@ -430,30 +426,221 @@ public class ClusterPoint {
 
 
   // =====================================================================================
+  // Group Labeled Data
   // -------------------------------------------------------------------------------------
   static public List<List<ClusterPoint>> collate( List<ClusterPoint>  points ) {
     // -----------------------------------------------------------------------------------
 
-      int[] class_id  = constructClassMap( points ).getKeys();
-      int   num_class = class_id.length;
+    int[] class_id  = constructClassMap( points ).getKeys();
+    int   num_class = class_id.length;
 
-      logger.debug( "Map has "+num_class+" unique labels" );
+    logger.debug( "Map has "+num_class+" unique labels" );
 
-      List<List<ClusterPoint>> list = new LinkedList<List<ClusterPoint>>();
+    List<List<ClusterPoint>> list = new LinkedList<List<ClusterPoint>>();
 
-      for ( int index=0; index<num_class; index++ ) {
-        int id = class_id[ index ];
+    for ( int index=0; index<num_class; index++ ) {
+      int id = class_id[ index ];
 
-        List<ClusterPoint> group = new LinkedList<ClusterPoint>();
-        for ( ClusterPoint point : points ) {
-          int point_label = point.member_of_cluster();
-          if ( id == point_label ) {
-            group.add( point.clone() );
+      List<ClusterPoint> group = new LinkedList<ClusterPoint>();
+      for ( ClusterPoint point : points ) {
+        int point_label = point.member_of_cluster();
+        if ( id == point_label ) {
+          group.add( point.clone() );
+        }
+      }
+      list.add( group );
+    }
+    return list;
+  }
+
+
+
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  protected boolean isEqual( ClusterPoint P, double tol ) {
+    // -----------------------------------------------------------------------------------
+    int n = cluster_coord.length;
+
+    for ( int i=0; i<n; i++ ) {
+      double dif = this.cluster_coord[i] - P.cluster_coord[i];
+      if ( dif < -tol ) return false;
+      if ( dif >  tol ) return false;
+    }
+    return true;
+  }
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  static boolean not_in_list( ClusterPoint[] list, int n, ClusterPoint test ) {
+    // -----------------------------------------------------------------------------------
+    for ( int i=0; i<n; i++ ) {
+      if ( test.isEqual( list[i], 1.0e-8 ) ) return false;
+    }
+    return true;
+  }
+
+  
+  // =====================================================================================
+  /** Generate Initial Centers.
+   *  @param data list of points to sample.
+   *  @param num_seed desired number of initial centroids.
+   *  @param method 0=random, 1=k-means++, 3....
+   *  @return list of the initial seed centrioids.
+   */
+  // -------------------------------------------------------------------------------------
+  public static List<ClusterPoint> gen_seed( List<ClusterPoint> data, int num_seed,
+                                             int method ) {
+    // -----------------------------------------------------------------------------------
+    if ( UNIFORM_SEED==method )  return gen_seed_random( data, num_seed );
+    if ( KMEANSPP_SEED==method ) return gen_seed_kmeanspp( data, num_seed );
+    logger.warn( "No method exists for ("+method+") reverting to uniform random" );
+    return gen_seed_random( data, num_seed );
+  }
+
+
+  
+
+  // =====================================================================================
+  /** Generate Initial Centers uning uniform random.
+   *  @param data list of points to sample.
+   *  @param num_seed desired number of initial centroids.
+   *  @return list of the initial seed centrioids.
+   */
+  // -------------------------------------------------------------------------------------
+  public static List<ClusterPoint> gen_seed_random( List<ClusterPoint> data, int num_seed ) {
+    // -----------------------------------------------------------------------------------
+
+    Dice dd = Dice.getInstance();
+
+    ClusterPoint[] points = data.toArray(new ClusterPoint[0]);
+    int            n      = points.length;
+    int[]          index  = new int[n];
+
+    // -----------------------------------------------------------------------------------
+
+    for ( int i=0; i<n; i++ ) {
+      index[i] = i;
+    }
+    dd.scramble( index, n, 3*n );
+
+    // -----------------------------------------------------------------------------------
+
+    List<ClusterPoint> seed = new LinkedList<ClusterPoint>();
+    for ( int i=0; i<num_seed; i++ ) {
+      seed.add( new ClusterPoint.Builder()
+                .copy(points[index[i]])
+                .build() );
+    }
+    
+    return seed;
+  }
+
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public static double euclid( double[] a, double[] b, int n ) {
+    // -----------------------------------------------------------------------------------
+    double sum = 0.0e0;
+    for ( int i=0; i<n; i++ ) {
+      double d = a[i] - b[i];
+      sum += (d*d);
+    }
+    return sum;
+  }
+
+  
+  // =====================================================================================
+  /** Generate Initial Centers using k-means++.
+   *  @param data list of points to sample.
+   *  @param num_seed desired number of initial centroids.
+   *  @return list of the initial seed centrioids.
+   */
+  // -------------------------------------------------------------------------------------
+  public static List<ClusterPoint> gen_seed_kmeanspp( List<ClusterPoint> data, int num_seed ) {
+    // -----------------------------------------------------------------------------------
+
+    Dice dd = Dice.getInstance();
+
+    List<ClusterPoint> seed = new LinkedList<ClusterPoint>();
+    ClusterPoint[] points  = data.toArray(new ClusterPoint[0]);
+    int            num_pts = points.length;
+    boolean[]      taken   = new boolean[num_pts];
+
+    for ( int i=0; i<num_pts; i++ ) {
+      taken[i] = false;
+    }
+
+    // -----------------------------------------------------------------------------------
+
+    int first_idx = dd.uniform(num_pts);
+    ClusterPoint P = points[ first_idx ];
+    taken[first_idx] = true;
+    int num_dim = P.coord_dims();
+
+    seed.add( new ClusterPoint.Builder()
+              .copy(P)
+              .build() );
+    
+    double[] minD2 = new double[num_pts];
+
+    for ( int i=0; i<num_pts; i++ ) {
+      if ( i != first_idx ) {
+        minD2[i] = euclid( P.get_coord(), points[i].get_coord(), num_dim );
+      } else {
+        minD2[i] = 0.0e0;
+      }
+    }
+
+    for ( int k=1; k<num_seed; k++ ) {
+
+      double sumD2 = 0.0e0;
+      for ( int i=0; i<num_pts; i++ ) {
+        if ( ! taken[i] ) {
+          sumD2 += minD2[i];
+        }
+      }
+
+      double r = dd.uniform() * sumD2;
+
+      int next = -1;
+
+      double sum = 0.0e0;
+      for ( int i=0; i<num_pts; i++ ) {
+        if ( ! taken[i] ) {
+          sum += minD2[i];
+          if ( ! (sum < r) ) {
+            next = i;
+            break;
           }
         }
-        list.add( group );
       }
-      return list;
+
+      if ( 0 > next ) {
+        do {
+          next = dd.uniform(num_pts);
+        } while( taken[next] );
+      }
+
+      P = points[next];
+      taken[next] = true;
+      seed.add( new ClusterPoint.Builder()
+                .copy(P)
+                .build() );
+      
+      for ( int i=0; i<num_pts; i++ ) {
+        if ( ! taken[i] ) {
+          double d = euclid( P.get_coord(), points[i].get_coord(), num_dim );
+          double d2 = d*d;
+          if ( d2 < minD2[i] ) {
+            minD2[i] = d2;
+          }
+        }
+      }
+
+    }
+
+    return seed;
   }
 
 

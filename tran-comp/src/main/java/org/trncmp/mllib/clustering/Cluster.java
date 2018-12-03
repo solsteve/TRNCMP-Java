@@ -50,27 +50,120 @@ public abstract class Cluster {
   // -------------------------------------------------------------------------------------
 
   /** Logging */
-  private static final Logger logger = LogManager.getLogger();
+  private static final Logger logger = LogManager.getRootLogger();
 
   /** Identification Number */
   protected int id;
   
-  /** Members of this cluster */
-  protected List<ClusterPoint> members = null;
-
   /** Number of variables */
   protected int num_var = 0;
 
+  /** Members of this cluster */
+  protected List<ClusterPoint> members = null;
+
   /** Minimum values. */
-  protected double[] min_val  = null;
+  protected double[] min_val       = null;
+  protected double[] min_val_temp  = null;
 
   /** Maximum values */
-  protected double[] max_val  = null;
+  protected double[] max_val       = null;
+  protected double[] max_val_temp  = null;
 
   /** Mean values */
-  protected double[] mean_val = null;
+  protected double[] mean_val      = null;
+  protected double[] mean_val_temp = null;
 
-  
+  protected boolean stats_run = false;
+
+  // =====================================================================================
+  public static abstract class Builder<T extends Builder<T>> {
+    // -----------------------------------------------------------------------------------
+
+    private int                id_number            = -1;
+    private int                number_of_dimensions =  0;
+    private double[]           defined_mean         =  null;
+    private List<ClusterPoint> provided_samples     =  null;
+
+    
+    protected abstract T getThis();
+
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public T id( int i ) {
+      // ---------------------------------------------------------------------------------
+      id_number = i;
+      return getThis();
+    }
+
+
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public T dims( int d ) {
+      // ---------------------------------------------------------------------------------
+      number_of_dimensions = d;
+      return getThis();
+    }
+
+    
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public T mean( ClusterPoint P ) {
+      // ---------------------------------------------------------------------------------
+      int n = P.coord_dims();
+      
+      defined_mean         = new double[n];
+
+      for ( int i=0; i<n; i++ ) {
+        defined_mean[i] = P.get_coord(i);
+      }
+
+      return getThis();
+    }
+
+    
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public T mean( double[] mu ) {
+      // ---------------------------------------------------------------------------------
+      int n = mu.length;
+      
+      defined_mean         = new double[n];
+
+      for ( int i=0; i<n; i++ ) {
+        defined_mean[i] = mu[i];
+      }
+
+      return getThis();
+    }
+
+    
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public T mean( double[] mu, int offset, int length ) {
+      // ---------------------------------------------------------------------------------
+
+      defined_mean = new double[length];
+      
+      for ( int i=0; i<length; i++ ) {
+        defined_mean[i] = mu[i+offset];
+      }
+
+      return getThis();
+    }
+
+    
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public T samples( List<ClusterPoint> list ) {
+      // ---------------------------------------------------------------------------------
+      provided_samples = list;
+
+      return getThis();
+    }
+
+  } // end class Cluster.Builder
+
+
   // =====================================================================================
   /** Initialize.
    *  @param n number of dimensions.
@@ -78,24 +171,129 @@ public abstract class Cluster {
   // -------------------------------------------------------------------------------------
   protected void resize( int n ) {
     // -----------------------------------------------------------------------------------
-    num_var  = n;
-    min_val  = new double[num_var];
-    max_val  = new double[num_var];
-    mean_val = new double[num_var];
+    num_var       = n;
+    min_val       = new double[num_var];
+    max_val       = new double[num_var];
+    mean_val      = new double[num_var];
+    min_val_temp  = new double[num_var];
+    max_val_temp  = new double[num_var];
+    mean_val_temp = new double[num_var];
   }
 
   
   // =====================================================================================
-  /** Constructor
-   *  @param n number of dimensions.
-   */
+  /** Constructor */
   // -------------------------------------------------------------------------------------
-  public Cluster() {
+  protected Cluster( Builder<?> builder ) {
     // -----------------------------------------------------------------------------------
+
+    int init_method = 0;
+
+    if ( 0 < builder.number_of_dimensions ) { init_method += 1; }
+    if ( null != builder.defined_mean )     { init_method += 2; }
+    if ( null != builder.provided_samples ) { init_method += 4; }
+
+    id      = builder.id_number;
     members = new LinkedList<ClusterPoint>();
+    
+    switch( init_method ) {
+      case 0: // ----- nothing was provided for creating a cluster -----------------------
+        logger.error( "one of .dims() .mean() .samples() must be used" );
+        System.exit(1);
+        break;
+        
+      case 1:  // ----- only dims were supplied ------------------------------------------
+        num_var = builder.number_of_dimensions;
+        resize( num_var );
+        break;
+
+      case 3: // ----- mean was supplied -------------------------------------------------
+        logger.warn( ".dims() is not necessary when using .mean()" );
+      case 2:
+        num_var = builder.defined_mean.length;
+        resize( num_var );
+        for ( int i=0; i<num_var; i++ ) {
+          mean_val[i] = builder.defined_mean[i];
+          min_val[i]  = mean_val[i];
+          max_val[i]  = mean_val[i];
+        }
+        stats_run = false;
+        break;
+
+      case 5: // ----- samples were supplied ---------------------------------------------
+        logger.warn( ".dims() is not necessary when using .samples()" );
+      case 4:
+        num_var = builder.provided_samples.get(0).coord_dims();
+        resize( num_var );
+        add( builder.provided_samples );
+        if ( 0 == basic_stats() ) {
+          logger.error( "No samples were found" );
+          System.exit(1);
+        }
+        break;
+
+      case 6: // ----- both samples and mean were provided -----------------------------
+        logger.error("Only use .mean() or .samples() not both");
+        System.exit(1);
+        break;
+
+      case 7:
+      default: // ----- wrong number of things were provided ---------------------------
+        logger.error( "one of .dims() .mean() .samples() must be used" );
+        System.exit(1);
+        break;
+    } // end switch
+    
   }
 
-  
+
+  // =====================================================================================
+  /** Basic Statisitics.
+   *  <p>
+   *  Set the basic statistics for this cluster based on the ClusterPoints in the members list.
+   */
+  // -------------------------------------------------------------------------------------
+  protected int basic_stats() {
+    // -----------------------------------------------------------------------------------
+    stats_run = false;
+
+    for ( int i=0; i<num_var; i++ ) {
+      // --- save previous values -------------------------------
+      min_val_temp[i]  = min_val[i];
+      max_val_temp[i]  = max_val[i];
+      mean_val_temp[i] = mean_val[i];
+
+      min_val[i]  =  1.0e299;
+      max_val[i]  = -1.0e299;
+      mean_val[i] = 0.0e0;
+    }
+    
+    int number_of_samples = 0;
+    
+    for ( ClusterPoint sample : members ) {
+      double[] x = sample.get_coord();
+      for ( int i=0; i<num_var; i++ ) {
+        if ( x[i] < min_val[i] ) { min_val[i] = x[i]; }
+        if ( x[i] > max_val[i] ) { max_val[i] = x[i]; }
+        mean_val[i] += x[i];
+      }
+      number_of_samples += 1;
+    }
+
+    if ( 0 < number_of_samples ) {
+      for ( int i=0; i<num_var; i++ ) {
+        mean_val[i] /= (double)number_of_samples;
+      }
+      stats_run = true;
+    }
+
+    return number_of_samples;
+  }
+
+
+
+
+
   // =====================================================================================
   /** Clear.
    *  <p>
@@ -240,54 +438,25 @@ public abstract class Cluster {
 
 
   // =====================================================================================
-  /** Basic Statisitics.
-   *  @param samples.
-   *  <p>
-   *  Set the basic statistics for this cluster based on the ClusterPoints in the members list.
+  /** Get Count.
+   *  @return number of samples compiled.
    */
   // -------------------------------------------------------------------------------------
-  protected int basic_stats() {
+  public int dims() {
     // -----------------------------------------------------------------------------------
-    for ( int i=0; i<num_var; i++ ) {
-      min_val[i]  =  1.0e299;
-      max_val[i]  = -1.0e299;
-      mean_val[i] = 0.0e0;
-    }
-    
-    int number_of_samples = 0;
-    for ( ClusterPoint sample : members ) {
-      double[] x = sample.get_coord();
-      for ( int i=0; i<num_var; i++ ) {
-        if ( x[i] < min_val[i] ) { min_val[i] = x[i]; }
-        if ( x[i] > max_val[i] ) { max_val[i] = x[i]; }
-        mean_val[i] += x[i];
-      }
-      number_of_samples += 1;
-    }
-
-    if ( 0 < number_of_samples ) {
-      for ( int i=0; i<num_var; i++ ) {
-        mean_val[i] /= (double)number_of_samples;
-      }
-    }
-
-    return number_of_samples;
+    return num_var;
   }
 
 
   abstract public int    recenter        ();
   abstract public double distanceSquared ( ClusterPoint P );
 
-
   abstract public void    write          ( PrintStream ps );
 
-
-
-
-
-
+  
 } // end class Cluster
-     
+
+
 // =======================================================================================
 // **                                   C L U S T E R                                   **
 // ======================================================================== END FILE =====

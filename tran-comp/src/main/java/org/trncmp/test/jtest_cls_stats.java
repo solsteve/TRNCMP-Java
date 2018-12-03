@@ -87,10 +87,10 @@ public class jtest_cls_stats {
         //System.out.format( ", %10.5f", x );
       }
       //System.out.format("\n");
-      samples.add( new ClusterPoint( src ) );
+      samples.add( new ClusterPoint.Builder().coords( src ).build() );
     }
 
-    EuclideanCluster stats = new EuclideanCluster( DIMS, 1 );
+    EuclideanCluster stats = new EuclideanCluster.Builder().dims(DIMS).id(1).build();
 
     stats.add( samples );
     int n = stats.recenter();
@@ -133,10 +133,10 @@ public class jtest_cls_stats {
         //System.out.format( ", %10.5f", x );
       }
       //System.out.format("\n");
-      samples.add( new ClusterPoint( src ) );
+      samples.add( new ClusterPoint.Builder().coords( src ).build() );
     }
 
-    GaussianCluster stats = new GaussianCluster( DIMS, 1 );
+    GaussianCluster stats = new GaussianCluster.Builder().dims(DIMS).id(1).build();
 
     stats.add( samples );
     int n = stats.recenter();

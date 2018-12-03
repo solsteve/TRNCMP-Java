@@ -332,6 +332,70 @@ public class Math2 implements MathConstants {
   public static double MaxValue( double[] x ) { return x[ Math2.MaxIndex(x) ]; }
   public static double MinValue( double[] x ) { return x[ Math2.MinIndex(x) ]; }
 
+  // =====================================================================================
+  /** Minimum row col.
+   *  @param coord row and column containing minimum value.
+   *  @param array pointer to 2D array.
+   */
+  // -------------------------------------------------------------------------------------
+  public static int[] minarg( double[][] array ) {
+    // -----------------------------------------------------------------------------------
+    int nr = array.length;
+    int nc = array[0].length;
+
+    double min_val = array[0][0];
+    int    min_row = 0;
+    int    min_col = 0;
+    
+    for ( int r=0; r<nr; r++ ) {
+      for ( int c=0; c<nc; c++ ) {
+        double test = array[r][c];
+        if ( test < min_val ) {
+          min_val = test;
+          min_row = r;
+          min_col = c;
+        }
+      }
+    }
+
+    int[] rv = { min_row, min_col };
+
+    return rv;
+  }
+
+
+  // =====================================================================================
+  /** Maximum row col.
+   *  @param coord row and column containing maximum value.
+   *  @param array pointer to 2D array.
+   */
+  // -------------------------------------------------------------------------------------
+  public static int[] maxarg( double[][] array ) {
+    // -----------------------------------------------------------------------------------
+    int nr = array.length;
+    int nc = array[0].length;
+
+    double max_val = array[0][0];
+    int    max_row = 0;
+    int    max_col = 0;
+    
+    for ( int r=0; r<nr; r++ ) {
+      for ( int c=0; c<nc; c++ ) {
+        double test = array[r][c];
+        if ( test > max_val ) {
+          max_val = test;
+          max_row = r;
+          max_col = c;
+        }
+      }
+    }
+
+    int[] rv = { max_row, max_col };
+
+    return rv;
+  }
+
+
 
   // ===================================================================================
   public static double dist2( double x1, double x2 ) {

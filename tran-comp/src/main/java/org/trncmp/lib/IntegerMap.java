@@ -136,7 +136,7 @@ public class IntegerMap<T> {
   // -------------------------------------------------------------------------------------
   public boolean hasKey( Integer key ) {
     // -----------------------------------------------------------------------------------
-    if ( 1 > key ) {
+    if ( 0 > key ) {
       return false;
     }
     return imap.containsKey( key );

@@ -49,62 +49,118 @@ public class EuclideanCluster extends Cluster {
   // -------------------------------------------------------------------------------------
 
   /** Logging */
-  private static final Logger logger = LogManager.getLogger();
+  private static final Logger logger = LogManager.getRootLogger();
 
   /** Standard deviation of the mean */
   protected double[] stddev_val = null;
 
+
+  // =====================================================================================
+  public static class Builder extends Cluster.Builder<Builder> {
+    // -----------------------------------------------------------------------------------
+    private double[] defined_stddev = null;
+
+    
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    @Override
+    public Builder getThis() {
+      // ---------------------------------------------------------------------------------
+      return this;
+    }
+
+    
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public Builder stddev( double[] S ) {
+      // ---------------------------------------------------------------------------------
+      int n = S.length;
+      defined_stddev = new double[n];
+      for ( int i=0; i<n; i++ ) {
+        defined_stddev[i] = S[i];
+      }
+      return this;
+    }
+
+    
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public Builder stddev( double[] S, int offset, int length ) {
+      // ---------------------------------------------------------------------------------
+      defined_stddev = new double[length];
+      for ( int i=0; i<length; i++ ) {
+        defined_stddev[i] = S[i+offset];
+      }
+      return this;
+    }
+
+
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public EuclideanCluster build() {
+      // ---------------------------------------------------------------------------------
+      return new EuclideanCluster(this);
+    }
+
+  } // end class EuclideanCluster.Builder
+
+
+
   
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  protected void compute_stddev() {
+    // -----------------------------------------------------------------------------------
+    int n = members.size();
+    if ( 0 < n ) {
+      if ( ! stats_run ) { basic_stats(); }
+
+      for ( int i=0; i<num_var; i++ ) {
+        stddev_val[i] = 0.0e0;
+      }
+
+      if ( ! stats_run ) { basic_stats(); }
+
+      for ( ClusterPoint sample : members ) {
+        double[] x = sample.get_coord();
+        for ( int i=0; i<num_var; i++ ) {
+          double d = mean_val[i] - x[i];
+          stddev_val[i] += (d*d);
+        }
+      }
+      
+      for ( int i=0; i<num_var; i++ ) {
+        stddev_val[i] = Math.sqrt( stddev_val[i] / (double)(n - 1) );
+      }
+      
+      
+    } else {
+      logger.error( "There are no members to sample" );
+    }
+  }
+
+
   // =====================================================================================
   /** Constructor
    *  @param n number of dimensions.
    */
   // -------------------------------------------------------------------------------------
-  public EuclideanCluster( int n, int id_num ) {
+  protected EuclideanCluster( Builder builder ) {
     // -----------------------------------------------------------------------------------
-    resize(n); // set the parent class member data
-    stddev_val = new double[n];
-    id         = id_num;
-  }
-    
+    super( builder );
 
-  // =====================================================================================
-  /** Constructor
-   *  @param P point representing the Cluter's center.
-   */
-  // -------------------------------------------------------------------------------------
-  public EuclideanCluster( ClusterPoint P, int id_num ) {
-    // -----------------------------------------------------------------------------------
-    int n = P.coord_dims();
-    resize(n); // set the parent class member data
-    stddev_val = new double[n];
-    id         = id_num;
-  }
-    
+    stddev_val = new double[ num_var ];
 
-  // =====================================================================================
-  /** Constructor
-   *  @param init_pop members in this cluster.
-   */
-  // -------------------------------------------------------------------------------------
-  public EuclideanCluster( List<ClusterPoint> init_pop, int id_num ) {
-    // -----------------------------------------------------------------------------------
-    if ( 0 < init_pop.size() ) {
-      int n = init_pop.get(0).coord_dims();
-      resize(n); // set the parent class member data
-    
-      stddev_val = new double[n];
-      id         = id_num;
-
-      add( init_pop );
-      recenter();
+    if ( stats_run ) {
+      compute_stddev();
     } else {
-      logger.error( "Data point list is empty." );
-      System.exit(1);
+      for ( int i=0; i<num_var; i++ ) {
+        stddev_val[i] = ( (null == builder.defined_stddev) ?
+                          (1.0e0) :
+                          (builder.defined_stddev[i]) );
+      }
     }
   }
-
-
 
 
 
@@ -141,27 +197,9 @@ public class EuclideanCluster extends Cluster {
   @Override
   public int recenter() {
     // -----------------------------------------------------------------------------------
-    for ( int i=0; i<num_var; i++ ) {
-      stddev_val[i] = 0.0e0;
-    }
-
-    int n = basic_stats();
-
-    if ( 0 < n ) {
-      for ( ClusterPoint sample : members ) {
-        double[] x = sample.get_coord();
-        for ( int i=0; i<num_var; i++ ) {
-          double d = mean_val[i] - x[i];
-          stddev_val[i] += (d*d);
-        }
-      }
-      
-      for ( int i=0; i<num_var; i++ ) {
-        stddev_val[i] = Math.sqrt( stddev_val[i] / (double)(n - 1) );
-      }
-    }
-
-    return n;
+    stats_run = false;
+    compute_stddev();
+    return members.size();
   }
 
 
@@ -177,15 +215,7 @@ public class EuclideanCluster extends Cluster {
   @Override
   public double distanceSquared( ClusterPoint P ) {
     // -----------------------------------------------------------------------------------
-    double[] x   = P.get_coord();
-    double   sum = 0.0e0;
-
-    for ( int i=0; i<num_var; i++ ) {
-      double d = x[i] - mean_val[i];
-      sum += (d*d);
-    }
-
-    return sum;
+    return ClusterPoint.euclid( P.get_coord(), mean_val, num_var );
   }
 
 
@@ -216,13 +246,16 @@ public class EuclideanCluster extends Cluster {
     int cid = inp.nextInt();
     int nvr = inp.nextInt();
 
-    EuclideanCluster EC = new EuclideanCluster( nvr, cid );
+    EuclideanCluster EC = new EuclideanCluster.Builder()
+        .dims(nvr)
+        .id(cid)
+        .build();
 
     for ( int i=0; i<nvr; i++ ) {
-     EC.min_val[i]    = inp.nextDouble();
-     EC.max_val[i]    = inp.nextDouble();
-     EC.mean_val[i]   = inp.nextDouble();
-     EC.stddev_val[i] = inp.nextDouble();
+      EC.min_val[i]    = inp.nextDouble();
+      EC.max_val[i]    = inp.nextDouble();
+      EC.mean_val[i]   = inp.nextDouble();
+      EC.stddev_val[i] = inp.nextDouble();
     }
 
     return EC;

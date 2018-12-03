@@ -24,10 +24,8 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file Classifier.java
- * <p>
  * Provides interface for a Clustering Classifier.
- *
+ * <p>
  * @date 2018-11-13
  *
  */
@@ -51,22 +49,165 @@ abstract public class Classifier {
   // -------------------------------------------------------------------------------------
 
   /** Logging */
-  private static final Logger logger = LogManager.getLogger();
+  private static final Logger logger = LogManager.getRootLogger();
 
   /** Array of clusters */
   IntegerMap<Cluster> cluster = null;
 
-  public int size() { return cluster.size(); }
-  
+  /** number of dimensions. */
+  int num_dims = 0;
+
+  // =====================================================================================
+  public static abstract class Builder<T extends Builder<T>> {
+    // -----------------------------------------------------------------------------------
+
+    protected int                      num_centers      = 0;
+    protected int                      num_dims         = 0;
+
+    protected List<ClusterPoint>       provided_centers = null;
+    protected List<List<ClusterPoint>> provided_samples = null;
+
+    protected int                      init_method      = 0;
+    
+    protected abstract T getThis();
+
+    // ===================================================================================
+    /** Set number of dimensions                                                        */
+    // -----------------------------------------------------------------------------------
+    public T dims( int d ) {
+      // ---------------------------------------------------------------------------------
+      num_dims = d;
+
+      return getThis();
+    }
+
+    // ===================================================================================
+    /** Set number of dimensions                                                        */
+    // -----------------------------------------------------------------------------------
+    public T centers( int c ) {
+      // ---------------------------------------------------------------------------------
+      num_centers = c;
+
+      return getThis();
+    }
+
+    // ===================================================================================
+    /** Set number of dimensions                                                        */
+    // -----------------------------------------------------------------------------------
+    public T centers( List<ClusterPoint> C ) {
+      // ---------------------------------------------------------------------------------
+      provided_centers = C;
+
+      return getThis();
+    }
+
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public T samples( List<List<ClusterPoint>> S ) {
+      // ---------------------------------------------------------------------------------
+      provided_samples = S;
+
+      return getThis();
+    }
+
+  } // end class Classifier.Builder
+
+
   // =====================================================================================
   /** Void Constructor.
    */
   // -------------------------------------------------------------------------------------
-  Classifier() {
+  protected Classifier( Builder<?> builder ) {
     // -----------------------------------------------------------------------------------
-    logger.debug( "Executing root constructor" );
+
+    builder.init_method = 0;
+    
+    if ( null != builder.provided_centers ) { builder.init_method += 1; }
+    if ( null != builder.provided_samples ) { builder.init_method += 2; }
+    if ( 0    <  builder.num_centers )      { builder.init_method += 4; }
+    if ( 0    <  builder.num_dims )         { builder.init_method += 8; }
+    
+    switch( builder.init_method ) {
+      // ----- these are the only valid combinations -----------------
+      case 0:
+      case 1:
+      case 2:
+      case 12:
+        logger.debug( "builder.init_method = "+builder.init_method );
+        break;
+        // -------------------------------------------------------------
+
+      case 3:
+      case 7:
+      case 11:
+      case 15:
+        logger.error( ".samples() and .centers(List) cannot be used togeather" );
+        System.exit(1);
+        break;
+
+      case 4:
+      case 8:
+        logger.error( ".centers(n) and .dims() must be used togeather" );
+        System.exit(1);
+        break;
+        
+      case 5:
+        logger.error( ".centers(n) and .centers(List) cannot be used togeather" );
+        System.exit(1);
+        break;
+        
+      case 6:
+        logger.error( ".centers(n) and .samples() cannot be used togeather" );
+        System.exit(1);
+        break;
+
+      case 9:
+        logger.error( ".dims(n) and .centers(List) cannot be used togeather" );
+        System.exit(1);
+        break;
+        
+      case 10:
+        logger.error( ".dims() and .samples() cannot be used togeather" );
+        System.exit(1);
+        break;
+
+      case 13:
+        logger.error( ".centers(n) .dims() and .centers(List) cannot be used togeather" );
+        System.exit(1);
+        break;
+        
+      case 14:
+        logger.error( ".centers(n) .dims() and .samples() cannot be used togeather" );
+        System.exit(1);
+        break;
+        
+      default:
+        logger.error( "this really should not have happened" );
+        System.exit(1);
+        break;
+    }
+
     cluster = new IntegerMap<Cluster>();
   }
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public int count() {
+    // -----------------------------------------------------------------------------------
+    return cluster.size();
+  }
+
+  
+  // =====================================================================================
+  /** Get Count.
+   *  @return number of samples compiled.
+   */
+  // -------------------------------------------------------------------------------------
+  public int dims() {
+    // -----------------------------------------------------------------------------------
+    return num_dims;
+  }
+
 
   // =====================================================================================
   /** Classify Point.
@@ -95,6 +236,40 @@ abstract public class Classifier {
 
 
   // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  protected void clear_clusters() {
+    // -----------------------------------------------------------------------------------
+    IntegerMap.Iterator<Cluster> it = cluster.iterator();
+    while ( it.hasNext() ) {
+      it.next().clear();
+    }
+  }
+
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  protected void recenter_clusters() {
+    // -----------------------------------------------------------------------------------
+    IntegerMap.Iterator<Cluster> it = cluster.iterator();
+    while ( it.hasNext() ) {
+      Cluster C = it.next();
+      if ( 1 < C.count() ) {
+        C.recenter();
+      } else {
+        System.err.println( "Empty cluster detected" );
+      }
+    }
+  }
+
+
+  // =====================================================================================
+  public int[] getLabels() {
+    // -----------------------------------------------------------------------------------
+    return cluster.getKeys();
+  }
+
+  
+  // =====================================================================================
   public Cluster get( Integer key ) {
     // -----------------------------------------------------------------------------------
     return cluster.get( key );
@@ -105,9 +280,8 @@ abstract public class Classifier {
   public void set( Integer key, Cluster cls ) {
     // -----------------------------------------------------------------------------------
     cluster.set( key, cls );
+    num_dims = cls.dims();
   }
-
-
 
   
   // =====================================================================================
@@ -135,10 +309,31 @@ abstract public class Classifier {
     PrintStream ps = FileTools.openWrite( fspc );
     write( ps );
     ps.close();
+  }
+
+  
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public void learn( List<ClusterPoint> points, int max_gen ) {
+    // -----------------------------------------------------------------------------------
+
+    for (int gen=0; gen<max_gen; gen++) {
+
+      clear_clusters();
+        
+      for ( ClusterPoint point : points ) {
+        point.remove_cluster_assignment();
+        int label = classify( point );
+        cluster.get(label).add( point );
+      }
+      
+      recenter_clusters();
+
+    }
+    
   }    
 
 
-  abstract public void learn    ( List<ClusterPoint> C );
 
 
 } // end class Classifier

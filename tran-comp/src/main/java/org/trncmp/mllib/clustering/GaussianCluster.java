@@ -50,7 +50,7 @@ public class GaussianCluster extends Cluster {
   // -------------------------------------------------------------------------------------
 
   /** Logging */
-  private static final Logger logger = LogManager.getLogger();
+  private static final Logger logger = LogManager.getRootLogger();
 
   /** Covariance of the ClusterPoints in the members list. */
   protected Matrix covariance = null;
@@ -58,65 +58,109 @@ public class GaussianCluster extends Cluster {
   /** Inverse of the Covariance matrix. This is the precision matrix. */
   protected Matrix inv_cov    = null;
 
+  // =====================================================================================
+  public static class Builder extends Cluster.Builder<Builder> {
+    // -----------------------------------------------------------------------------------
+    private Matrix defined_cov = null;
+
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    @Override
+    public Builder getThis() {
+      // ---------------------------------------------------------------------------------
+      return this;
+    }
+
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public Builder cov( Matrix C ) {
+      // ---------------------------------------------------------------------------------
+      defined_cov = new Matrix( C );
+      return this;
+    }
+
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public GaussianCluster build() {
+      // ---------------------------------------------------------------------------------
+      return new GaussianCluster(this);
+    }
+
+  } // end class GaussianCluster.Builder
+
+
+  
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  protected void compute_covariance() {
+    // -----------------------------------------------------------------------------------
+    int n = members.size();
+    if ( 0 < n ) {
+      if ( ! stats_run ) { basic_stats(); }
+
+      for ( int r=0; r<num_var; r++ ) {
+        for ( int c=0; c<num_var; c++ ) {
+          covariance.A[r][c] = 0.0e0;
+        }
+      }
+
+      for ( int r=0; r<num_var; r++ ) {
+        double rmean = mean_val[r];
+        for ( int c=r; c<num_var; c++ ) {
+          double cmean = mean_val[c];
+          double c_sum = 0.0e0;
+          for ( ClusterPoint sample : members ) {
+            double rx = sample.get_coord(r) - rmean;
+            double cx = sample.get_coord(c) - cmean;
+            c_sum += ( rx * cx );
+          }
+          c_sum /= (double)(n - 1);
+          covariance.A[r][c] = c_sum;
+          covariance.A[c][r] = c_sum;
+        }
+      }
+
+      inv_cov.invert( covariance );
+
+    } else {
+      logger.error( "There are no members to sample" );
+    }
+  }
+
   
   // =====================================================================================
   /** Constructor
    *  @param n number of dimensions.
    */
   // -------------------------------------------------------------------------------------
-  public GaussianCluster( int n, int id_num ) {
+  protected GaussianCluster(  Builder builder  ) {
     // -----------------------------------------------------------------------------------
-    resize(n); // set the parent class member data
-    covariance = new Matrix(n,n);
-    inv_cov    = new Matrix(n,n);
-    id         = id_num;
-  }
+    super( builder );
 
+    covariance = new Matrix(num_var,num_var);
+    inv_cov    = new Matrix(num_var,num_var);
 
-  // =====================================================================================
-  /** Constructor
-   *  @param P   point representing the Cluter's center..
-   *  @param cov covariance of the cluster.
-   */
-  // -------------------------------------------------------------------------------------
-  public GaussianCluster( ClusterPoint P, Matrix cov, int id_num ) {
-    // -----------------------------------------------------------------------------------
-    int n = P.coord_dims();
-    resize(n); // set the parent class member data
-    covariance = cov;
-    inv_cov    = new Matrix(n,n);
-    inv_cov.invert(cov);
-    id         = id_num;
-  }
-    
-
-  // =====================================================================================
-  /** Constructor
-   *  @param init_pop members in this cluster.
-   */
-  // -------------------------------------------------------------------------------------
-  public GaussianCluster( List<ClusterPoint> init_pop, int id_num ) {
-    // -----------------------------------------------------------------------------------
-    if ( 0 < init_pop.size() ) {
-      int n = init_pop.get(0).coord_dims();
-      resize(n); // set the parent class member data
-    
-      covariance = new Matrix(n,n);
-      inv_cov    = new Matrix(n,n);
-      id         = id_num;
-
-      add( init_pop );
-      recenter();
+    if ( stats_run ) {
+      compute_covariance();
     } else {
-      logger.error( "Data point list is empty." );
-      System.exit(1);
+      if ( null != builder.defined_cov ) {
+        covariance.copy( builder.defined_cov );
+        inv_cov.invert(covariance);
+      } else {
+        for ( int i=0; i<num_var; i++ ) {
+          for ( int j=0; j<num_var; j++ ) {
+            double x = ( (i==j) ? (1.0e0) : (0.0e0) );
+            covariance.A[i][j] = x;
+            inv_cov.A[i][j]    = x;
+          }
+        }
+      }
     }
   }
 
 
-
-
-
+  
 
   // =====================================================================================
   /** Get Covariance.
@@ -153,36 +197,9 @@ public class GaussianCluster extends Cluster {
   @Override
   public int recenter() {
     // -----------------------------------------------------------------------------------
-    for ( int r=0; r<num_var; r++ ) {
-      for ( int c=0; c<num_var; c++ ) {
-        covariance.A[r][c] = 0.0e0;
-        inv_cov.A[r][c]    = 1.0e0;
-      }
-    }
-
-    int n = basic_stats();
-
-    if ( 0 < n ) {
-      for ( int r=0; r<num_var; r++ ) {
-        double rmean = mean_val[r];
-        for ( int c=r; c<num_var; c++ ) {
-          double cmean = mean_val[c];
-          double c_sum = 0.0e0;
-          for ( ClusterPoint sample : members ) {
-            double rx = sample.get_coord(r) - rmean;
-            double cx = sample.get_coord(c) - cmean;
-            c_sum += ( rx * cx );
-          }
-          c_sum /= (double)(n - 1);
-          covariance.A[r][c] = c_sum;
-          covariance.A[c][r] = c_sum;
-        }
-      }
-
-      inv_cov.invert( covariance );
-    }
-
-    return n;
+    stats_run = false;
+    compute_covariance();
+    return members.size();
   }
 
   
@@ -239,8 +256,6 @@ public class GaussianCluster extends Cluster {
   }    
 
 
-
-
   // =====================================================================================
   /** Read.
    *  @param br reference to an open Scanner.
@@ -252,29 +267,31 @@ public class GaussianCluster extends Cluster {
     int cid = inp.nextInt();
     int nvr = inp.nextInt();
 
-    GaussianCluster EC = new GaussianCluster( nvr, cid );
+    GaussianCluster GC = new GaussianCluster.Builder()
+        .dims(nvr)
+        .id(cid)
+        .build();
 
     for ( int i=0; i<nvr; i++ ) {
-     EC.min_val[i]    = inp.nextDouble();
-     EC.max_val[i]    = inp.nextDouble();
-     EC.mean_val[i]   = inp.nextDouble();
+      GC.min_val[i]    = inp.nextDouble();
+      GC.max_val[i]    = inp.nextDouble();
+      GC.mean_val[i]   = inp.nextDouble();
     }
 
     for ( int r=0; r<nvr; r++ ) {
-        for ( int c=r; c<nvr; c++ ) {
-          EC.covariance.A[r][c] = inp.nextDouble();
-          if ( r != c ) {
-            EC.covariance.A[c][r] = EC.covariance.A[r][c];
-          }
+      for ( int c=r; c<nvr; c++ ) {
+        GC.covariance.A[r][c] = inp.nextDouble();
+        if ( r != c ) {
+          GC.covariance.A[c][r] = GC.covariance.A[r][c];
         }
+      }
     }
 
-    EC.inv_cov.invert( EC.covariance );
+    GC.inv_cov.invert( GC.covariance );
 
-    return EC;
+    return GC;
   }
 
-  
 
 } // end class GaussianCluster
 

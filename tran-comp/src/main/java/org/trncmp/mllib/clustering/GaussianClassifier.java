@@ -51,51 +51,102 @@ public class GaussianClassifier extends Classifier {
   // -------------------------------------------------------------------------------------
 
   /** Logging */
-  private static final Logger logger = LogManager.getLogger();
+  private static final Logger logger = LogManager.getRootLogger();
 
 
   // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public GaussianClassifier() {
+  public static class Builder extends Classifier.Builder<Builder> {
     // -----------------------------------------------------------------------------------
-    super();
-  }
 
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public GaussianClassifier( int n, int m ) {
+
+    // ===================================================================================
     // -----------------------------------------------------------------------------------
-    super();
-    for ( int i=0; i<n; i++ ) {
-      Cluster C = new GaussianCluster( m, i );
-      cluster.set( i, C );
+    @Override
+    public Builder getThis() {
+      // ---------------------------------------------------------------------------------
+      return this;
     }
-  }
+
+    
+    // ===================================================================================
+    // -----------------------------------------------------------------------------------
+    public GaussianClassifier build() {
+      // ---------------------------------------------------------------------------------
+      return new GaussianClassifier( this );
+    }
+
+  } // end class GaussianClassifier.Builder
+
+
+
+
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  public GaussianClassifier( List<List<ClusterPoint>> labled_data ) {
+  public GaussianClassifier( Builder builder ) {
     // -----------------------------------------------------------------------------------
-    super();
-    logger.debug( "Presented with "+labled_data.size()+" unique classes" );
+    super( builder );
+    
+    int key = -1;
 
-    for ( List<ClusterPoint> group : labled_data ) {
-      int n = group.size();
-      if ( 0 < n ) {
-        int key = group.get(0).member_of_cluster();
+    switch( builder.init_method ) {
+
+      case 0:   // ----- empty classifier -----------------------------------------------
+        break;
+
+      case 1:   // ----- provided centers -----------------------------------------------
+
+        logger.debug( "Presented with "+builder.provided_centers.size()+" initial centers" );
+
+        key = 1;
+        for ( ClusterPoint center : builder.provided_centers ) {
+          cluster.set( key,
+                       new GaussianCluster.Builder()
+                       .id( key )
+                       .mean( center )
+                       .build() );
+          key += 1;
+        }
+
+        break ;
         
-        cluster.set( key, new GaussianCluster( group, key ) );
-      }
-    }
-  }
+      case 2:   // ----- provided samples -----------------------------------------------
 
-  
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  @Override
-  public void learn( List<ClusterPoint> C ) {
-    // -----------------------------------------------------------------------------------
-  }    
+        logger.debug( "Presented with "+builder.provided_samples.size()+" unique classes" );
+
+        for ( List<ClusterPoint> group : builder.provided_samples ) {
+          int n = group.size();
+          if ( 0 < n ) {
+            key = group.get(0).member_of_cluster();
+        
+            cluster.set( key,
+                         new GaussianCluster.Builder()
+                         .id( key )
+                         .samples( group )
+                         .build() );
+          }
+        }
+
+        break ;
+
+      case 12:  // ----- empty classifier -----------------------------------------------
+
+        for ( int i=0; i<builder.num_centers; i++ ) {
+          Cluster C = new GaussianCluster.Builder()
+              .id(i)
+              .dims(builder.num_dims)
+              .build();
+          cluster.set( i, C );
+        }
+        break ;
+        
+      default:  // ----------------------------------------------------------------------
+        logger.error( "this really should not have happened" );
+        System.exit(1);
+        break;
+    }
+
+  }
 
 
   // =====================================================================================
@@ -107,7 +158,8 @@ public class GaussianClassifier extends Classifier {
   // -------------------------------------------------------------------------------------
   static public GaussianClassifier read( Scanner inp ) {
     // -----------------------------------------------------------------------------------
-    GaussianClassifier cls = new GaussianClassifier();
+    GaussianClassifier cls = new GaussianClassifier.Builder().build();
+
     int n = inp.nextInt();
     for ( int i=0; i<n; i++ ) {
       GaussianCluster EC = GaussianCluster.read( inp );
