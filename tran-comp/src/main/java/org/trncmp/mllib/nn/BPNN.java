@@ -2,20 +2,23 @@
 // **                                      B P N N                                      **
 // =======================================================================================
 // **                                                                                   **
-// **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
-// **                      One Wall Street #1, Burlington, MA 01803                     **
+// **  Copyright (c) 2018, Stephen W. Soliday                                           **
+// **                      stephen.soliday@trncmp.org                                   **
+// **                      http://research.trncmp.org                                   **
 // **                                                                                   **
 // **  -------------------------------------------------------------------------------  **
 // **                                                                                   **
-// **  This file, and associated source code, is not free software; you may not         **
-// **  redistribute it and/or modify it. This file is part of a research project        **
-// **  that is in a development phase. No part of this research has been publicly       **
-// **  distributed. Research and development for this project has been at the sole      **
-// **  cost in both time and funding by L3 Technologies Advanced Programs.              **
+// **  This program is free software: you can redistribute it and/or modify it under    **
+// **  the terms of the GNU General Public License as published by the Free Software    **
+// **  Foundation, either version 3 of the License, or (at your option)                 **
+// **  any later version.                                                               **
 // **                                                                                   **
-// **  Any reproduction of computer software or portions thereof marked with this       **
-// **  legend must also reproduce the markings.  Any person who has been provided       **
-// **  access to such software must promptly notify L3 Technologies Advanced Programs.  **
+// **  This program is distributed in the hope that it will be useful, but WITHOUT      **
+// **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    **
+// **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.   **
+// **                                                                                   **
+// **  You should have received a copy of the GNU General Public License along with     **
+// **  this program. If not, see <http://www.gnu.org/licenses/>.                        **
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
@@ -23,15 +26,8 @@
  * <p>
  * Provides interface and methods for a Backpropagation Neural network.
  *
- * @date 2018-08-24
+ * @date 2018-12-23
  *
- * ---------------------------------------------------------------------------------------
- *
- * @note This code was ported from a C++ version contained in the TRNCMP
- *       Machine learning Research Library. (formerly SolLib)
- *
- * @author Stephen W. Soliday
- * @date 2014-06-27
  */
 // =======================================================================================
 
@@ -51,8 +47,11 @@ import org.trncmp.lib.Dice;
 import org.trncmp.lib.FileTools;
 import org.trncmp.lib.Math2;
 
+import org.hipparchus.util.FastMath;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 
 // =======================================================================================
 public class BPNN {
@@ -60,456 +59,621 @@ public class BPNN {
 
   private static final Logger logger = LogManager.getLogger();
 
-  protected int        nInp = 0;     // number of inputs
-  protected int        nHid = 0;     // number of hidden nodes
-  protected int        nOut = 0;     // number of outputs
-
-  protected double[][] w1   = null;  // input-hidden  layer weights
-  protected double[][] w2   = null;  // hidden-output layer weights
-
-  protected double[]   b1   = null;  // input-hidden  layer bias
-  protected double[]   b2   = null;  // hidden-output layer bias
+  private static Dice dd = Dice.getInstance();
   
-  protected double[]   z1   = null;  // sum of weighted inputs
-  protected double[]   z2   = null;  // sum of weighted hidden
-  
-  protected double[]   a1   = null;  // output of hidden nodes
-  protected double[]   a2   = null;  // output of hidden nodes
-
-  protected double[]   d1   = null;  // output layer delta
-  protected double[]   d2   = null;  // hidden layer delta
-
-  protected double[][] dW1  = null;  // input-hidden  layer accumulated weight delta
-  protected double[][] dW2  = null;  // hidden-output layer accumulated weight delta
-
-  protected double[]   dB1  = null;  // input-hidden  layer accumulated bias delta
-  protected double[]   dB2  = null;  // hidden-output layer accumulated bias delta
-  
-  
-
   // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public static class Builder {
+  static public class Layer {
     // -----------------------------------------------------------------------------------
 
-    protected int    nInp           = 0; // number of inputs
-    protected int    nHid           = 0; // number of hidden nodes
-    protected int    nOut           = 0; // number of outputs
-    protected String configFilename = null;
+    public int        num_inp = 0;    /** Number of inputs */
+    public int        num_out = 0;    /** Number of nodes (or Outputs) */
 
-    private   int    cfg_count      = 0;
+    public double[][] W       = null; /** Weight Matrix */
+    public double[]   b       = null; /** Bias Vector   */
+
+    public double[][] dW      = null; /** Cumulative delta Weight Matrix */
+    public double[]   db      = null; /** Cumulative delta Bias Vector   */
+
+    public double[]   Z       = null; /** Weighted sum vector. */
+    public double[]   A       = null; /** Activation Vector. */
+    public double[]   E       = null; /** Error vector */
+    public double[]   D       = null; /** Delta vector */
 
     
-    // ===================================================================================
-    /** @brief Constructor
+    // =====================================================================================
+    /** Allocate space.
+     *  @param nInp number of inputs to this layer.
+     *  @param nOut number of nodes (outputs) in this layer.
      */
-    // -----------------------------------------------------------------------------------
-    public Builder() {
-      // ---------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------
+    protected void alloc( int nInp, int nOut ) {
+      // -----------------------------------------------------------------------------------
+      num_inp = nInp;
+      num_out = nOut;
+      
+      W  = new double[num_out][num_inp];
+      dW = new double[num_out][num_inp];
+      b  = new double[num_out];
+      db = new double[num_out];
+      Z  = new double[num_out];
+      A  = new double[num_out];
+      E  = new double[num_out];
+      D  = new double[num_out];
     }
 
     
-    // ===================================================================================
-    /** @brief Add I/O
-     *  @param ni number of inputs.
-     *  @param no number of outputs.
+    // =====================================================================================
+    /** Constructor.
+     *  @param nInp number of inputs to this layer.
+     *  @param nOut number of nodes (outputs) in this layer.
      */
-    // -----------------------------------------------------------------------------------
-    public Builder io( int ni, int no ) {
-      // ---------------------------------------------------------------------------------
-      nInp       = ni;
-      nOut       = no;
-      nHid       = ni+no;
-      cfg_count += 1;
-      return this;
+    // -------------------------------------------------------------------------------------
+    public Layer( int nInp, int nOut ) {
+      // -----------------------------------------------------------------------------------
+      alloc( nInp, nOut );
     }
 
     
-    // ===================================================================================
-    /** @brief Add hidden
-     *  @param nh number of hidden nodes.
+    // =====================================================================================
+    /** Randomize weights and bias.
+     *  @param scale scale for random numbers
+     *
+     *  Set each weight or bias uniformily between (-scale,+scale)
      */
-    // -----------------------------------------------------------------------------------
-    public Builder hidden( int nh ) {
-      // ---------------------------------------------------------------------------------
-      nHid = nh;
-      return this;
-    }
-
-    
-    // ===================================================================================
-    /** @brief Add Filename
-     *  @param fspc path to file containing configuration.
-     */
-    // -----------------------------------------------------------------------------------
-    public Builder file( String fspc ) {
-      // ---------------------------------------------------------------------------------
-      configFilename = fspc;
-      cfg_count     += 1;
-      return this;
-    }
-
-    
-    // ===================================================================================
-    // -----------------------------------------------------------------------------------
-    public BPNN build() {
-      // ---------------------------------------------------------------------------------
-
-      switch( cfg_count ) {
-        case 0:
-          logger.error( "BPNN.Builder requires either .io() or .file()" );
-          System.exit(1);
-          break;
-          
-        case 1:
-          break;
-          
-        default:
-          logger.error( "BPNN.Builder may not have both .io() and .file()" );
-          System.exit(2);
-          break;
-      }
-
-      BPNN net = null;
-
-      if ( 0 < nHid ) {
-        net = new BPNN();
-        if ( 0 != net.init( nInp, nHid, nOut ) ) {
-          logger.error( "Network failed to initialize" );
-          System.exit(3);
-        }
-      } else {
-        net = new BPNN();
-        if ( 0 != net.read( configFilename ) ) {
-          logger.error( "Network failed to read from file: "+configFilename );
-          System.exit(4);
+    // -------------------------------------------------------------------------------------
+    public void randomize( double scale ) {
+      // -----------------------------------------------------------------------------------
+      for ( int k=0; k<num_out; k++ ) {
+        b[k] = scale*(2.0*dd.uniform() - 1.0);
+        for ( int j=0; j<num_inp; j++ ) {
+          W[k][j] = scale*(2.0*dd.uniform() - 1.0);
         }
       }
-
-      return net;
     }
 
-  } // end class BPNN.Builder
-
-  
-  // =====================================================================================
-  /** @brief Constructor
-   */
-  // -------------------------------------------------------------------------------------
-  protected BPNN( ) {
-    // -----------------------------------------------------------------------------------
-  }
-
-  // =====================================================================================
-  /** @brief Constructor
-   *  @param number of inputs.
-   *  @param number of hidden nodes.
-   *  @param number of outputs.
-   */
-  // -------------------------------------------------------------------------------------
-  protected int init( int ni, int nh, int no ) {
-    // -----------------------------------------------------------------------------------
-    nInp = ni;
-    nHid = nh;
-    nOut = no;
     
-    dW1 = new double[nHid][nInp];
-    dB1 = new double[nHid];
-    w1  = new double[nHid][nInp];
-    b1  = new double[nHid];
-    d1  = new double[nHid];
-    z1  = new double[nHid];
-    a1  = new double[nHid];
-
-    dW2 = new double[nOut][nHid];
-    dB2 = new double[nOut];
-    w2  = new double[nOut][nHid];
-    b2  = new double[nOut];
-    d2  = new double[nOut];
-    z2  = new double[nOut];
-    a2  = new double[nOut];
-
-    return 0;
-  }
-
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public void init_weights( double s ) {
-    // -----------------------------------------------------------------------------------
-    Dice dd = Dice.getInstance();
-
-    for ( int node=0; node<nHid; node++ ) {
-      b1[node] = s*dd.normal();
-      for ( int con=0; con<nInp; con++ ) {
-        w1[node][con] = s*dd.normal();
-      }
-    }
-    
-    for ( int node=0; node<nOut; node++ ) {
-      b2[node] = s*dd.normal();
-      for ( int con=0; con<nHid; con++ ) {
-        w2[node][con] = s*dd.normal();
-      }
-    }
-
-    reset();
-  }
-
-  
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public void reset( ) {
-    // -----------------------------------------------------------------------------------
-    Dice dd = Dice.getInstance();
-
-    for ( int node=0; node<nHid; node++ ) {
-      z1[node]  = 0.0e0;
-      a1[node]  = 0.0e0;
-      d1[node]  = 0.0e0;
-      dB1[node] = 0.0e0;
-      for ( int con=0; con<nInp; con++ ) {
-        dW1[node][con] = 0.0e0;
-      }
-    }
-    
-    for ( int node=0; node<nOut; node++ ) {
-      z2[node]  = 0.0e0;
-      a2[node]  = 0.0e0;
-      a2[node]  = 0.0e0;
-      dB2[node] = 0.0e0;
-      for ( int con=0; con<nHid; con++ ) {
-        dW2[node][con] = 0.0e0;
-      }
-    }
-  }
-
-  
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public void execute( double y[], double x[] ) {
-    // -----------------------------------------------------------------------------------
-
-    // ----- hidden layer --------------------------------------
-    for ( int node=0; node<nHid; node++ ) {
-      double s = b1[node];
-      for ( int con=0; con<nInp; con++ ) {
-        s = s + ( w1[node][con] * x[con] );
-      }
-      a1[node] = 1.0e0 / ( 1.0e0 + Math.exp( -s ) );
-    }
-
-    // ----- output layer --------------------------------------
-    for ( int node=0; node<nOut; node++ ) {
-      double s = b2[node];
-      for ( int con=0; con<nHid; con++ ) {
-        s = s + ( w2[node][con] * a1[con] );
-      }
-      y[node] = 1.0e0 / ( 1.0e0 + Math.exp( -s ) );
-    }
-    
-  }
-
-  
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public void forward_pass( double x[] ) {
-    // -----------------------------------------------------------------------------------
-
-    // ----- hidden layer --------------------------------------
-    for ( int node=0; node<nHid; node++ ) {
-      double s = b1[node];
-      for ( int con=0; con<nInp; con++ ) {
-        s = s + ( w1[node][con] * x[con] );
-      }
-      z1[node] = s;
-      a1[node] = 1.0e0 / ( 1.0e0 + Math.exp( -s ) );
-    }
-
-    // ----- output layer --------------------------------------
-    for ( int node=0; node<nOut; node++ ) {
-      double s = b2[node];
-      for ( int con=0; con<nHid; con++ ) {
-        s = s + ( w2[node][con] * a1[con] );
-      }
-      z2[node] = s;
-      a2[node] = 1.0e0 / ( 1.0e0 + Math.exp( -s ) );
-    }
-    
-  }
-
-  
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public double backwards_pass( double x[], double[] t ) {
-    // -----------------------------------------------------------------------------------
-
-    double cost = 0.0;
-
-    // ----- output layer --------------------------------------
-    for ( int node=0; node<nOut; node++ ) {
-      double dif = a2[node] - t[node];
-      cost += ( dif*dif );
-      //                 |<-- derivative of activation --->|
-      d2[node]   = dif * ( a2[node] * ( 1.0e0 - a2[node] ) );
-      dB2[node] += d2[node];
-      for ( int con=0; con<nHid; con++ ) {
-        dW2[node][con] += ( d2[node] * a1[con] );
-      }
-    }
-
-    // ----- hidden layer --------------------------------------
-    for ( int node=0; node<nHid; node++ ) {
-      double s = 0.0e0;
-      for ( int fwd=0; fwd<nOut; fwd++ ) {
-        s += ( d2[fwd] * w2[fwd][node] );
-      }
-      //               |<-- derivative of activation --->|
-      d1[node]   = s * a1[node] * ( a1[node] * ( 1.0e0 - a1[node] ) );
-      dB1[node] += d1[node];
-      for ( int con=0; con<nInp; con++ ) {
-        dW1[node][con] += ( d1[node] * x[con] );
-      }
-    }
-    
-    return cost / (double) nOut;
-  }
-
-  // =====================================================================================
-  /** @brief Update the Weights.
-   *  @param alf learning parameter.
-   */
-  // -------------------------------------------------------------------------------------
-  public void update( double alf ) {
-    // -----------------------------------------------------------------------------------
-
-    // ----- hidden layer --------------------------------------
-    for ( int node=0; node<nHid; node++ ) {
-      b1[node] -= ( alf * dB1[node] );
-      for ( int con=0; con<nInp; con++ ) {
-        w1[node][con] -= ( alf * dW1[node][con] );
-      }
-    }
-    
-    // ----- output layer --------------------------------------
-    for ( int node=0; node<nOut; node++ ) {
-      b2[node] -= ( alf * dB2[node] );
-      for ( int con=0; con<nHid; con++ ) {
-        w2[node][con] -= ( alf * dW2[node][con] );
-      }
-    }
-    
-    reset();
-  }
-
-  // =====================================================================================
-  /** @brief Read
-   *  @param fspc path to file containing configuration.
-   */
-  // -------------------------------------------------------------------------------------
-  public int read( String fspc ) {
-    // -----------------------------------------------------------------------------------
-
-    if ( null == fspc ) {
-      logger.error( "Filename can not be null" );
-      return 1;
-    }
-    
-    InputStream is    = null;
-    int         count = 0;
-    
-    try {
-      is = new FileInputStream( new File( fspc ) );
-    } catch( FileNotFoundException e ) {
-      logger.error( "Cannot open [" + fspc + "] for reading" );
-      return 2;
-    }
-
-    try {
-      Scanner scan = new Scanner( is );
-
-      int ni = scan.nextInt();
-      int nh = scan.nextInt();
-      int no = scan.nextInt();
-
-      init( ni, nh, no );
-
-      count = 2;
-      for ( int i=0; i<nHid; i++ ) {
-        b1[i] = scan.nextDouble();
-        for ( int j=0; j<nInp; j++ ) {
-          w1[i][j] = scan.nextDouble();
+    // =====================================================================================
+    /** Reset each weight or bias delta to zero.
+     */
+    // -------------------------------------------------------------------------------------
+    public void reset( ) {
+      // -----------------------------------------------------------------------------------
+      for ( int k=0; k<num_out; k++ ) {
+        db[k] = 0.0e0;
+        for ( int j=0; j<num_inp; j++ ) {
+          dW[k][j] = 0.0e0;
         }
-        count += 1;
       }
-
-      for ( int i=0; i<nOut; i++ ) {
-        b2[i] = scan.nextDouble();
-        for ( int j=0; j<nHid; j++ ) {
-          w2[i][j] = scan.nextDouble();
-        }
-        count += 1;
-      }
-
-    } catch( InputMismatchException e1 ) {
-      logger.error( "Table.read: value error on line: "+count );
-      return 3;
     }
+    
+  } // end class BPNN.Layer
 
-    try {
-      is.close();
-    } catch( IOException e ) {
-      logger.error( "Cannot close [" + fspc + "] after reading" );
-      return 4;
-    }
-   
-    return 0;
-  }
 
-  
+  protected Layer[] L            = null;  /** Layers */
+  protected int     num_layer    = 0;     /** number of layers */
+  protected int     num_inp      = 0;     /** number of inputs */
+  protected int     num_out      = 0;     /** number of outputs (nodes in last layer) */
+  protected int     sample_count = 0;     /** number of samples presented since reset */
+
+
   // =====================================================================================
-  /** @brief Write
-   *  @param fspc path to file containing configuration.
+  /** Allocate network layers.
+   *  @param nInp number of inputs to the network.
+   *  @param nHid array of the number of nodes in each layer.
+   *  @param nOut number of outputs (or nodes in last layer)
    */
   // -------------------------------------------------------------------------------------
-  public int write( String fspc ) {
+  protected void alloc( int nInp, int[] nHid, int nOut ) {
     // -----------------------------------------------------------------------------------
-    PrintStream ps = FileTools.openWrite( fspc );
-    
-    ps.format( "%d %d %d\n", nInp, nHid, nOut );
-    
-    for ( int i=0; i<nHid; i++ ) {
-      ps.format( "%17.10e ", b1[i] );
-      for ( int j=0; j<nInp; j++ ) {
-        ps.format( " %17.10e", w1[i][j] );
-      }
-      ps.format( "\n" );
+    int nh = nHid.length;
+
+    num_layer = nh + 1;
+    num_inp   = nInp;
+    num_out   = nOut;
+
+    L = new Layer[num_layer];
+
+    L[0] = new Layer( num_inp, nHid[0] );
+
+    for ( int i=1; i<nh; i++ ) {
+      L[i] = new Layer( nHid[i-1], nHid[i] );
     }
-    
-    for ( int i=0; i<nOut; i++ ) {
-      ps.format( "%17.10e ", b2[i] );
-      for ( int j=0; j<nHid; j++ ) {
-        ps.format( " %17.10e", w2[i][j] );
-      }
-      ps.format( "\n" );
-    }
-    
-    ps.close();
-    
-    return 0;
+
+    L[nh] = new Layer( nHid[nh-1], nOut );
   }
 
 
   // =====================================================================================
+  /** Constructor.
+   *  @param nInp number of inputs to the network.
+   *  @param nHid array of the number of nodes in each layer.
+   *  @param nOut number of outputs (or nodes in last layer)
+   */
   // -------------------------------------------------------------------------------------
-  public void compare( PrintStream ps, BPNN that ) {
+  public BPNN( int nInp, int[] nHid, int nOut ) {
     // -----------------------------------------------------------------------------------
-    ps.format( "B1: %g\n", Math2.sumsq( this.b1, that.b1 ) );
-    ps.format( "W1: %g\n", Math2.sumsq( this.w1, that.w1 ) );
-    ps.format( "B2: %g\n", Math2.sumsq( this.b2, that.b2 ) );
-    ps.format( "W2: %g\n", Math2.sumsq( this.w2, that.w2 ) );
+    alloc( nInp, nHid, nOut );
+  }
+
+  
+  // =====================================================================================
+  /** Randomize weights and bias.
+   *  @param scale scale for random numbers
+   *
+   *  Set each weight or bias uniformily between (-scale,+scale)
+   */
+  // -------------------------------------------------------------------------------------
+  public void randomize( double scale ) {
+    // -----------------------------------------------------------------------------------
+    for ( int k=0; k<num_layer; k++ ) {
+      L[k].randomize( scale );
+    }
+  }
+    
+
+  // =====================================================================================
+  /** Reset each weight or bias delta to zero.
+   */
+  // -------------------------------------------------------------------------------------
+  public void reset() {
+    // -----------------------------------------------------------------------------------
+    for ( int k=0; k<num_layer; k++ ) {
+      L[k].reset();
+    }
+    sample_count = 0;
+  }
+    
+
+  // =====================================================================================
+  /** Forward pass.
+   *  @param input input vector.
+   *
+   *  Perform a forward pass through this network.
+   */
+  // -------------------------------------------------------------------------------------
+  protected void forward( double[] input ) {
+    // -----------------------------------------------------------------------------------
+    Layer T1 = L[0];
+    mul_weight( T1.Z, T1.W, T1.b, input, num_inp, T1.num_out );
+    transfer( T1.A, T1.Z, T1.num_out );
+
+    for ( int i=1; i<num_layer; i++ ) {
+      Layer T2 = L[i];
+      mul_weight( T2.Z, T2.W, T2.b, T1.A, num_inp, T2.num_out );
+      transfer( T2.A, T2.Z, T2.num_out );
+      T1 = T2;
+    }
+  }
+    
+
+  // =====================================================================================
+  /** Forward pass.
+   *  @param output output vector.
+   *  @param input  input  vector.
+   *
+   *  Perform a forward pass through this network and copy the output.
+   */
+  // -------------------------------------------------------------------------------------
+  public void forward( double[] output, double[] input ) {
+    // -----------------------------------------------------------------------------------
+    forward( input );
+    copy( output, L[num_layer-1].A, num_out );
+  }
+    
+
+  // =====================================================================================
+  /** Forward pass.
+   *  @param output output table.
+   *  @param input  input  table.
+   *
+   *  Perform a forward pass through this network and copy the output.
+   */
+  // -------------------------------------------------------------------------------------
+  public void forward( double[][] output, double[][] input ) {
+    // -----------------------------------------------------------------------------------
+    int ns = input.length;
+
+    for ( int i=0; i<ns; i++ ) {
+      forward( input[i] );
+      copy( output[i], L[num_layer-1].A, num_out );
+    }
+  }
+    
+
+  // =====================================================================================
+  /** Full training.
+   *  @param input  input  table.
+   *  @param output output table.
+   *  @param max_gen number of passes.
+   *  @param report report interval. (0 = no report)
+   *
+   */
+  // -------------------------------------------------------------------------------------
+  public double train( double[][] input, double[][] output,
+                       int max_gen, int report,
+                       double alpha ) {
+    // -----------------------------------------------------------------------------------
+    double M = 1.0e10;
+    if ( 0 < report ) {
+      M = mse( input, output );
+      System.out.format( "0: %13.6e\n", M );
+    }
+
+    int ns = input.length;
+
+    double tc = alpha / (double)ns;
+    
+    for ( int i=1; i<max_gen; i++ ) {
+      reset();
+      for ( int j=0; j<ns; j++ ) {
+        backpropagate( input[j], output[j] );
+      }
+      update( tc );
+
+      if ( 0 < report ) {
+        if ( 0 == ( i % 1000 ) ) {
+          System.out.format( "%d: %13.6e\n", i, mse( input, output ) );
+        }
+      }
+
+    }
+    
+    M = mse( input, output );
+    if ( 0 < report ) {
+      System.out.format( "%d: %13.6e\n", max_gen, M );
+    }
+
+    return M;
+  }
+    
+
+  // =====================================================================================
+  /** Full training.
+   *  @param input  input  table.
+   *  @param output output table.
+   *  @param max_gen number of passes.
+   *  @param report report interval. (0 = no report)
+   *
+   */
+  // -------------------------------------------------------------------------------------
+  public double batch( double[][] input, double[][] output,
+                       int max_gen, int batch_size, int report,
+                       double alpha ) {
+    // -----------------------------------------------------------------------------------
+    double M = 1.0e10;
+    if ( 0 < report ) {
+      M = mse( input, output );
+      System.out.format( "0: %13.6e\n", M );
+    }
+
+    int ns = input.length;
+
+    int[] index = new int[ns];
+
+    for ( int j=0; j<ns; j++ ) { index[j] = j; }
+    
+    dd.scramble( index );
+
+    int offset = 0;
+    int max_offset = ns - batch_size - 1;
+
+    for ( int i=1; i<max_gen; i++ ) {
+      reset();
+      for ( int j=0; j<batch_size; j++ ) {
+        backpropagate( input[index[offset+j]], output[index[offset+j]] );
+      }
+      update( alpha );
+
+      offset += batch_size;
+
+      if ( offset > max_offset ) {
+        dd.scramble( index );
+        offset = 0;
+      }
+
+      if ( 0 < report ) {
+        if ( 0 == ( i % 1000 ) ) {
+          System.out.format( "%d: %13.6e\n", i, mse( input, output ) );
+        }
+      }
+
+    }
+    
+    M = mse( input, output );
+    if ( 0 < report ) {
+      System.out.format( "%d: %13.6e\n", max_gen, M );
+    }
+
+    return M;
+  }
+    
+
+  // =====================================================================================
+  /** Back-propagation pass.
+   *  @param input          input vector
+   *  @param desired_output output vector
+   *  @param alpha          training parameter
+   *
+   *  Perform a backward pass through this network incrementing dW and db.
+   */
+  // -------------------------------------------------------------------------------------
+  public void backpropagate( double[] input, double[] desired_output ) {
+    // -----------------------------------------------------------------------------------
+
+    forward( input );
+    
+    // ----- accumulate the gradient with reverse passes -------------------------------
+
+    Layer T1 = L[num_layer-1];
+    subtract( T1.E, desired_output,   T1.A, num_out );
+    delta(    T1.D, T1.E, T1.A, num_out );
+
+    for ( int i=num_layer-2; i>=0; i-- ) {
+      Layer TI  = L[i];
+      Layer Tp1 = L[i+1];
+      error_matrix_mul( TI.E, Tp1.D, Tp1.W, Tp1.num_inp, Tp1.num_out );
+      delta( TI.D, TI.E, TI.A, TI.num_out );
+    }
+
+    // ----- update the weight deltas --------------------------------------------------
+
+    for ( int i=num_layer-1; i>0; i-- ) {
+      Layer TI  = L[i];
+      Layer Tm1 = L[i-1];
+      update_weight_delta( TI.dW, TI.num_inp, TI.num_out, TI.db,
+                           TI.D, Tm1.A );
+    }
+    
+    T1 = L[0];
+    update_weight_delta( T1.dW, T1.num_inp, T1.num_out, T1.db,
+                         T1.D, input );
+
+    sample_count += 1;
+  }
+
+
+  // =====================================================================================
+  /** Weight Updates.
+   *  @param alpha training parameter
+   *
+   *  Update the weights and bias using the accumulated dW and db.
+   */
+  // -------------------------------------------------------------------------------------
+  public void update( double alpha ) {
+    // -----------------------------------------------------------------------------------
+
+    double tc = alpha/(double)sample_count;
+    
+    for ( int i=0; i<num_layer; i++ ) {
+      Layer TI = L[i];
+      update_weight( TI.W, TI.dW, TI.num_inp, TI.num_out,
+                     TI.b, TI.db, tc );
+    }
+    
+  }
+
+
+  // =====================================================================================
+  /** Mean Square Error.
+   *  @param input   input vector.
+   *  @param desired desired output vector.
+   *  @return mean square error.
+   *
+   *  Calculate the mean square difference between the actual network output and the
+   *  desired output vector.
+   */
+  // -------------------------------------------------------------------------------------
+  public double mse( double[] input, double[] desired ) {
+    // -----------------------------------------------------------------------------------
+
+    forward( input );
+
+    double mse = 0.0e0;
+    
+    for ( int k=0; k<num_out; k++ ) {
+      double d = desired[k] - L[num_layer-1].A[k];
+      mse += (d*d);
+    }
+
+    return mse / (double)num_out;
+  }
+
+  
+  // =====================================================================================
+  /** Mean Square Error.
+   *  @param input   input vector.
+   *  @param desired desired output vector.
+   *  @return mean square error.
+   *
+   *  Calculate the mean square difference between the actual network output and the
+   *  desired output vector.
+   */
+  // -------------------------------------------------------------------------------------
+  public double mse( double[][] input, double[][] desired ) {
+    // -----------------------------------------------------------------------------------
+    int    n   = input.length;
+
+    double mse = 0.0e0;
+    for ( int i=0; i<n; i++ ) {
+      mse += mse( input[i], desired[i] );
+    }
+    return mse / (double)n;    
+
+    
+  }
+
+  
+  // =====================================================================================
+  /** Activation Function.
+   *  @param A  activation vector.
+   *  @param Z  weighted sum vector.
+   *  @param nz number of nodes.
+   */
+  // -------------------------------------------------------------------------------------
+  static protected void transfer( double[] A, double[] Z, int nz ) {
+    // -----------------------------------------------------------------------------------
+    for ( int k=0; k<nz; k++ ) {
+      A[k] = 1.0e0 / ( 1.0e0 + FastMath.exp( -Z[k] ) );
+    }
+  }
+
+
+  // =====================================================================================
+  /** Activation Function.
+   *  @param A  activation matrix.
+   *  @param Z  input matrix.
+   *  @param nz number of nodes.
+   *  @param ns number of samples.
+   */
+  // -------------------------------------------------------------------------------------
+  protected void transfer( double[][] A, double[][] Z, int nz, int ns ) {
+    // -----------------------------------------------------------------------------------
+      for ( int s=0; s<ns; s++ ) {
+        for ( int k=0; k<nz; k++ ) {
+          A[s][k] = 1.0e0 / ( 1.0e0 + FastMath.exp( -Z[s][k] ) );
+        }
+      }
+  }
+
+
+  // =====================================================================================
+  /** Compute layer delta.
+   *  @param D  error vector times the gradient.
+   *  @param E  the gradient vector.
+   *  @param A  the forward activation values.
+   *  @param nz number of nodes.
+   */   
+  // -------------------------------------------------------------------------------------
+  static protected void delta( double[] D, double[] E, double[] A, int nz ) {
+    // -----------------------------------------------------------------------------------
+    for ( int k=0; k<nz; k++ ) {
+      D[k] = E[k]*A[k]*(1.0e0 - A[k]);
+    }
   }
   
 
+  // =====================================================================================
+  /** Forward multiply (eq1)
+   *  @param Z  weight sum vector.
+   *  @param W  weight matrix.
+   *  @param b  bias vector.
+   *  @param X  input vector.
+   *  @param nx number of inputs.
+   *  @param nz number of weighted sums.
+   */
+  // -------------------------------------------------------------------------------------
+  static protected void mul_weight( double[] Z, double[][] W, double[] B,
+                                    double[] X, int nx, int nz ) {
+    // -----------------------------------------------------------------------------------
+    for ( int k=0; k<nz; k++ ) {
+      double sum = B[k];
+      for ( int j=0; j<nx; j++ ) {
+        sum += ( W[k][j] * X[j]);
+      }
+      Z[k] = sum;
+    }
+  }
+
+
+  // =====================================================================================
+  /** Activation Function.
+   *  @param D destination vector.
+   *  @param S source      vector.
+   *  @param n number of elements
+   */
+  // -------------------------------------------------------------------------------------
+  static protected void copy( double[] D, double[] S, int n ) {
+    // -----------------------------------------------------------------------------------
+    for ( int i=0; i<n; i++ ) {
+      D[i] = S[i];
+    }
+  }
+
+
+  // =====================================================================================
+  /** Difference of two vectors.
+   *  @param S  destination vector.
+   *  @param A  left  hand vector.
+   *  @param B  right hand vector.
+   *  @param n number of elements.
+   */
+  // -------------------------------------------------------------------------------------
+  static protected void subtract( double[] S, double[] A, double[] B, int n ) {
+    // -----------------------------------------------------------------------------------
+    for ( int k=0; k<n; k++ ) {
+      S[k] = A[k] - B[k];
+    }
+  }
+
+
+  // =====================================================================================
+  /** Compute layer delta.
+   *  @param E  error vector
+   *  @param D  delta vector
+   *  @param W  weight matrix
+   *  @param nx number of inputs.
+   *  @param nz number of outputs (nodes).
+   */   
+  // -------------------------------------------------------------------------------------
+  static protected void error_matrix_mul( double[] E, double[] D, double[][] W,
+                                          int nx, int nz ) {
+    // -----------------------------------------------------------------------------------
+    for ( int k=0; k<nx; k++ ) { E[k] = 0.0e0; }
+    
+    for ( int m=0; m<nz; m++ ) {
+      for ( int k=0; k<nx; k++ ) {
+        E[k] += ( D[m] * W[m][k] );
+      }
+    }
+  }
+  
+
+  // =====================================================================================
+  /** Compute layer delta.
+   *  @param dW    weight delta being updated
+   *  @param nx    number of inputs to this layer
+   *  @param nz    number of nodes in this layer
+   *  @param dB    bias delta being updated
+   *  @param D     error vector
+   *  @param A     inputs that feed the weights being updated
+   */   
+  // -------------------------------------------------------------------------------------
+  static protected void update_weight_delta( double[][] dW, int nx, int nz, double[] dB,
+                                             double[] D, double[] A ) {
+    // -----------------------------------------------------------------------------------
+    for ( int k=0; k<nz; k++ ) {
+      dB[k] += D[k];
+      for ( int j=0; j<nx; j++ ) {
+        dW[k][j] += A[j] * D[k];
+      }
+    }
+  }
+
+  
+  // =====================================================================================
+  /** Compute layer delta.
+   *  @param W     weight matrix being updated.
+   *  @param dW    weight deltas.
+   *  @param nx    number of inputs to this layer.
+   *  @param nz    number of nodes in this layer.
+   *  @param B     bias vector being updated.
+   *  @param dB    bias deltas.
+   *  @param alpha training constant.
+   */   
+  // -------------------------------------------------------------------------------------
+  static protected void update_weight( double[][] W, double[][] dW, int nx, int nz,
+                                       double[] B, double[] dB, double alpha ) {
+    // -----------------------------------------------------------------------------------
+
+    for ( int k=0; k<nz; k++ ) {
+      B[k] += ( alpha * dB[k] );
+      for ( int j=0; j<nx; j++ ) {
+        W[k][j] += ( alpha * dW[k][j] );
+      }
+    }
+    
+  }
+  
 } // end class BPNN
 
 

@@ -2,20 +2,23 @@
 // **                          P O P U L A T I O N M E M B E R                          **
 // =======================================================================================
 // **                                                                                   **
-// **  Copyright (c) 2018, L3 Technologies Advanced Programs                            **
-// **                      One Wall Street #1, Burlington, MA 01803                     **
+// **  Copyright (c) 2018, Stephen W. Soliday                                           **
+// **                      stephen.soliday@trncmp.org                                   **
+// **                      http://research.trncmp.org                                   **
 // **                                                                                   **
 // **  -------------------------------------------------------------------------------  **
 // **                                                                                   **
-// **  This file, and associated source code, is not free software; you may not         **
-// **  redistribute it and/or modify it. This file is part of a research project        **
-// **  that is in a development phase. No part of this research has been publicly       **
-// **  distributed. Research and development for this project has been at the sole      **
-// **  cost in both time and funding by L3 Technologies Advanced Programs.              **
+// **  This program is free software: you can redistribute it and/or modify it under    **
+// **  the terms of the GNU General Public License as published by the Free Software    **
+// **  Foundation, either version 3 of the License, or (at your option)                 **
+// **  any later version.                                                               **
 // **                                                                                   **
-// **  Any reproduction of computer software or portions thereof marked with this       **
-// **  legend must also reproduce the markings.  Any person who has been provided       **
-// **  access to such software must promptly notify L3 Technologies Advanced Programs.  **
+// **  This program is distributed in the hope that it will be useful, but WITHOUT      **
+// **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    **
+// **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.   **
+// **                                                                                   **
+// **  You should have received a copy of the GNU General Public License along with     **
+// **  this program. If not, see <http://www.gnu.org/licenses/>.                        **
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**

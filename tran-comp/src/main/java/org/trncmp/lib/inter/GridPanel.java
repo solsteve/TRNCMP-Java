@@ -122,6 +122,8 @@ public class GridPanel extends JPanel implements MouseListener {
     grid[r][c] = v;
   }
 
+
+  public void update() { repaint(); }
   
   // =====================================================================================
   /** @brief Number of Grid Rows.

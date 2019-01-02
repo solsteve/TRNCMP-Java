@@ -620,61 +620,61 @@ public class Statistics {
     }
 
 
-    // ===============================================================================
-    // -------------------------------------------------------------------------------
-    public boolean correlate( double[][] data, int num_samples, int width ) {
-      // ---------------------------------------------------------------------------
-      this.level2b = false;
+      // ===============================================================================
+      // -------------------------------------------------------------------------------
+      public boolean correlate( double[][] data, int num_samples, int width ) {
+        // ---------------------------------------------------------------------------
+        this.level2b = false;
 
-      if ( ! this.level1 ) {
-        logger.warn( "this requires that you call compile first" );
-        if ( this.compile( data, num_samples, width ) ) {
-          logger.warn( "   I tried to do it for you, but it failed" );
-          return true;
-        }
-        logger.warn( "   I did it for you" );
-      }
-
-      if ( num_samples != this.count ) {
-        logger.warn( "you should run extra with the same data count as compile" );
-      }
-
-      double fnm1 = (double)(num_samples - 1);
-
-      // ----- calculate the covariance matrix -------------------------------------
-      for ( int i=0; i<this.nvar; i++ ) {
-        double iMean = this.mean[i];
-        for ( int j=i; j<this.nvar; j++ ) {
-          double jMean = this.mean[j];
-          double c_sum = Math2.N_ZERO;
-          for ( int k=0; k<num_samples; k++ ) {
-            double x = data[k][i] - iMean;
-            double y = data[k][j] - jMean;
-            c_sum += ( x * y );
+        if ( ! this.level1 ) {
+          logger.warn( "this requires that you call compile first" );
+          if ( this.compile( data, num_samples, width ) ) {
+            logger.warn( "   I tried to do it for you, but it failed" );
+            return true;
           }
-          c_sum /= fnm1;
-          covariance.A[i][j] = c_sum;
-          covariance.A[j][i] = c_sum;
+          logger.warn( "   I did it for you" );
         }
-      }
 
-      // ----- calculate the correlation matrix ------------------------------------
-      for ( int i=0; i<this.nvar; i++ ) {
-        double ivar = Math.sqrt(covariance.A[i][i]);
-        for ( int j=i; j<this.nvar; j++ ) {
-          if ( i == j ) {
-            correlation.A[i][i] = Math2.N_ONE;
-          } else {
-            double w = covariance.A[i][j] / (ivar * Math.sqrt(covariance.A[j][j]) + 1.0e-10);
-            correlation.A[i][j] = w;
-            correlation.A[j][i] = w;
+        if ( num_samples != this.count ) {
+          logger.warn( "you should run extra with the same data count as compile" );
+        }
+
+        double fnm1 = (double)(num_samples - 1);
+
+        // ----- calculate the covariance matrix -------------------------------------
+        for ( int i=0; i<this.nvar; i++ ) {
+          double iMean = this.mean[i];
+          for ( int j=i; j<this.nvar; j++ ) {
+            double jMean = this.mean[j];
+            double c_sum = Math2.N_ZERO;
+            for ( int k=0; k<num_samples; k++ ) {
+              double x = data[k][i] - iMean;
+              double y = data[k][j] - jMean;
+              c_sum += ( x * y );
+            }
+            c_sum /= fnm1;
+            covariance.A[i][j] = c_sum;
+            covariance.A[j][i] = c_sum;
           }
         }
-      }
 
-      this.level2b = true;
-      return false;
-    }
+        // ----- calculate the correlation matrix ------------------------------------
+        for ( int i=0; i<this.nvar; i++ ) {
+          double ivar = Math.sqrt(covariance.A[i][i]);
+          for ( int j=i; j<this.nvar; j++ ) {
+            if ( i == j ) {
+              correlation.A[i][i] = Math2.N_ONE;
+            } else {
+              double w = covariance.A[i][j] / (ivar * Math.sqrt(covariance.A[j][j]) + 1.0e-10);
+              correlation.A[i][j] = w;
+              correlation.A[j][i] = w;
+            }
+          }
+        }
+
+        this.level2b = true;
+        return false;
+      }
 
 
 

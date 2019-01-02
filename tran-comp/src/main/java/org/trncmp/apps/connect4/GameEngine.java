@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                        I N T E R R U P T A B L E T I M E R                        **
+// **                                G A M E E N G I N E                                **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
@@ -22,106 +22,160 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @brief   Interruptable Timer.
- * @file    InterruptableTimer.java
+ * @file GameEngine.java
+ * <p>
+ * 
  *
- * @details Provides the interface and procedures for providing an interruptable timer.
- *          This timer may be instantly interrupted. Use this in favor of Thread.sleep()
- *          with very long durrations.
+ * @date 2018-12-26
  *
- * @date    2018-08-07
  */
 // =======================================================================================
 
-package org.trncmp.lib;
+package org.trncmp.apps.connect4;
+
 
 // =======================================================================================
-public class InterruptableTimer {
+public class GameEngine {
   // -------------------------------------------------------------------------------------
-  private   Thread  thread      = null;
-  protected boolean forced_stop = true;
 
+  protected int     order = 0;
+  protected int[][] board = null;
+
+
+  public final int getOrder() { return order; }
+
+  
   // =====================================================================================
-  static public class Stopped extends Exception {
+  public void reset() {
     // -----------------------------------------------------------------------------------
-    public Stopped(String message) { super(message); }
-  } // end class InterruptableTimer.Stopped
-
-  // =====================================================================================
-  static protected class TimerThread extends Thread {
-    // -----------------------------------------------------------------------------------
-    protected InterruptableTimer parent   = null;
-    protected long               duration = 0L;
-
-    // ===================================================================================
-    public TimerThread( InterruptableTimer p, long d ) {
-      // ---------------------------------------------------------------------------------
-      parent   = p;
-      duration = d;
-    }
-
-    // ===================================================================================
-    public void run() {
-      // ---------------------------------------------------------------------------------
-      try {
-        Thread.sleep( duration );
-      } catch( InterruptedException e ) {
-        parent.forced_stop = true;
+    for ( int r=0; r<order; r++ ) {
+      for ( int c=0; c<order; c++ ) {
+        board[r][c] = 0;
       }
     }
- 
-  } // end InterruptableTimer.TimerThread
+  }
+
 
   // =====================================================================================
-  public InterruptableTimer() {
+  public GameEngine( int n ) {
     // -----------------------------------------------------------------------------------
+    order = n;
+    board = new int[order][order];
+    reset();
   }
+
   
   // =====================================================================================
-  /** @brief Sleep.
-   *  @param seconds sleep for seconds.
-   *
-   *  Sleep for a duration measured in floating-point seconds.
-   */
-  // -------------------------------------------------------------------------------------
-  public void sleep( double seconds ) throws InterruptableTimer.Stopped {
+  public int[] getState() {
     // -----------------------------------------------------------------------------------
-    sleep( (long)Math.floor( seconds * 1000.0 + 0.5 ) );
-  }
-  
-  // =====================================================================================
-  /** @brief Sleep.
-   *
-   *  Interrupt this timer immediately.
-   */
-  // -------------------------------------------------------------------------------------
-  public void interrupt() {
-    // -----------------------------------------------------------------------------------
-    if ( null != thread ) { thread.interrupt(); }
-  }
-    
-  // =====================================================================================
-  /** @brief Sleep.
-   *  @param milliseconds sleep for milliseconds.
-   *
-   *  Sleep for a duration measured in integer milliseconds.
-   */
-  // -------------------------------------------------------------------------------------
-  public void sleep( long milliseconds ) throws InterruptableTimer.Stopped {
-    // -----------------------------------------------------------------------------------
-    forced_stop = false;
-    thread = new TimerThread(this, milliseconds);
-    thread.start();
-    try {
-      thread.join();
-    } catch( InterruptedException e ) {
-      forced_stop = true;
+    int[] state = new int[ order*order ];
+
+    int idx = 0;
+
+    for ( int r=0; r<order; r++ ) {
+      for ( int c=0; c<order; c++ ) {
+        state[idx] = board[r][c];
+        idx += 1;
+      }
     }
-    if ( forced_stop ) { throw new InterruptableTimer.Stopped("timer interrupted"); }
+
+    return state;
   }
 
-} // end class InterruptableTimer
+
+  // =====================================================================================
+  public int get( int r, int c ) {
+    // -----------------------------------------------------------------------------------
+    return board[r][c];
+  }
+
+
+  // =====================================================================================
+  public int set( int r, int c, int x ) {
+    // -----------------------------------------------------------------------------------
+    if ( 0 == board[r][c] ) {
+      board[r][c] = x;
+      return 0;
+    }
+    return 1;
+  }
+
+
+  // =====================================================================================
+  protected boolean winner( int type ) {
+    // -----------------------------------------------------------------------------------
+
+    int sum = 0;
+    
+    // ----- check horizontal ------------------------------------
+    for (int r=0; r<order; r++) {
+       sum = 0;
+      for (int c=0; c<order; c++) {
+        if ( type == board[r][c] ) {
+          sum += 1;
+        }
+        if ( order == sum ) {
+          return true;
+        }
+      }
+    }
+
+    // ----- check vertical --------------------------------------
+    for (int c=0; c<order; c++) {
+       sum = 0;
+      for (int r=0; r<order; r++) {
+        if ( type == board[r][c] ) {
+          sum += 1;
+        }
+        if ( order == sum ) {
+          return true;
+        }
+      }
+    }
+
+    // ----- check right diagonal --------------------------------
+
+     sum = 0;
+    for (int i=0; i<order; i++) {
+      if ( type == board[i][i] ) {
+        sum += 1;
+      }
+    }
+    if ( order == sum ) {
+      return true;
+    }
+
+    // ----- check left diagonal ---------------------------------
+
+     sum = 0;
+    for (int i=0; i<order; i++) {
+      if ( type == board[i][i-order+1] ) {
+        sum += 1;
+      }
+    }
+    if ( order == sum ) {
+      return true;
+    }
+
+    return false;
+   }
+  
+  
+  // =====================================================================================
+  public int checkWinner() {
+    // -----------------------------------------------------------------------------------
+    if ( winner(1) ) {
+      return 1;
+    }
+    if ( winner(-1) ) {
+      return -1;
+    }
+    return 0;
+  }
+
+} // end class GameEngine
+
 
 // =======================================================================================
-// **                        I N T E R R U P T A B L E T I M E R                        **
-// =========================================================================== END FILE ==
+// **                                G A M E E N G I N E                                **
+// ======================================================================== END FILE =====

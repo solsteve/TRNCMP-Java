@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                                J T E S T _ B P N N                                **
+// **                         J T E S T _ B P N N _ M A T R I X                         **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
@@ -39,14 +39,14 @@ import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-import org.trncmp.mllib.nn.BPNN;
+import org.trncmp.mllib.nn.BPNN_matrix;
 import org.trncmp.lib.Dice;
 import org.trncmp.lib.Math2;
 import org.trncmp.lib.StopWatch;
 
 // =======================================================================================
 // ---------------------------------------------------------------------------------------
-public class jtest_bpnn {
+public class jtest_bpnn_matrix {
   // -------------------------------------------------------------------------------------
 
   static String TData = "data/Iris/iris.onehot";
@@ -59,7 +59,7 @@ public class jtest_bpnn {
   static int   num_output = 0;
   static int[] num_hidden = { 7, 5 };
 
-  static BPNN  net = null;
+  static BPNN_matrix  net = null;
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
@@ -115,40 +115,51 @@ public class jtest_bpnn {
   // -------------------------------------------------------------------------------------
   static void BuildNet() {
     // -----------------------------------------------------------------------------------
-    net = new BPNN( num_input, num_hidden, num_output );
+    net = new BPNN_matrix( num_input, num_hidden, num_output );
     net.randomize( 0.01 );
   }
-
-
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  static void fTrainNet() {
-    // -----------------------------------------------------------------------------------
-    StopWatch SW = new StopWatch();
-    SW.reset();
-    
-    double m = net.train( iris_input, iris_output, 100000, 0, 0.3 );
-
-    double elap = SW.seconds();
-
-    System.out.format( "%f seconds\n", elap );
-    System.out.format( "Final = %13.6e\n", net.mse( iris_input, iris_output ) );
-  }
-
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
   static void TrainNet() {
     // -----------------------------------------------------------------------------------
+
+    double mse = net.mse( iris_input, iris_output );
+    if ( 0.0 > mse ) {
+      System.out.format( "Error at 0: %d\n", -(int)mse );
+      System.exit(1);
+    } else {
+      System.out.format( "0: %13.6e\n", mse );
+    }
+
+
     StopWatch SW = new StopWatch();
     SW.reset();
     
-    double m = net.batch( iris_input, iris_output, 100000, 50, 0, 0.3 );
+    for ( int i=1; i<100000; i++ ) {
+      net.backpropagate( iris_input, iris_output, 0.3 );
+//      if ( 0 == ( i % 1000 ) ) {
+//        mse = net.mse( iris_input, iris_output );
+//        if ( 0.0 > mse ) {
+//          System.out.format( "Error at %d: %d\n", i, -(int)mse );
+//          System.exit(1);
+//        } else {
+//          System.out.format( "%d: %13.6e\n", i, mse );
+//        }
+//      }
+    }
 
     double elap = SW.seconds();
 
+    mse = net.mse( iris_input, iris_output );
+    if ( 0.0 > mse ) {
+      System.out.format( "Error at 100000: %d\n", -(int)mse );
+      System.exit(1);
+    } else {
+      System.out.format( "100000: %13.6e\n", mse );
+    }    
+
     System.out.format( "%f seconds\n", elap );
-    System.out.format( "Final = %13.6e\n", net.mse( iris_input, iris_output ) );
   }
 
 
@@ -165,7 +176,7 @@ public class jtest_bpnn {
     // -----------------------------------------------------------------------------------
     byte[] ss = { 3,1,4,1,5,9,2,6,5,3,5 };
     Dice.getInstance().seed_set(ss);
-
+    
     ReadData();
 
     BuildNet();
@@ -181,5 +192,5 @@ public class jtest_bpnn {
 
 
 // =======================================================================================
-// **                                J T E S T _ B P N N                                **
+// **                         J T E S T _ B P N N _ M A T R I X                         **
 // ======================================================================== END FILE =====

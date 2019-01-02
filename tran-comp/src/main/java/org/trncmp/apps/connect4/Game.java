@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                                  F U N C T I O N                                  **
+// **                                  G R I D T E S T                                  **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
@@ -22,141 +22,169 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file Function.java
- * <p>
- * Provides an abstract fuzzy function.
+ * @brief   Interactive Grid Display.
+ * @file    GridTest.java
  *
- * @date 2018-08-06
+ * @details Provides the interface and procedures testing the GridPanel.
  *
- * ---------------------------------------------------------------------------------------
- *
- * @note This code was ported from a C++ version contained in the TRNCMP
- *       Machine learning Research Library. (formerly SolLib)
- *
- * @author Stephen W. Soliday
- * @date 2014-06-27
+ * @author  Stephen W. Soliday
+ * @date    2018-12-27
  */
 // =======================================================================================
 
-package org.trncmp.mllib.fuzzy;
+package org.trncmp.apps.connect4;
 
+import java.awt.EventQueue;
+import java.awt.event.KeyEvent;
+
+import org.trncmp.lib.Dice;
+
+import org.trncmp.lib.inter.GridFrame;
+import org.trncmp.lib.inter.GridEventListener;
+import org.trncmp.lib.inter.GridKeyListener;
+import org.trncmp.lib.inter.GridButtonListener;
 
 // =======================================================================================
-public abstract class Function {
+public class Game implements GridEventListener, GridKeyListener, GridButtonListener {
   // -------------------------------------------------------------------------------------
+
+  protected static Dice dd     = Dice.getInstance();
+  protected GameEngine  engine = null;
+  protected GridFrame   grid   = null;
+  protected int         order  = 0;
+
+  int player = 0;
   
   // =====================================================================================
-  public enum Type {
+  public Game( int ord ) {
     // -----------------------------------------------------------------------------------
-    LEFTTRAP  ( "LT", "LeftTrapezoid" ),
-    TRIANGLE  ( "T",  "Triangle" ),
-    RIGHTTRAP ( "RT", "RightTrapezoid" );
-    private final String code_value;
-    private final String name_value;
-    Type( String cd, String nm )        { this.code_value = cd; this.name_value = nm; }
-    public String  toString()           { return this.name_value; }
-    public boolean isEqual( String cd ) { return ( cd == this.code_value ); }
-    public boolean isEqual( Type   tp ) { return ( tp.code_value == this.code_value ); }
-  } // enum Type
 
-  protected final Type function_type;
+    order = ord;
 
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  static public Function create( Type tp, double... x ) {
-    // -----------------------------------------------------------------------------------
-    Function rf = null;
-    switch(tp) {
-      case LEFTTRAP:
-        rf  = new LeftTrapezoidFunction( x[0], x[1] );
-        break;
-      case TRIANGLE:
-        rf  = new TriangleFunction( x[0], x[1], x[2] );
-        break;
-      case RIGHTTRAP:
-        rf  = new TriangleFunction( x[0], x[1], x[2] );
-        break;
-      default:
-        System.err.println("Unknown type: "+tp.toString());
+    String name = String.format( "Connect %d", order );
+    if ( 3 == order ) {
+      name = "Tic-tac-toe";
     }
-    return rf;
+
+    engine = new GameEngine( order );
+    
+    grid = new GridFrame.Builder( order, order )
+        .width(640)
+        .height(640)
+        .title(name)
+        .build();
+
+    grid.addGridListener( this );
+    grid.addKeyboardListener( this );
+    grid.addButtonListener( this );
+
+    grid.setVisible(true);
   }
 
+
   // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  static public Function create( String tp, double... x ) {
+  public void cellClicked( int r, int c, int button ) {      
     // -----------------------------------------------------------------------------------
-    if ( tp.startsWith( "LT" ) ) { return create( Type.LEFTTRAP, x ); }
-    if ( tp.startsWith( "T"  ) ) { return create( Type.TRIANGLE, x ); }
-    if ( tp.startsWith( "RT" ) ) { return create( Type.RIGHTTRAP, x ); }
-    return null;
+    if ( 0 == player ) {
+      if ( 0 == engine.set( r, c, -1 ) ) {
+        grid.setStatus( "Player 0 moved" );
+        grid.greenOn();
+        grid.redOff();
+        player = 1;
+      } else {
+        grid.setStatus( "Player 0 bad move, try again" );
+        grid.greenOff();
+        grid.redOn();
+      }
+    } else {
+      if ( 0 == engine.set( r, c, 1 ) ) {
+        grid.setStatus( "Player 1 moved" );
+        player = 0;
+        grid.greenOn();
+        grid.redOff();
+      } else {
+        grid.setStatus( "Player 1 bad move, try again" );
+        grid.greenOff();
+        grid.redOn();
+      }
+    }
+    updateBoard();
   }
-
-
-
-
+    
   // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  Function( Type tp ) {
+  public void keyPressed( KeyEvent e ) {
     // -----------------------------------------------------------------------------------
-    function_type = tp;
+    System.out.format( "Key = %d\n", e.getKeyCode() );
+  } 
+
+
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public void requestRun() {
+    // -----------------------------------------------------------------------------------
+    System.out.println( "Run has been requested" );
   }
 
-  public abstract double getLeft();
-  public abstract double getCenter();
-  public abstract double getRight();
+  
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  public void requestStop() {
+    // -----------------------------------------------------------------------------------
+    System.out.println( "Stop has been requested" );
+  }
 
   
   // =====================================================================================
-  /** @brief Membership.
-   *  @param x crisp value.
-   *  @return degree of membership.
-   *
-   *  Compute the degree of membership in this function based on a crisp value x.
-   *  The domain is all real numbers. The range is 0 to 1 inclusive.
-   */
   // -------------------------------------------------------------------------------------
-  public abstract double mu( double x );
+  public void resetButtonPressed() {
+    // -----------------------------------------------------------------------------------
+    System.out.println( "the reset button pressed" );
+  }
 
   
   // =====================================================================================
-  /** @brief Area.
-   *  @param d degree of membership.
-   *  @return area.
-   *
-   *  Compute the area under the degree of membership for this fuzzy function.
-   *  The domain is 0 to 1 inclusive. The range is 0 to max area for this function.
-   */
   // -------------------------------------------------------------------------------------
-  public abstract double area( double d );
+  public void closeAction() {
+    // -----------------------------------------------------------------------------------
+    System.out.println( "Bye..." );
+  }
 
 
   // =====================================================================================
-  /** @brief Center of area.
-   *  @param d degree of membership.
-   *  @return center of area.
-   *
-   *  Compute the center of area based on the degree of membership in this fuzzy function. 
-   *  The domain is 0 to 1 inclusive. The range is (left) to (right) inclusive.
-   */
   // -------------------------------------------------------------------------------------
-  public abstract double coa( double degree );
+  public void updateBoard() {
+    // -----------------------------------------------------------------------------------
+    int n = engine.getOrder();
+    for ( int r=0; r<n; r++ ) {
+      for ( int c=0; c<n; c++ ) {
+        int x   = engine.get( r, c );
+        int clr = 0;
+        if ( x == -1 ) { clr = 1; }
+        if ( x ==  1 ) { clr = 2; }
+        grid.set( r, c, clr );
+      }
+    }
+    grid.update();
+  }
+
+
+
   
 
+  
   // =====================================================================================
-  /** @brief To String.
-   *  @param fmt edit descriptor.
-   */
-  // -------------------------------------------------------------------------------------
-  public abstract String toString( String fmt );
+  public static void main( String[] args ) {
+    // -----------------------------------------------------------------------------------
 
+    dd.seed_set();
 
-  public abstract int load(  double[] src, int offset );
-  public abstract int store( double[] dst, int offset );
+    EventQueue.invokeLater(new Runnable() {
+        @Override
+        public void run() {
 
-} // end class Function
+          Game G = new Game(3);
+        }
+      });
+  }
 
-
-// =======================================================================================
-// **                                  F U N C T I O N                                  **
-// ======================================================================== END FILE =====
+} // end class Game

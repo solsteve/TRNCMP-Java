@@ -26,6 +26,12 @@
  *  Provides interface and methods to perform Principle Component Analysis.
  *  <p>
  *
+ *  ****************************************************
+ *  ****************************************************
+ *  TODO:  normalize input data by dividing the variance
+ *  ****************************************************
+ *  ****************************************************
+ *
  * @author Stephen W. Soliday
  * @date 2018-04-20
  */

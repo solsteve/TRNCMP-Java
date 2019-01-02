@@ -2,7 +2,7 @@
 // **                                J T E S T _ B P N N                                **
 // =======================================================================================
 // **                                                                                   **
-// **  Copyright (c) 2018, Stephen W. Soliday                                           **
+// **  Copyright (c) 2019, Stephen W. Soliday                                           **
 // **                      stephen.soliday@trncmp.org                                   **
 // **                      http://research.trncmp.org                                   **
 // **                                                                                   **
@@ -25,7 +25,7 @@
  * @file jtest_bpnn.java
  *
  * @author Stephen W. Soliday
- * @date 2018-12-23
+ * @date 2018-08-27
  */
 // =======================================================================================
 
@@ -39,14 +39,13 @@ import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-import org.trncmp.mllib.nn.BPNN;
+import org.trncmp.mllib.nn.BPNN_Aug;
 import org.trncmp.lib.Dice;
 import org.trncmp.lib.Math2;
-import org.trncmp.lib.StopWatch;
 
 // =======================================================================================
 // ---------------------------------------------------------------------------------------
-public class jtest_bpnn {
+public class jtest_bpnn_aug {
   // -------------------------------------------------------------------------------------
 
   static String TData = "data/Iris/iris.onehot";
@@ -54,12 +53,10 @@ public class jtest_bpnn {
   static double[][] iris_input  = null;
   static double[][] iris_output = null;
 
-  static int   num_sample = 0;
-  static int   num_input  = 0;
-  static int   num_output = 0;
-  static int[] num_hidden = { 7, 5 };
-
-  static BPNN  net = null;
+  static int num_sample = 0;
+  static int num_input  = 0;
+  static int num_output = 0;
+  static int num_hidden = 0;
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
@@ -115,41 +112,59 @@ public class jtest_bpnn {
   // -------------------------------------------------------------------------------------
   static void BuildNet() {
     // -----------------------------------------------------------------------------------
-    net = new BPNN( num_input, num_hidden, num_output );
-    net.randomize( 0.01 );
+    double eta   = 0.36;
+
+    BPNN_Aug net = new BPNN_Aug.Builder()
+        .io(num_input,num_output)
+        .hidden(num_input*num_output)
+        .build();
+
+    Dice.getInstance().seed_set();
+    net.init_weights( eta );
+    net.write( "test.init.net" );
+
+    BPNN_Aug net2 = new BPNN_Aug.Builder()
+        .file( "test.init.net" )
+        .build();
+
+    net.compare( System.out, net2 );
   }
-
-
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  static void fTrainNet() {
-    // -----------------------------------------------------------------------------------
-    StopWatch SW = new StopWatch();
-    SW.reset();
-    
-    double m = net.train( iris_input, iris_output, 100000, 0, 0.3 );
-
-    double elap = SW.seconds();
-
-    System.out.format( "%f seconds\n", elap );
-    System.out.format( "Final = %13.6e\n", net.mse( iris_input, iris_output ) );
-  }
-
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
   static void TrainNet() {
     // -----------------------------------------------------------------------------------
-    StopWatch SW = new StopWatch();
-    SW.reset();
-    
-    double m = net.batch( iris_input, iris_output, 100000, 50, 0, 0.3 );
 
-    double elap = SW.seconds();
+    int num_rep  = 100;
+    int report   =  1000;
+    double eta   = 0.36;
+    double alpha = 0.5;
 
-    System.out.format( "%f seconds\n", elap );
-    System.out.format( "Final = %13.6e\n", net.mse( iris_input, iris_output ) );
-  }
+    BPNN_Aug net = new BPNN_Aug.Builder()
+        .file( "test.init.net" )
+        .build();
+
+    Dice.getInstance().seed_set();
+
+    net.reset();
+
+    int g = 0;
+    double err = 0.0e0;
+    for ( int k=0; k<num_rep; k++ ) {
+      for ( int j=0; j<report; j++ ) {
+        err = 0.0e0;
+        for ( int i=0; i<num_sample; i++ ) {
+          net.forward_pass( iris_input[i] );
+          err += net.backwards_pass( iris_input[i], iris_output[i] );
+        }
+        net.update( alpha/(double)num_sample );
+        g += 1;
+      }
+      System.out.format( "%d\t%g\n", g, err );
+    }
+
+    net.write( "test.ftrained.net" );
+}
 
 
   // =====================================================================================
@@ -157,14 +172,42 @@ public class jtest_bpnn {
   static void ValidateNet() {
     // -----------------------------------------------------------------------------------
 
+    BPNN_Aug net = new BPNN_Aug.Builder()
+        .file( "test.ftrained.net" )
+        .build();
+
+    double[] test = new double[num_output];
+
+    double err = 0.0e0;
+    for ( int i=0; i<num_sample; i++ ) {
+      net.execute( test, iris_input[i] );
+      
+      for ( int j=0; j<num_output; j++ ) {
+        System.out.format( "%4.2f ", iris_output[i][j] );
+      }
+
+      System.out.format( "==" );
+      
+      for ( int j=0; j<num_output; j++ ) {
+        if ( test[j] < 0.5 ) {
+          test[j] = 0.0e0;
+        } else {
+          test[j] = 1.0e0;
+        }
+        System.out.format( " %4.2f", test[j] );
+      }
+      System.out.format( "\n" );
+
+      err += Math2.sumsq( iris_output[i], test );
+    }
+
+    System.out.format( "%d: %g\n", num_sample, err / (double)num_sample );
   }
 
 
   // =====================================================================================
   public static void main( String[] args ) {
     // -----------------------------------------------------------------------------------
-    byte[] ss = { 3,1,4,1,5,9,2,6,5,3,5 };
-    Dice.getInstance().seed_set(ss);
 
     ReadData();
 

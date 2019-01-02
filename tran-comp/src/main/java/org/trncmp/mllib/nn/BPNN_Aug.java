@@ -22,7 +22,7 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file BPNN.java
+ * @file BPNN_Aug.java
  * <p>
  * Provides interface and methods for a Backpropagation Neural network.
  *
@@ -58,7 +58,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 // =======================================================================================
-public class BPNNold {
+public class BPNN_Aug {
   // -------------------------------------------------------------------------------------
 
   private static final Logger logger = LogManager.getLogger();
@@ -155,12 +155,12 @@ public class BPNNold {
     
     // ===================================================================================
     // -----------------------------------------------------------------------------------
-    public BPNNold build() {
+    public BPNN_Aug build() {
       // ---------------------------------------------------------------------------------
 
       switch( cfg_count ) {
         case 0:
-          logger.error( "BPNN.Builder requires either .io() or .file()" );
+          logger.error( "BPNN_Aug.Builder requires either .io() or .file()" );
           System.exit(1);
           break;
           
@@ -168,21 +168,21 @@ public class BPNNold {
           break;
           
         default:
-          logger.error( "BPNN.Builder may not have both .io() and .file()" );
+          logger.error( "BPNN_Aug.Builder may not have both .io() and .file()" );
           System.exit(2);
           break;
       }
 
-      BPNNold net = null;
+      BPNN_Aug net = null;
 
       if ( 0 < nHid ) {
-        net = new BPNNold();
+        net = new BPNN_Aug();
         if ( 0 != net.init( nInp, nHid, nOut ) ) {
           logger.error( "Network failed to initialize" );
           System.exit(3);
         }
       } else {
-        net = new BPNNold();
+        net = new BPNN_Aug();
         if ( 0 != net.read( configFilename ) ) {
           logger.error( "Network failed to read from file: "+configFilename );
           System.exit(4);
@@ -192,14 +192,14 @@ public class BPNNold {
       return net;
     }
 
-  } // end class BPNN.Builder
+  } // end class BPNN_Aug.Builder
 
   
   // =====================================================================================
   /** @brief Constructor
    */
   // -------------------------------------------------------------------------------------
-  protected BPNNold( ) {
+  protected BPNN_Aug( ) {
     // -----------------------------------------------------------------------------------
   }
 
@@ -504,7 +504,7 @@ public class BPNNold {
 
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  public void compare( PrintStream ps, BPNNold that ) {
+  public void compare( PrintStream ps, BPNN_Aug that ) {
     // -----------------------------------------------------------------------------------
     ps.format( "B1: %g\n", Math2.sumsq( this.b1, that.b1 ) );
     ps.format( "W1: %g\n", Math2.sumsq( this.w1, that.w1 ) );
@@ -513,7 +513,7 @@ public class BPNNold {
   }
   
 
-} // end class BPNN
+} // end class BPNN_Aug
 
 
 // =======================================================================================

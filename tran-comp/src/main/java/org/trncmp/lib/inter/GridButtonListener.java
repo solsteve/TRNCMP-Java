@@ -1,5 +1,5 @@
 // ====================================================================== BEGIN FILE =====
-// **                                     G R O U P                                     **
+// **                        G R I D B U T T O N L I S T E N E R                        **
 // =======================================================================================
 // **                                                                                   **
 // **  Copyright (c) 2018, Stephen W. Soliday                                           **
@@ -22,60 +22,29 @@
 // **                                                                                   **
 // ----- Modification History ------------------------------------------------------------
 /**
- * @file Group.java
- * <p>
- * Provides the interface and methods for a group of fuzzy partitions.
+ * @file    GridButtonListener.java
  *
- * @date 2018-08-12
+ * @details Provides the interface for grid button events.
  *
- * ---------------------------------------------------------------------------------------
- *
- * @note This code was ported from a C++ version contained in the TRNCMP
- *       Machine learning Research Library. (formerly SolLib)
- *
- * @author Stephen W. Soliday
- * @date 2014-06-27
+ * @author  Stephen W. Soliday
+ * @date    2018-12-27
  */
 // =======================================================================================
 
-package org.trncmp.mllib.fuzzy;
+package org.trncmp.lib.inter;
 
 // =======================================================================================
-public class Group {
+public interface GridButtonListener {
   // -------------------------------------------------------------------------------------
 
-  protected Partition[] partitions = null;
-  protected int         num_part   = 0;
+  abstract public void requestRun();
+  abstract public void requestStop();
+  abstract public void resetButtonPressed();
+  abstract public void closeAction();
 
-  public Group() {};
+} // end interface GridButtonListener
 
-  public Partition part     ( int p )        { return partitions[p]; }
-  public Function  function ( int p, int f ) { return partitions[p].function(f); }
-
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public void fuzzify( double[] mu, double[] x ) {
-    // -----------------------------------------------------------------------------------
-    int idx = 0;
-    for ( int i=0; i<num_part; i++ ) {
-      partitions[i].mu( mu, idx, x[i] );
-      idx += partitions[i].size();
-    }
-  }
-
-  // =====================================================================================
-  // -------------------------------------------------------------------------------------
-  public void defuzzify( double[] x, double[] mu ) {
-    // -----------------------------------------------------------------------------------
-    int idx = 0;
-    for ( int i=0; i<num_part; i++ ) {
-      x[i] = partitions[i].coa( mu, idx );
-      idx += partitions[i].size();
-    }
-  }
-
-} //end class Group
 
 // =======================================================================================
-// **                                 P A R T I T I O N                                 **
+// **                        G R I D B U T T O N L I S T E N E R                        **
 // ======================================================================== END FILE =====

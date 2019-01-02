@@ -55,11 +55,24 @@ public class GridFrame extends JFrame implements KeyListener {
 
   /** listener for keyboard actions */
     GridKeyListener grid_key_listener = null;
+  
+  /** listener for button presses */
+  GridButtonListener grid_button_listener = null;
 
-  JButton    run_button     = null;
-  JButton    reset_button   = null;
-  JButton    quit_button    = null;
-  JTextField status_display = null;
+  JButton    run_stop_button = null;
+  JButton    reset_button    = null;
+  JButton    quit_button     = null;
+  JTextField status_display  = null;
+
+  public final String[] rs_label = { "RUN", "STOP" };
+
+  public final int GSTOPPED = 0;
+  public final int GRUNNING = 1;
+  
+  int current_state = GSTOPPED;
+
+  TrafficLight tlight = null;
+  
 
   // =====================================================================================
   public static class Builder {
@@ -124,70 +137,109 @@ public class GridFrame extends JFrame implements KeyListener {
   // -------------------------------------------------------------------------------------
   public void addKeyboardListener( GridKeyListener gkl ) {
     // -----------------------------------------------------------------------------------
+    setFocusable( true );
     grid_key_listener = gkl;
   }
 
+  
   // =====================================================================================
   // -------------------------------------------------------------------------------------
-  protected void press_run_button() {
+  public void addButtonListener( GridButtonListener gbl ) {
     // -----------------------------------------------------------------------------------
-    System.out.println( "the run button pressed" );
+    grid_button_listener = gbl;
   }
 
+  
+  // =====================================================================================
+  // -------------------------------------------------------------------------------------
+  protected void toggle_run_stop_button() {
+    // -----------------------------------------------------------------------------------
+    if ( current_state == GRUNNING ) {
+      current_state = GSTOPPED;
+    } else {
+      current_state = GRUNNING;
+    }
+
+    run_stop_button.setText(rs_label[current_state]);
+
+    
+    if ( null != grid_button_listener ) {
+      if ( current_state == GRUNNING ) {
+        grid_button_listener.requestStop();
+      } else {
+       grid_button_listener.requestRun();
+      }
+    }
+  }
+
+  
   // =====================================================================================
   // -------------------------------------------------------------------------------------
   protected void press_reset_button() {
     // -----------------------------------------------------------------------------------
-    System.out.println( "the reset button pressed" );
+    if ( current_state == GSTOPPED ) {
+      if ( null != grid_button_listener ) {
+        grid_button_listener.resetButtonPressed();
+      }
+    }
   }
 
+  
   // =====================================================================================
   // -------------------------------------------------------------------------------------
   protected void press_quit_button() {
     // -----------------------------------------------------------------------------------
-    System.out.println( "the quit button pressed" );
     close_action();
     System.exit(0);
   }
 
+  
   // =====================================================================================
   // -------------------------------------------------------------------------------------
   protected void close_action() {
     // -----------------------------------------------------------------------------------
-    System.out.println( "take close action" );
+    if ( null != grid_button_listener ) {
+      grid_button_listener.closeAction();
+    }
   }
-
-
-  
 
   
   // =====================================================================================
   private void initUI( String title, int w, int h ) {
     // -----------------------------------------------------------------------------------
     
+    current_state = GSTOPPED;
+
+    JPanel top_panel    = new JPanel();
     JPanel button_panel = new JPanel();
 
-    run_button     = new JButton("RUN");
-    reset_button   = new JButton("RESET");
-    quit_button    = new JButton("QUIT");
-    status_display = new JTextField();
+    run_stop_button = new JButton(rs_label[current_state]);
+    reset_button    = new JButton("RESET");
+    quit_button     = new JButton("QUIT");
+    status_display  = new JTextField();
     status_display.setEditable( false );
 
-    button_panel.add( run_button );
+    tlight = new TrafficLight( TrafficLight.HORIZONTAL );
+
+    button_panel.add( tlight );
+    button_panel.add( run_stop_button );
     button_panel.add( reset_button );
     button_panel.add( quit_button );
 
-    add( button_panel,     BorderLayout.PAGE_START );
-    add( panel,     BorderLayout.CENTER );
+    //top_panel.add( tlight, BorderLayout.WEST );
+    //top_panel.add( button_panel, BorderLayout.CENTER );
+    
+    add( button_panel,      BorderLayout.PAGE_START );
+    add( panel,          BorderLayout.CENTER );
     add( status_display, BorderLayout.PAGE_END );
 
 
     // ------------------------------------------------------
-    run_button.addActionListener( new ActionListener() {
+    run_stop_button.addActionListener( new ActionListener() {
         // --------------------------------------------------
         @Override
         public void actionPerformed(ActionEvent e) {
-          press_run_button();
+          toggle_run_stop_button();
         }
       });
   
@@ -255,6 +307,9 @@ public class GridFrame extends JFrame implements KeyListener {
     panel.set( r, c, v );
   }
 
+  public void update() { panel.update(); }
+  
+
    // =====================================================================================
   /** @brief Number of Grid Rows.
    *  @return Number or rows in the grid.
@@ -264,6 +319,22 @@ public class GridFrame extends JFrame implements KeyListener {
     // -----------------------------------------------------------------------------------
     return panel.nRow();
   }
+
+
+   // =====================================================================================
+  public void setStatus( String txt ) {
+    // -----------------------------------------------------------------------------------
+    status_display.setText( txt );
+  }
+
+  public void allOn()     { tlight.allOn();     }
+  public void redOn()     { tlight.redOn();     }
+  public void yellowOn()  { tlight.yellowOn();  }
+  public void greenOn()   { tlight.greenOn();   }
+  public void allOff()    { tlight.allOff();    }
+  public void redOff()    { tlight.redOff();    }
+  public void yellowOff() { tlight.yellowOff(); }
+  public void greenOff()  { tlight.greenOff();  }
 
   
   // =====================================================================================
@@ -278,13 +349,19 @@ public class GridFrame extends JFrame implements KeyListener {
 
   
   public void keyPressed( KeyEvent e ) {
-    if ( null != grid_key_listener ) {
-      grid_key_listener.keyPressed(e);
-    }
+    System.out.format( "Key Pressed  = %d\n", e.getKeyCode() );
+    //if ( null != grid_key_listener ) {
+    //  grid_key_listener.keyPressed(e);
+    //}
   }
   
-  public void keyReleased ( KeyEvent e ) {}
-  public void keyTyped    ( KeyEvent e ) {}
+  public void keyReleased ( KeyEvent e ) {
+    System.out.format( "Key Released = %d\n", e.getKeyCode() );
+  }
+  
+  public void keyTyped    ( KeyEvent e ) {
+    System.out.format( "Key Typed    = %d\n", e.getKeyCode() );
+  }
 
   
 } // end class GridFrame
