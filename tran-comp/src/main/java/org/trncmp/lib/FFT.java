@@ -2,7 +2,7 @@
 // **                                      F F T                                        **
 // =======================================================================================
 // **                                                                                   **
-// **  Copyright (c) 2018, Stephen W. Soliday                                           **
+// **  Copyright (c) 2019, Stephen W. Soliday                                           **
 // **                      stephen.soliday@trncmp.org                                   **
 // **                      http://research.trncmp.org                                   **
 // **                                                                                   **
@@ -41,66 +41,62 @@ public class FFT {
 
 
   // =====================================================================================
-  private static void recursiveforward( double[] Xr, double[] Xi ) {
+  private static int recursiveforward( double[] Xr, double[] Xi ) {
     // -----------------------------------------------------------------------------------
 
-    int    N = Xr.length;
-    double Q = -Math2.N_2PI / (double) N;
+    int N   = Xr.length;
+    int Nd2 = N/2;
     
-        if ( N >= 1 ) {
+    if ( N == 1 ) return 1;
 
-          double[] Or = new double[(N+1)/2];
-          double[] Oi = new double[(N+1)/2];
-          double[] Er = new double[N/2];
-          double[] Ei = new double[N/2];
+    if ( 0 != (N%2) ) {
+      throw new IllegalArgumentException("n is not a power of 2");
+    }
 
-          int j = 0;
-          for ( int i=1; i<N; i+=2 ) {
-            Or[j] = Xr[i];
-            Oi[j] = Xi[i];
-            j += 1;
-          }
+    // ----- FFT of the even terms ------------------------
+    
+    double[] Er = new double[N/2];
+    double[] Ei = new double[N/2];
+    for ( int k=0; k<Nd2; k++ ) {
+      Er[k] = Xr[2*k];
+      Ei[k] = Xi[2*k];
+    }
+    recursiveforward( Er, Ei );
 
-          j = 0;
-          for ( int i=0; i<N; i+=2 ) {
-            Er[j] = Xr[i];
-            Ei[j] = Xi[i];
-            j += 1;
-          }
+    // ----- FFT of the odd terms -------------------------
+    
+    double[] Or = new double[N/2];
+    double[] Oi = new double[N/2];
+    for ( int k=0; k<Nd2; k++ ) {
+      Or[k] = Xr[2*k + 1];
+      Oi[k] = Xi[2*k + 1];
+    }
+    recursiveforward( Or, Oi );
 
-          recursiveforward( Or, Oi );
-          recursiveforward( Er, Ei );
+    // ----- Combine odd and even elements ----------------
 
-          int Nh = N/2;
-          for ( int i=0; i<Nh; i++ ) {
-            double f = Q * (double)i;
-            double C = Math.cos( Q );
-            double S = Math.sin( Q );
-            double Tr = (Er[i] * C) - (Ei[i] * S);
-            double Ti = (Er[i] * S) + (Er[i] * C);
-            Xr[i]    = Or[i] + Tr;
-            Xi[i]    = Oi[i] + Ti;
-            Xr[i+Nh] = Or[i] - Tr;
-            Xi[i+Nh] = Oi[i] - Ti;
-          }
-        }
+    double Q  = -Math2.N_2PI / (double) N;
+    int    Nh = N/2;
+
+    for ( int i=0; i<Nd2; i++ ) {
+      double t  = Q * (double) i;
+      double C  = Math.cos( t );
+      double S  = Math.sin( t );
+      double Tr = (Or[i] * C) - (Oi[i] * S);
+      double Ti = (Or[i] * S) + (Oi[i] * C);
+      Xr[i]     = Er[i] + Tr;
+      Xi[i]     = Ei[i] + Ti;
+      Xr[i+Nh]  = Er[i] - Tr;
+      Xi[i+Nh]  = Ei[i] - Ti;
+    }
+
+    return 0;
   }
 
   // =====================================================================================
   public static int forward( double[][] data ) {
     // -----------------------------------------------------------------------------------
-    recursiveforward( data[0], data[1] );
-    return 0;
-  }
-
-  // =====================================================================================
-  public static int forward( double[] data ) {
-    // -----------------------------------------------------------------------------------
-    int n = data.length;
-    double[] zeros = new double[n];
-    for ( int i=0; i<n; i++ ) { zeros[i] = 0.0e0; }
-    recursiveforward( data, zeros );
-    return 0;
+    return recursiveforward( data[0], data[1] );
   }
 
   // =====================================================================================
@@ -130,10 +126,10 @@ public class FFT {
 
 
   // =====================================================================================
-  public static double[][][] testVectors() {
+  public static final double[][] testVectors() {
     // -----------------------------------------------------------------------------------
 
-    double[][] TV = {
+    final double[][] TV = {
       { 0.0000000000000000e+00,  5.4614451035858980e-01,  5.4614451035671752e-01,  0.0000000000000000e+00 },
       { 3.2258064516129031e-02, -6.3136611133540618e-02,  3.3334599683641630e+00,  3.4067954661615024e-02 },
       { 6.4516129032258063e-02,  1.0723729931871533e-02,  4.3450564215269916e-01,  1.7195704548239771e-01 },
@@ -167,18 +163,7 @@ public class FFT {
       { 9.6774193548387033e-01, -1.0470126709414823e-01,  4.3450564215270004e-01, -1.7195704548239901e-01 },
       { 9.9999999999999933e-01,  5.4614451035843459e-01,  3.3334599683641617e+00, -3.4067954661622851e-02 } };
 
-    double[][][] table = new double[3][2][32];
-
-    for ( int i=0; i<32; i++ ) {
-      table[0][0][i] = TV[i][0];
-      table[0][1][i] = 0.0;
-      table[1][0][i] = TV[i][1];
-      table[1][1][i] = 0.0;
-      table[2][0][i] = TV[i][2];
-      table[2][1][i] = TV[i][3];
-    }
-
-    return table;
+    return TV;
   }
 
   
