@@ -62,7 +62,7 @@ public class jtest_control {
     // ===================================================================================
     public void on_receive( String msg ) {
       // ---------------------------------------------------------------------------------
-      if ( msg.equals( "GOAWAY" ) ) {
+      if ( msg.equals( "SYSEXIT" ) ) {
         System.out.format( "%s received exit notification\n", my_name );
       } else if (msg.equals( my_msg ) ) {
         System.out.format( "%s processed message = %s\n", my_name, msg );
@@ -95,9 +95,9 @@ public class jtest_control {
     TestListener L3 = new TestListener( "Gamma ", "RELOAD" );
     TestListener L4 = new TestListener( "Delta ", "BACKUP" );
 
-    ControlReceiver CR = new ControlReceiver( 12345 );
+    ControlReceiver CR = new ControlReceiver( 44242 );
 
-    CR.setShutdown( "GOAWAY" );
+    CR.setShutdown( "SYSEXIT" );
 
     CR.add( L1 );
     CR.add( L2 );
@@ -115,9 +115,11 @@ public class jtest_control {
     CR.receive( "PROCESS" );
     CR.receive( "BACKUP"  );
 
-    System.out.println( "Waiting 10 seconds" );
+    CR.writeScript( "test.sh" );
+
+    System.out.println( "Waiting 20 seconds" );
     try {
-        Thread.sleep( 10000 );
+        Thread.sleep( 20000 );
     } catch ( InterruptedException e ) {
       logger.debug( "JTest control was interuppted by exception" );
     }
