@@ -16,7 +16,9 @@
 
   <modules>
     <module>thirdparty-parent</module>
-    <module>tran-comp</module>
+    <module>tran-comp-apps</module>
+    <module>tran-comp-lib</module>
+    <module>tran-comp-mllib</module>
   </modules>
   
   <properties>
