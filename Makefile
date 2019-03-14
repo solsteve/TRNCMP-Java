@@ -47,14 +47,20 @@ deploy: install
 	mvn deploy
 
 clean:
-	make -C tran-comp $@
+	make -C tran-comp-apps  $@
+	make -C tran-comp-lib   $@
+	make -C tran-comp-mllib $@
 
 fullclean: clean
 	rm -f *~
-	make -C tran-comp $@
+	make -C tran-comp-apps  $@
+	make -C tran-comp-lib   $@
+	make -C tran-comp-mllib $@
 
 distclean: fullclean
-	make -C tran-comp $@
+	make -C tran-comp-apps  $@
+	make -C tran-comp-lib   $@
+	make -C tran-comp-mllib $@
 
 #/ =======================================================================================
 #/ **                                  M A K E F I L E                                  **
