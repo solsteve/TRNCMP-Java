@@ -321,8 +321,10 @@ public class USMTF {
     String  raw   = null;
     try {
       while ( null != (raw = br.readLine()) ) {
-        count += 1;
-        add( raw.trim(), delim );
+        if ( -1 == raw.indexOf('#') ) {
+          count += 1;
+          add( raw.trim(), delim );
+        }
       }
     } catch( IOException e ) {
       System.err.println( "Read error at line "+count );
