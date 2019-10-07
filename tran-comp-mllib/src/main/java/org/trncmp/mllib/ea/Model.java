@@ -144,7 +144,7 @@ public abstract class Model {
    *  @return true if the left hand metric is better than the right.
    *
    *  Compare two metrics and return true if the left metric 
-   *  is better than the right.
+   *  is better than the rightM.get.
    */
   // -------------------------------------------------------------------------------------
   public abstract boolean isLeftBetter( Metric lhs, Metric rhs );
