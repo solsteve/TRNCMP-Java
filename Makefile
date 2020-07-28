@@ -43,7 +43,10 @@ help:
 	@echo ""
 
 install:
-	make -C tran-comp install
+	(cd thirdparty-parent; mvn install)
+	make -C tran-comp-lib install
+	make -C tran-comp-mllib install
+	make -C tran-comp-apps install
 	mvn install
 
 deploy: install

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ "" == "$1" ]; then
+    echo "" 1>&2
+    echo "USAGE: $0 class [arguments]"    1>&2
+    echo "   class     - string - suffix" 1>&2
+    echo "   arguments - list   - optional arguments passed to test code" 1>&2
+    echo "Example: $0 ConfusionMatrix"  1>&2
+    echo "" 1>&2
+    exit 1
+fi
+
+MAIN_CLASS=org.trncmp.lib.${1}
+MAIN_LIB=target/lib-*.jar
+shift
+
+if [ -e ${MAIN_LIB} ]; then
+    java -Djava.net.preferIPv4Stack=true -cp ${MAIN_LIB} ${MAIN_CLASS} $*
+    exit $?
+else
+    echo "You need to do a:  make jar"
+fi
+
+exit -1
+
